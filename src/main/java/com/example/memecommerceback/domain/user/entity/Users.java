@@ -25,6 +25,9 @@ public class Users {
   @Column(columnDefinition = "UUID", updatable = false, nullable = false)
   private UUID id;
 
+  @Column(nullable = false)
+  private String email;
+
   @PrePersist
   public void generateId() {
     if (id == null) {
