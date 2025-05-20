@@ -28,6 +28,9 @@ public class Users {
   @Column(nullable = false)
   private String email;
 
+  /**
+   * 엔티티가 저장되기 전에 id 필드가 비어 있으면 새로운 UUID를 생성하여 할당합니다.
+   */
   @PrePersist
   public void generateId() {
     if (id == null) {

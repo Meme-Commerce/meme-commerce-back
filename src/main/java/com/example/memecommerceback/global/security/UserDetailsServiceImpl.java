@@ -14,6 +14,13 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
   private final UserRepository userRepository;
 
+  /**
+   * 주어진 이메일로 사용자를 조회하여 Spring Security의 UserDetails 객체로 반환합니다.
+   *
+   * @param email 조회할 사용자의 이메일
+   * @return 해당 이메일에 해당하는 사용자의 UserDetails 객체
+   * @throws UsernameNotFoundException 사용자를 찾을 수 없는 경우 발생
+   */
   @Override
   public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
     Users user = userRepository.findByEmail(email).orElseThrow(() ->

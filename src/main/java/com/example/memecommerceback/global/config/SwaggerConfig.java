@@ -18,7 +18,13 @@ public class SwaggerConfig {
   @Value("${my-config.email}")
   private String myEmail;
 
-  // 기본 설정
+  /**
+   * Swagger(OpenAPI) 문서 생성을 위한 OpenAPI 인스턴스를 설정합니다.
+   *
+   * API 메타데이터, JWT 기반 인증 스키마, 서버 URL, 보안 요구사항 등을 포함하여 Swagger UI에서 API 문서를 제공합니다.
+   *
+   * @return Swagger UI 및 OpenAPI 문서 생성을 위한 OpenAPI 객체
+   */
   @Bean
   public OpenAPI openAPI() {
     Info info = new Info()
