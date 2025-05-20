@@ -20,7 +20,7 @@ public class SwaggerConfig {
 
   // 기본 설정
   @Bean
-  public OpenAPI openAPI(){
+  public OpenAPI openAPI() {
     Info info = new Info()
         .title("BackOffice API Document")
         .version("1.0")

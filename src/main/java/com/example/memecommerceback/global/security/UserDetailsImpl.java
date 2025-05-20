@@ -15,66 +15,65 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 @RequiredArgsConstructor
 public class UserDetailsImpl implements UserDetails, OAuth2User {
 
-    private final Users user;
+  private final Users user;
 
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        // UserRole role = user.getRole();
-        // String authority = role.getAuthority();
+  @Override
+  public Collection<? extends GrantedAuthority> getAuthorities() {
+    // UserRole role = user.getRole();
+    // String authority = role.getAuthority();
 
-        SimpleGrantedAuthority simpleGrantedAuthority
-            = new SimpleGrantedAuthority(null);
-        Collection<GrantedAuthority> authorities
-            = new ArrayList<>();
-        authorities.add(simpleGrantedAuthority);
+    SimpleGrantedAuthority simpleGrantedAuthority = new SimpleGrantedAuthority(null);
+    Collection<GrantedAuthority> authorities = new ArrayList<>();
+    authorities.add(simpleGrantedAuthority);
 
-        return authorities;
-    }
+    return authorities;
+  }
 
-    @Override
-    public String getPassword(){
-        return null;
-    }
+  @Override
+  public String getPassword() {
+    return null;
+  }
 
-    @Override
-    public String getUsername() {
-        return null;
-        // return this.user.getNickname();
-    }
+  @Override
+  public String getUsername() {
+    return null;
+    // return this.user.getNickname();
+  }
 
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
+  @Override
+  public boolean isAccountNonExpired() {
+    return true;
+  }
 
-    @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
+  @Override
+  public boolean isAccountNonLocked() {
+    return true;
+  }
 
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
+  @Override
+  public boolean isCredentialsNonExpired() {
+    return true;
+  }
 
-    @Override
-    public boolean isEnabled() {
-        return true;
-    }
+  @Override
+  public boolean isEnabled() {
+    return true;
+  }
 
-    @Override
-    public Map<String, Object> getAttributes() {
-        return null;
-        // return Map.of("email", user.getEmail(), "oauthId", user.getOauthId());
-    }
+  @Override
+  public Map<String, Object> getAttributes() {
+    return null;
+    // return Map.of("email", user.getEmail(), "oauthId", user.getOauthId());
+  }
 
-    public String getEmail(){
-        return null;
-        // return this.user.getEmail();
-    }
-    @Override
-    public String getName() {
-        return null;
-        // return user.getOauthId(); // OAuth2 고유 식별자
-    }
+  public String getEmail() {
+    return null;
+    // return this.user.getEmail();
+  }
+
+  @Override
+  public String getName() {
+    return null;
+    // return user.getOauthId(); // OAuth2 고유 식별자
+  }
 }
