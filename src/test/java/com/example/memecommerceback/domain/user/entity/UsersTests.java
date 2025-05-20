@@ -1,86 +1,65 @@
 package com.example.memecommerceback.domain.user.entity;
 
-/*
- * Testing framework: JUnit 5 (JUnit Jupiter)
- * Assertion library: AssertJ
- */
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.*;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+class UsersTests {
 
-public class UsersTests {
-
-    private Users user;
+    private Users defaultUser;
 
     @BeforeEach
     void setUp() {
-        user = new Users();
-        user.setId(1L);
-        user.setUsername("alice");
-        user.setEmail("alice@example.com");
+        defaultUser = new Users(1L, "john_doe", "john@example.com", "password123");
     }
 
     @Test
-    void getId_ReturnsIdSetInSetup() {
-        assertThat(user.getId()).isEqualTo(1L);
+    void constructor_and_getters_should_initialize_all_fields() {
+        assertEquals(1L, defaultUser.getId());
+        assertEquals("john_doe", defaultUser.getUsername());
+        assertEquals("john@example.com", defaultUser.getEmail());
+        assertEquals("password123", defaultUser.getPassword());
     }
 
     @Test
-    void getUsername_ReturnsUsernameSetInSetup() {
-        assertThat(user.getUsername()).isEqualTo("alice");
+    void setters_should_update_fields() {
+        defaultUser.setUsername("jane_doe");
+        assertEquals("jane_doe", defaultUser.getUsername());
+
+        defaultUser.setEmail("jane@example.com");
+        assertEquals("jane@example.com", defaultUser.getEmail());
+
+        defaultUser.setPassword("newpass");
+        assertEquals("newpass", defaultUser.getPassword());
     }
 
     @Test
-    void getEmail_ReturnsEmailSetInSetup() {
-        assertThat(user.getEmail()).isEqualTo("alice@example.com");
+    void equals_and_hashCode_should_be_consistent_for_equal_objects() {
+        Users u1 = new Users(2L, "alice", "alice@example.com", "pwd");
+        Users u2 = new Users(2L, "alice", "alice@example.com", "pwd");
+        assertEquals(u1, u2);
+        assertEquals(u1.hashCode(), u2.hashCode());
     }
 
     @Test
-    void setId_UpdatesId() {
-        user.setId(2L);
-        assertThat(user.getId()).isEqualTo(2L);
+    void equals_should_return_false_for_different_ids() {
+        Users u1 = new Users(3L, "bob", "bob@example.com", "pwd");
+        Users u2 = new Users(4L, "bob", "bob@example.com", "pwd");
+        assertNotEquals(u1, u2);
     }
 
     @Test
-    void setUsername_UpdatesUsername() {
-        user.setUsername("bob");
-        assertThat(user.getUsername()).isEqualTo("bob");
+    void toString_should_contain_username_and_email() {
+        String repr = defaultUser.toString();
+        assertTrue(repr.contains("john_doe"));
+        assertTrue(repr.contains("john@example.com"));
     }
 
     @Test
-    void setEmail_UpdatesEmail() {
-        user.setEmail("bob@example.com");
-        assertThat(user.getEmail()).isEqualTo("bob@example.com");
-    }
-
-    @Test
-    void equalsAndHashCode_WithSameFieldValues_IsConsistent() {
-        Users other = new Users();
-        other.setId(1L);
-        other.setUsername("alice");
-        other.setEmail("alice@example.com");
-        assertThat(other).isEqualTo(user);
-        assertThat(other.hashCode()).isEqualTo(user.hashCode());
-    }
-
-    @Test
-    void toString_IncludesKeyFields() {
-        String s = user.toString();
-        assertThat(s).contains("id=1", "username='alice'", "email='alice@example.com'");
-    }
-
-    @Test
-    void setUsername_Null_ThrowsNullPointerException() {
-        assertThatThrownBy(() -> user.setUsername(null))
-            .isInstanceOf(NullPointerException.class);
-    }
-
-    @Test
-    void setEmail_Null_ThrowsNullPointerException() {
-        assertThatThrownBy(() -> user.setEmail(null))
-            .isInstanceOf(NullPointerException.class);
+    void constructor_should_throw_when_email_is_null() {
+        // Ensure null email is not allowed
+        assertThrows(NullPointerException.class,
+            () -> new Users(5L, "charlie", null, "pwd"));
     }
 }

@@ -1,59 +1,77 @@
 package com.example.memecommerceback.global.config;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.runner.ApplicationContextRunner;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Import;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.example.memecommerceback.global.config.WebSecurityConfig;
-
+@SpringBootTest
+@AutoConfigureMockMvc
+@Import(WebSecurityConfigTests.TestEndpoints.class)
 public class WebSecurityConfigTests {
 
-    private final ApplicationContextRunner contextRunner =
-        new ApplicationContextRunner()
-            .withUserConfiguration(WebSecurityConfig.class);
+    @Autowired
+    private ApplicationContext applicationContext;
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Test
-    void whenContextLoads_thenPasswordEncoderBeanExistsAndIsBCrypt() {
-        contextRunner.run(context -> {
-            PasswordEncoder encoder = context.getBean(PasswordEncoder.class);
-            assertNotNull(encoder, "PasswordEncoder bean should not be null");
-            assertTrue(encoder instanceof BCryptPasswordEncoder,
-                "PasswordEncoder should be a BCryptPasswordEncoder");
-        });
+    void contextLoads_andBeansArePresent() {
+        // Verify WebSecurityConfig is loaded
+        assertThat(applicationContext.getBean(WebSecurityConfig.class)).isNotNull();
+        // Verify PasswordEncoder bean exists and works
+        assertThat(passwordEncoder).isNotNull();
+        String raw = "password123";
+        String encoded = passwordEncoder.encode(raw);
+        assertThat(passwordEncoder.matches(raw, encoded)).isTrue();
+        assertThat(passwordEncoder.matches("wrong", encoded)).isFalse();
     }
 
     @Test
-    void whenContextLoads_thenAuthenticationManagerBeanExists() {
-        contextRunner.run(context -> {
-            AuthenticationManager authManager =
-                context.getBean("authenticationManager", AuthenticationManager.class);
-            assertNotNull(authManager, "AuthenticationManager bean should be present");
-        });
+    void whenGetPublicEndpoint_thenOkWithoutAuthentication() throws Exception {
+        mockMvc.perform(get("/public/ping"))
+               .andExpect(status().isOk());
     }
 
     @Test
-    void whenContextLoads_thenSecurityFilterChainBeanExists() {
-        contextRunner.run(context -> {
-            SecurityFilterChain filterChain =
-                context.getBean(SecurityFilterChain.class);
-            assertNotNull(filterChain, "SecurityFilterChain bean should be present");
-        });
+    void whenGetPrivateEndpoint_thenRedirectToLogin() throws Exception {
+        mockMvc.perform(get("/private/secret"))
+               .andExpect(status().is3xxRedirection())
+               .andExpect(redirectedUrl("http://localhost/login"));
     }
 
     @Test
-    void passwordEncoderShouldEncodeAndMatch() {
-        contextRunner.run(context -> {
-            PasswordEncoder encoder = context.getBean(PasswordEncoder.class);
-            String raw = "TestPassword123!";
-            String encoded = encoder.encode(raw);
-            assertNotNull(encoded, "Encoded password should not be null");
-            assertTrue(encoder.matches(raw, encoded),
-                "PasswordEncoder should correctly match raw and encoded passwords");
-        });
+    void whenGetLoginPage_thenOk() throws Exception {
+        mockMvc.perform(get("/login"))
+               .andExpect(status().isOk());
+    }
+
+    @RestController
+    static class TestEndpoints {
+
+        @GetMapping("/public/ping")
+        public String publicPing() {
+            return "pong";
+        }
+
+        @GetMapping("/private/secret")
+        public String privateSecret() {
+            return "secret";
+        }
     }
 }

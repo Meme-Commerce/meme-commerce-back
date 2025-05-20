@@ -1,102 +1,89 @@
 package com.example.memecommerceback.global.security;
 
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import com.example.memecommerceback.user.User;
+import com.example.memecommerceback.user.Role;
+import org.springframework.security.core.GrantedAuthority;
 
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+public class UserDetailsImplTests {
 
-import com.example.memecommerceback.global.security.UserDetailsImpl;
-import com.example.memecommerceback.global.model.User;
-import com.example.memecommerceback.global.model.Role;
-import com.example.memecommerceback.global.model.ERole;
-
-import java.util.List;
-import java.util.Set;
-
-class UserDetailsImplTests {
-
-    @Test
-    void shouldReturnCorrectUserDetailsFields() {
-        List<SimpleGrantedAuthority> authorities = List.of(
-            new SimpleGrantedAuthority("ROLE_USER"),
-            new SimpleGrantedAuthority("ROLE_ADMIN")
-        );
-        UserDetailsImpl userDetails = new UserDetailsImpl(1L, "testUser", "testPass", authorities);
-
-        assertEquals(1L, userDetails.getId());
-        assertEquals("testUser", userDetails.getUsername());
-        assertEquals("testPass", userDetails.getPassword());
-        assertIterableEquals(authorities, userDetails.getAuthorities());
+    private User createUser(Long id, String username, String password, String... roles) {
+        User u = new User();
+        u.setId(id);
+        u.setUsername(username);
+        u.setPassword(password);
+        for (String roleName : roles) {
+            Role r = new Role();
+            r.setName(roleName);
+            u.getRoles().add(r);
+        }
+        return u;
     }
 
     @Test
-    void shouldAlwaysReturnTrueForAccountStatusChecks() {
-        UserDetailsImpl userDetails = new UserDetailsImpl(1L, "u", "p", List.of());
+    @DisplayName("build() should map User fields to UserDetailsImpl correctly")
+    void buildShouldMapFieldsCorrectly() {
+        User user = createUser(42L, "alice", "secret", "ROLE_USER", "ROLE_ADMIN");
+        UserDetailsImpl details = UserDetailsImpl.build(user);
 
-        assertTrue(userDetails.isAccountNonExpired());
-        assertTrue(userDetails.isAccountNonLocked());
-        assertTrue(userDetails.isCredentialsNonExpired());
-        assertTrue(userDetails.isEnabled());
+        assertThat(details.getId()).isEqualTo(42L);
+        assertThat(details.getUsername()).isEqualTo("alice");
+        assertThat(details.getPassword()).isEqualTo("secret");
+        assertThat(details.getAuthorities())
+            .extracting(GrantedAuthority::getAuthority)
+            .containsExactlyInAnyOrder("ROLE_USER", "ROLE_ADMIN");
     }
 
     @Test
-    void equalsShouldBeBasedOnId() {
-        UserDetailsImpl u1 = new UserDetailsImpl(1L, "u1", "p1", List.of());
-        UserDetailsImpl u2 = new UserDetailsImpl(1L, "u2", "p2", List.of());
-        UserDetailsImpl u3 = new UserDetailsImpl(2L, "u3", "p3", List.of());
-
-        assertEquals(u1, u2);
-        assertEquals(u1.hashCode(), u2.hashCode());
-        assertNotEquals(u1, u3);
-        assertNotEquals(u1.hashCode(), u3.hashCode());
-        assertNotEquals(u1, null);
-        assertNotEquals(u1, "some string");
-    }
-
-    @Test
-    void buildShouldMapUserPropertiesAndAuthorities() {
-        User user = new User();
-        user.setId(5L);
-        user.setUsername("buildUser");
-        user.setPassword("buildPass");
-
-        Role role = new Role();
-        role.setName(ERole.ROLE_MODERATOR);
-        user.setRoles(Set.of(role));
-
-        UserDetailsImpl built = UserDetailsImpl.build(user);
-
-        assertEquals(user.getId(), built.getId());
-        assertEquals(user.getUsername(), built.getUsername());
-        assertEquals(user.getPassword(), built.getPassword());
-        assertTrue(built.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_MODERATOR")));
-    }
-
-    @Test
+    @DisplayName("build() should produce empty authorities when user has no roles")
     void buildShouldHandleEmptyRoles() {
-        User user = new User();
-        user.setId(6L);
-        user.setUsername("emptyRolesUser");
-        user.setPassword("emptyPass");
-        user.setRoles(Set.of());
+        User user = createUser(1L, "bob", "pwd");
+        UserDetailsImpl details = UserDetailsImpl.build(user);
 
-        UserDetailsImpl built = UserDetailsImpl.build(user);
-        assertTrue(built.getAuthorities().isEmpty());
+        assertThat(details.getAuthorities()).isEmpty();
     }
 
     @Test
+    @DisplayName("build() should throw NullPointerException when user is null")
     void buildShouldThrowWhenUserIsNull() {
-        assertThrows(NullPointerException.class, () -> UserDetailsImpl.build(null));
+        assertThatThrownBy(() -> UserDetailsImpl.build(null))
+            .isInstanceOf(NullPointerException.class);
     }
 
     @Test
-    void buildShouldThrowWhenUserRolesIsNull() {
-        User user = new User();
-        user.setId(7L);
-        user.setUsername("nullRolesUser");
-        user.setPassword("nullRolesPass");
-        user.setRoles(null);
+    @DisplayName("account flags should all be true by default")
+    void accountFlagsShouldBeTrue() {
+        UserDetailsImpl details = UserDetailsImpl.build(createUser(2L, "carol", "pwd"));
+        assertThat(details.isAccountNonExpired()).isTrue();
+        assertThat(details.isAccountNonLocked()).isTrue();
+        assertThat(details.isCredentialsNonExpired()).isTrue();
+        assertThat(details.isEnabled()).isTrue();
+    }
 
-        assertThrows(NullPointerException.class, () -> UserDetailsImpl.build(user));
+    @Test
+    @DisplayName("equals() and hashCode() should consider only the id field")
+    void equalsAndHashCodeBasedOnId() {
+        User u1 = createUser(100L, "x", "p");
+        User u2 = createUser(100L, "y", "q");
+        User u3 = createUser(101L, "x", "p");
+
+        UserDetailsImpl d1 = UserDetailsImpl.build(u1);
+        UserDetailsImpl d2 = UserDetailsImpl.build(u2);
+        UserDetailsImpl d3 = UserDetailsImpl.build(u3);
+
+        assertThat(d1).isEqualTo(d2);
+        assertThat(d1.hashCode()).isEqualTo(d2.hashCode());
+        assertThat(d1).isNotEqualTo(d3);
+    }
+
+    @Test
+    @DisplayName("equals() should return false when comparing to null or different types")
+    void equalsWithNullOrDifferentType() {
+        UserDetailsImpl details = UserDetailsImpl.build(createUser(200L, "dave", "pwd"));
+        assertThat(details).isNotEqualTo(null);
+        assertThat(details).isNotEqualTo("some string");
     }
 }

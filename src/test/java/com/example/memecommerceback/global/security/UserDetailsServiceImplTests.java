@@ -1,20 +1,13 @@
-/*
- * Unit tests for UserDetailsServiceImpl
- * Testing framework: JUnit Jupiter (JUnit 5)
- * Mocking framework: Mockito
- */
 package com.example.memecommerceback.global.security;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.util.Optional;
-import java.util.List;
-import java.util.Collections;
-import java.util.Arrays;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -22,17 +15,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import com.example.memecommerceback.global.security.UserDetailsServiceImpl;
-import com.example.memecommerceback.global.security.UserRepository;
-import com.example.memecommerceback.global.security.User;
-import com.example.memecommerceback.global.security.Role;
+import com.example.memecommerceback.global.repository.UserRepository;
+import com.example.memecommerceback.global.model.User;
+import com.example.memecommerceback.global.model.Role;
 
 @ExtendWith(MockitoExtension.class)
-class UserDetailsServiceImplTests {
+public class UserDetailsServiceImplTests {
 
     @Mock
     private UserRepository userRepository;
@@ -42,98 +34,66 @@ class UserDetailsServiceImplTests {
 
     @BeforeEach
     void setUp() {
-        // MockitoExtension automatically initializes mocks
+        reset(userRepository);
     }
 
     @Test
-    @DisplayName("loadUserByUsername returns UserDetails when user exists with one role")
-    void loadUserByUsername_UserExistsSingleRole_ReturnsUserDetails() {
+    void loadUserByUsername_whenUserExists_returnsUserDetails() {
         // Arrange
-        Role role = new Role("ROLE_USER");
-        User user = new User("john", "password123", List.of(role));
-        when(userRepository.findByUsername("john")).thenReturn(Optional.of(user));
+        User domainUser = new User("john", "encodedPassword", Set.of(new Role("ROLE_USER")));
+        when(userRepository.findByUsername("john")).thenReturn(Optional.of(domainUser));
 
         // Act
-        UserDetails userDetails = userDetailsService.loadUserByUsername("john");
+        UserDetails details = userDetailsService.loadUserByUsername("john");
 
         // Assert
-        assertNotNull(userDetails);
-        assertEquals("john", userDetails.getUsername());
-        assertEquals("password123", userDetails.getPassword());
-        List<String> authorities = userDetails.getAuthorities().stream()
-            .map(GrantedAuthority::getAuthority)
-            .toList();
-        assertEquals(1, authorities.size());
-        assertTrue(authorities.contains("ROLE_USER"));
+        assertEquals("john", details.getUsername());
+        assertEquals("encodedPassword", details.getPassword());
+        assertTrue(details.getAuthorities().stream()
+            .anyMatch(a -> a.getAuthority().equals("ROLE_USER")));
+        verify(userRepository).findByUsername("john");
     }
 
     @Test
-    @DisplayName("loadUserByUsername throws UsernameNotFoundException when user does not exist")
-    void loadUserByUsername_UserNotFound_ThrowsException() {
+    void loadUserByUsername_whenUserNotFound_throwsException() {
         // Arrange
-        when(userRepository.findByUsername("unknown")).thenReturn(Optional.empty());
+        when(userRepository.findByUsername("jane")).thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThrows(
-            UsernameNotFoundException.class,
-            () -> userDetailsService.loadUserByUsername("unknown"),
-            "Expected UsernameNotFoundException for non-existent user"
+        assertThrows(UsernameNotFoundException.class,
+            () -> userDetailsService.loadUserByUsername("jane")
         );
+        verify(userRepository).findByUsername("jane");
     }
 
     @Test
-    @DisplayName("loadUserByUsername returns empty authorities when user has no roles")
-    void loadUserByUsername_UserWithNoRoles_ReturnsEmptyAuthorities() {
+    void loadUserByUsername_whenMultipleRoles_mapsAllAuthorities() {
         // Arrange
-        User user = new User("jane", "pass", Collections.emptyList());
-        when(userRepository.findByUsername("jane")).thenReturn(Optional.of(user));
+        User domainUser = new User("alice", "pw", Set.of(new Role("ROLE_USER"), new Role("ROLE_ADMIN")));
+        when(userRepository.findByUsername("alice")).thenReturn(Optional.of(domainUser));
 
         // Act
-        UserDetails userDetails = userDetailsService.loadUserByUsername("jane");
+        UserDetails details = userDetailsService.loadUserByUsername("alice");
 
         // Assert
-        assertNotNull(userDetails.getAuthorities());
-        assertTrue(userDetails.getAuthorities().isEmpty());
+        Set<String> auths = details.getAuthorities().stream()
+            .map(a -> a.getAuthority())
+            .collect(Collectors.toSet());
+        assertEquals(Set.of("ROLE_USER", "ROLE_ADMIN"), auths);
+        verify(userRepository).findByUsername("alice");
     }
 
     @Test
-    @DisplayName("loadUserByUsername maps multiple roles to authorities")
-    void loadUserByUsername_UserWithMultipleRoles_ReturnsAllAuthorities() {
+    void loadUserByUsername_whenUserDisabled_throwsException() {
         // Arrange
-        Role r1 = new Role("ROLE_USER");
-        Role r2 = new Role("ROLE_ADMIN");
-        User user = new User("alice", "secret", Arrays.asList(r1, r2));
-        when(userRepository.findByUsername("alice")).thenReturn(Optional.of(user));
+        User disabledUser = new User("bob", "pw", Set.of(new Role("ROLE_USER")));
+        disabledUser.setEnabled(false);
+        when(userRepository.findByUsername("bob")).thenReturn(Optional.of(disabledUser));
 
-        // Act
-        UserDetails userDetails = userDetailsService.loadUserByUsername("alice");
-
-        // Assert
-        List<String> authorities = userDetails.getAuthorities().stream()
-            .map(GrantedAuthority::getAuthority)
-            .toList();
-        assertEquals(2, authorities.size());
-        assertTrue(authorities.containsAll(List.of("ROLE_USER", "ROLE_ADMIN")));
-    }
-
-    @Test
-    @DisplayName("loadUserByUsername throws when username is null")
-    void loadUserByUsername_NullUsername_ThrowsException() {
-        assertThrows(
-            UsernameNotFoundException.class,
-            () -> userDetailsService.loadUserByUsername(null),
-            "Expected exception for null username"
+        // Act & Assert
+        assertThrows(UsernameNotFoundException.class,
+            () -> userDetailsService.loadUserByUsername("bob")
         );
-    }
-
-    @Test
-    @DisplayName("loadUserByUsername throws when username is blank")
-    void loadUserByUsername_BlankUsername_ThrowsException() {
-        when(userRepository.findByUsername("")).thenReturn(Optional.empty());
-        assertThrows(
-            UsernameNotFoundException.class,
-            () -> userDetailsService.loadUserByUsername(""),
-            "Expected exception for blank username"
-        );
+        verify(userRepository).findByUsername("bob");
     }
 }
