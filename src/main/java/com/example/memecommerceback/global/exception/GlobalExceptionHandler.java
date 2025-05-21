@@ -123,10 +123,10 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
         new CommonResponseDto<>(
             getErrorResponseDto(
-                "INPUT-INVALID-ENUM",
+                Error.INVALID_ENUM_VALUE.getCode(),
                 "잘못된 입력을 하셨습니다. : " + e.getMessage()),
             HttpStatus.BAD_REQUEST.getReasonPhrase() + " : " +
-                "해당 입력값은 열거형 타입에 맞는 값이 없습니다.",
+                Error.INVALID_ENUM_VALUE.getMessage(),
             HttpStatus.BAD_REQUEST.value()));
   }
 

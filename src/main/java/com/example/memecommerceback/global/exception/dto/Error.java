@@ -22,6 +22,9 @@ public enum Error {
   DATE_TIME_PARSE_ERROR(
       Code.DATE_TIME_PARSE_ERROR,
       Message.DATE_TIME_PARSE_ERROR),
+  INVALID_ENUM_VALUE(
+      Code.INPUT_INVALID_ENUM,
+      Message.INPUT_INVALID_ENUM)
   ;
 
   private final String code;
@@ -38,7 +41,7 @@ public enum Error {
   }
 
   public static class Code {
-
+    public static final String INPUT_INVALID_ENUM = "INPUT-INVALID-ENUM";
     public static final String INVALID_PARAMETER_ERROR = "INVALID-PARAMETER-ERROR";
     public static final String INVALID_DTO_MAPPING_ERROR = "INVALID-DTO-MAPPING-ERROR";
     public static final String AUTH_ERROR = "AUTH-ERROR";
@@ -54,5 +57,6 @@ public enum Error {
     public static final String ACCESS_DENIED = "접근 권한이 없습니다.";
     public static final String MISSING_REQUEST_PART = "요청 파트 누락";
     public static final String DATE_TIME_PARSE_ERROR = "요청한 날짜 형식이 올바르지 않습니다.";
+    public static final String INPUT_INVALID_ENUM = "해당 입력값은 열거형 타입에 맞는 값이 없습니다.";
   }
 }

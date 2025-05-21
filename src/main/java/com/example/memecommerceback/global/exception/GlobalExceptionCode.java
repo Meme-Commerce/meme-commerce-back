@@ -12,7 +12,7 @@ public enum GlobalExceptionCode {
       HttpStatus.BAD_REQUEST, "PROFANITY-001",
       "해당 텍스트는 공란입니다."),
   PROFANITY_DETECTED(
-      HttpStatus.BAD_REQUEST, "PROFANITY-001",
+      HttpStatus.BAD_REQUEST, "PROFANITY-002",
       "해당 텍스트에 비속어가 들어가 있습니다."),
   ;
 
