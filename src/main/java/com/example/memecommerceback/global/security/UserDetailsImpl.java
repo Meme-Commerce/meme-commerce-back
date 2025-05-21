@@ -1,5 +1,6 @@
 package com.example.memecommerceback.global.security;
 
+import com.example.memecommerceback.domain.user.entity.UserRole;
 import com.example.memecommerceback.domain.user.entity.Users;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -19,10 +20,11 @@ public class UserDetailsImpl implements UserDetails, OAuth2User {
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
-    // UserRole role = user.getRole();
-    // String authority = role.getAuthority();
+    UserRole role = user.getRole();
+    String authority = role.getAuthority();
 
-    SimpleGrantedAuthority simpleGrantedAuthority = new SimpleGrantedAuthority(null);
+    SimpleGrantedAuthority simpleGrantedAuthority
+        = new SimpleGrantedAuthority(authority);
     Collection<GrantedAuthority> authorities = new ArrayList<>();
     authorities.add(simpleGrantedAuthority);
 
