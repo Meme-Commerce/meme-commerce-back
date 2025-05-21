@@ -26,7 +26,9 @@ public enum Gender {
 
   // "F", "female", "M", "male" 등 다양한 입력에 대응
   public static Gender fromCode(String code) {
-    if (code == null) return UNKNOWN;
+    if (code == null) {
+      return UNKNOWN;
+    }
     String input = code.trim().toLowerCase();
 
     return Arrays.stream(values())
