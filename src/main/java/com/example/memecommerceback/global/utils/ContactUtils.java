@@ -3,11 +3,16 @@ package com.example.memecommerceback.global.utils;
 public class ContactUtils {
 
   public static String normalizeContact(String contact) {
+    if (contact == null || contact.isEmpty()) {
+      throw new IllegalArgumentException(
+          "전화번호는 null이거나 빈 문자열일 수 없습니다.");
+    }
     String digitsOnly;
 
     if (contact.startsWith("+82")) {
       // +82 10-1234-5678 → 01012345678
-      digitsOnly = "0" + contact.substring(contact.indexOf(" ") + 1).replaceAll("[^0-9]", "");
+      String withoutCountryCode = contact.substring(3);
+      digitsOnly = "0" + withoutCountryCode.replaceAll("[^0-9]", "");
     } else if (contact.startsWith("010")) {
       // 010-1234-5678 or 01012345678 → 01012345678
       digitsOnly = contact.replaceAll("[^0-9]", "");
