@@ -6,6 +6,7 @@ import com.example.memecommerceback.global.jwt.JwtConstants;
 import com.example.memecommerceback.global.jwt.JwtUtils;
 import com.example.memecommerceback.global.jwt.cookie.CookieConstants;
 import com.example.memecommerceback.global.jwt.cookie.CookieUtils;
+import com.example.memecommerceback.global.jwt.dto.JwtTokenDto;
 import com.example.memecommerceback.global.oauth.constant.OAuthConstants;
 import com.example.memecommerceback.global.oauth.entity.CustomOAuth2User;
 import com.example.memecommerceback.global.redis.repository.RefreshTokenRepository;
@@ -16,6 +17,7 @@ import java.io.IOException;
 import java.util.Date;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -25,6 +27,9 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
+
+  @Value("${oauth.redirect-uri}")
+  private String redirectUri;
 
   private final JwtUtils jwtUtils;
   private final CookieUtils cookieUtils;
@@ -46,10 +51,9 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
     UserRole role = user.getRole();
 
     // Access, Refresh 토큰 발급
-    String accessToken
-        = jwtUtils.generateToken(email, role).getAccessToken();
-    String refreshToken
-        = jwtUtils.generateToken(email, role).getRefreshToken();
+    JwtTokenDto tokenDto = jwtUtils.generateToken(email, role);
+    String accessToken = tokenDto.getAccessToken();
+    String refreshToken = tokenDto.getRefreshToken();
 
     refreshTokenRepository.save(
         JwtConstants.REFRESH_TOKEN_HEADER + ":" + email,
@@ -72,7 +76,8 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
     response.addHeader(
         CookieConstants.SET_COOKIE, refreshTokenCookie.toString());
 
-    response.sendRedirect(OAuthConstants.DEVELOPMENT_SETTINGS_REDIRECT_URL);
+
+    response.sendRedirect(redirectUri);
 
     log.info("액세스 토큰과 리프레시 토큰 쿠키로 전송 완료");
   }

@@ -67,9 +67,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService
     String birthDay = (String) response.get(OAuthConstants.BIRTH_DAY);
     String contact = (String) response.get(OAuthConstants.NAVER_MOBILE);
 
-    LocalDate birthDate
-        = DateUtils.parse(birthYear, birthDay, provider);
-    Integer age = DateUtils.calculateAge(birthDate);
     validateField(id, GlobalExceptionCode.NOT_FOUND_RESPONSE_ID);
     validateField(email, GlobalExceptionCode.NOT_FOUND_RESPONSE_EMAIL);
     validateField(name, GlobalExceptionCode.NOT_FOUND_RESPONSE_NAME);
@@ -77,6 +74,10 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService
     validateField(birthYear, GlobalExceptionCode.NOT_FOUND_RESPONSE_BIRTHYEAR);
     validateField(birthDay, GlobalExceptionCode.NOT_FOUND_RESPONSE_BIRTHDAY);
     validateField(contact, GlobalExceptionCode.NOT_FOUND_RESPONSE_CONTACT);
+
+    LocalDate birthDate
+        = DateUtils.parse(birthYear, birthDay, provider);
+    Integer age = DateUtils.calculateAge(birthDate);
 
     String oauthId = provider + "_" + id;
 
@@ -106,10 +107,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService
     String birthDay = (String) kakaoAccount.get(OAuthConstants.BIRTH_DAY);
     String contact = (String) kakaoAccount.get(OAuthConstants.KAKAO_MOBILE);
 
-    // 2000-0730
-    LocalDate birthDate = DateUtils.parse(birthYear, birthDay, provider);
-    Integer age = DateUtils.calculateAge(birthDate);
-
     validateField(id, GlobalExceptionCode.NOT_FOUND_RESPONSE_ID);
     validateField(email, GlobalExceptionCode.NOT_FOUND_RESPONSE_EMAIL);
     validateField(name, GlobalExceptionCode.NOT_FOUND_RESPONSE_NAME);
@@ -117,6 +114,10 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService
     validateField(birthYear, GlobalExceptionCode.NOT_FOUND_RESPONSE_BIRTHYEAR);
     validateField(birthDay, GlobalExceptionCode.NOT_FOUND_RESPONSE_BIRTHDAY);
     validateField(contact, GlobalExceptionCode.NOT_FOUND_RESPONSE_CONTACT);
+
+    // 2000-0730, parsing 위치 변경
+    LocalDate birthDate = DateUtils.parse(birthYear, birthDay, provider);
+    Integer age = DateUtils.calculateAge(birthDate);
 
     String oauthId = provider + "_" + id;
 

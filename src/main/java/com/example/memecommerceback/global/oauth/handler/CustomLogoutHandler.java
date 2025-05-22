@@ -54,6 +54,16 @@ public class CustomLogoutHandler implements LogoutHandler {
           log.info("delete refresh token success!");
         }
       }
+
+      if (refreshStatus == JwtStatus.ACCESS
+          || refreshStatus == JwtStatus.EXPIRED) {
+        String email = jwtUtils.getEmailFromToken(refreshToken);
+        String redisKey = JwtConstants.REFRESH_TOKEN_HEADER + ":" + email;
+            if (refreshTokenRepository.getByKey(redisKey) != null) {
+              refreshTokenRepository.deleteToken(redisKey);
+              log.info("delete refresh token by refresh token success!");
+            }
+      }
     } catch (Exception e) {
       log.warn("logout 중 예외 발생: {}", e.getMessage());
     } finally {

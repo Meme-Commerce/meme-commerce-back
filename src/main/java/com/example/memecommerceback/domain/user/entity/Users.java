@@ -41,9 +41,6 @@ public class Users extends CommonEntity {
   @Column(length = 20, unique = true)
   private String nickname;
 
-  @Column(name = "oauth_id", nullable = false, unique = true, length = 100)
-  private String oauthId;
-
   @Column(name = "profile_image")
   private String profileImage;
 

@@ -16,7 +16,6 @@ public class UsersConverter {
     Users user = Users.builder()
         .id(UUID.randomUUID())
         .email(email)
-        .oauthId(oauthId)
         .role(UserRole.USER)
         .name(name)
         .gender(Gender.fromCode(gender))

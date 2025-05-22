@@ -1,7 +1,7 @@
 package com.example.memecommerceback.domain.user.repository;
 
 import com.example.memecommerceback.domain.user.entity.Users;
-import io.lettuce.core.dynamic.annotation.Param;
+import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
