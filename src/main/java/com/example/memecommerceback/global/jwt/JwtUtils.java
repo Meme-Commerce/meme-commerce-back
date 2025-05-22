@@ -8,6 +8,7 @@ import com.example.memecommerceback.global.exception.dto.Error;
 import com.example.memecommerceback.global.exception.dto.ErrorResponseDto;
 import com.example.memecommerceback.global.jwt.cookie.CookieConstants;
 import com.example.memecommerceback.global.jwt.cookie.CookieUtils;
+import com.example.memecommerceback.global.jwt.dto.JwtTokenDto;
 import com.example.memecommerceback.global.redis.repository.RefreshTokenRepository;
 import com.example.memecommerceback.global.security.UserDetailsImpl;
 import com.example.memecommerceback.global.security.UserDetailsServiceImpl;
@@ -29,6 +30,7 @@ import java.util.Base64;
 import java.util.Collection;
 import java.util.Date;
 import java.util.stream.Collectors;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -60,6 +62,7 @@ public class JwtUtils {
   private final UserDetailsServiceImpl userDetailsService;
 
   private final RefreshTokenRepository refreshTokenRepository;
+
   private static final long ADMIN_LOCAL_ACCESS_EXP = 6 * 60 * 60 * 1000L;
   private static final long ADMIN_LOCAL_REFRESH_EXP = 7 * 24 * 60 * 60 * 1000L;
 
@@ -217,5 +220,18 @@ public class JwtUtils {
     response.setStatus(e.getHttpStatus().value());
     response.setContentType("application/json;charset=UTF-8");
     new ObjectMapper().writeValue(response.getWriter(), responseDto);
+  }
+
+  public String getEmailFromToken(String token) {
+    try {
+      Claims claims = getClaims(token);
+      return claims.getSubject();
+    } catch (ExpiredJwtException e) {
+      log.warn("Token has expired: {}", e.getMessage());
+      return e.getClaims().getSubject();
+    } catch (Exception e) {
+      log.error("Error parsing token: {}", e.getMessage());
+      throw new JwtCustomException(GlobalExceptionCode.INVALID_TOKEN_VALUE);
+    }
   }
 }

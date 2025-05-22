@@ -1,4 +1,4 @@
-package com.example.memecommerceback.global.jwt;
+package com.example.memecommerceback.global.jwt.dto;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

@@ -35,6 +35,34 @@ public enum GlobalExceptionCode {
       HttpStatus.UNAUTHORIZED, "JSON-001",
       "요청하신 Token을 변환하는 데, 실패하였습니다."),
 
+  // OAuth2
+  NOT_FOUND_RESPONSE(
+      HttpStatus.BAD_GATEWAY, "OAUTH-001",
+      "제공자 응답에서 response를 찾을 수 없습니다."),
+  NOT_FOUND_RESPONSE_ID(
+      HttpStatus.BAD_GATEWAY, "OAUTH-002",
+      "제공자 응답에서 response id 필드를 찾을 수 없습니다."),
+  NOT_FOUND_RESPONSE_NAME(
+      HttpStatus.BAD_GATEWAY, "OAUTH-003",
+      "제공자 응답에서 response name 필드를 찾을 수 없습니다."),
+  NOT_FOUND_RESPONSE_EMAIL(
+      HttpStatus.BAD_GATEWAY, "OAUTH-004",
+      "제공자 응답에서 response email 필드를 찾을 수 없습니다."),
+  NOT_FOUND_RESPONSE_GENDER(
+      HttpStatus.BAD_GATEWAY, "OAUTH-005",
+      "제공자 응답에서 response gender 필드를 찾을 수 없습니다."),
+  NOT_FOUND_RESPONSE_BIRTHDAY(
+      HttpStatus.BAD_GATEWAY, "OAUTH-006",
+      "제공자 응답에서 response birthday 필드를 찾을 수 없습니다."),
+  NOT_FOUND_RESPONSE_BIRTHYEAR(
+      HttpStatus.BAD_GATEWAY, "OAUTH-007",
+      "제공자 응답에서 response birthyear 필드를 찾을 수 없습니다."),
+  NOT_FOUND_RESPONSE_CONTACT(
+      HttpStatus.BAD_GATEWAY, "OAUTH-008",
+      "제공자 응답에서 response contact 필드를 찾을 수 없습니다."),
+  NOT_FOUND_PROVIDER(
+      HttpStatus.BAD_REQUEST, "OAUTH-009",
+      "지원하지 않거나 찾을 수 없는 공급자입니다."),
   ;
 
   private final HttpStatus httpStatus;

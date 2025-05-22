@@ -1,7 +1,7 @@
 package com.example.memecommerceback.global.security;
 
 import com.example.memecommerceback.domain.user.entity.Users;
-import com.example.memecommerceback.domain.user.repository.UserRepository;
+import com.example.memecommerceback.domain.user.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class UserDetailsServiceImpl implements UserDetailsService {
 
-  private final UserRepository userRepository;
+  private final UsersRepository userRepository;
 
   @Override
   public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {

@@ -1,15 +1,20 @@
 package com.example.memecommerceback.domain.user.entity;
 
+import com.example.memecommerceback.domain.userOAuthProvider.entity.UserOAuthProvider;
 import com.example.memecommerceback.global.common.CommonEntity;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -35,9 +40,6 @@ public class Users extends CommonEntity {
 
   @Column(length = 20, unique = true)
   private String nickname;
-
-  @Column(name = "oauth_id", nullable = false, unique = true, length = 100)
-  private String oauthId;
 
   @Column(name = "profile_image")
   private String profileImage;
@@ -68,6 +70,9 @@ public class Users extends CommonEntity {
   private String companyName = null;
 
   // relation
+  @Builder.Default
+  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<UserOAuthProvider> oauthProviderList = new ArrayList<>();
 
   // entity method
   @PrePersist
@@ -89,5 +94,9 @@ public class Users extends CommonEntity {
 
   public void updateRole(UserRole role) {
     this.role = role;
+  }
+
+  public void addOAuthProvider(UserOAuthProvider oAuthProvider) {
+    this.oauthProviderList.add(oAuthProvider);
   }
 }

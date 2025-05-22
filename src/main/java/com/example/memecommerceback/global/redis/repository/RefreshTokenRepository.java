@@ -42,10 +42,14 @@ public class RefreshTokenRepository {
 
   public <T> String getByKey(String key) {
     Object value = redisTemplateForToken.opsForValue().get(key);
-    if (value== null) {
+    if (value == null) {
       throw new JwtCustomException(GlobalExceptionCode.NOT_EXIST_REFRESH_TOKEN);
     }
     return value.toString();
+  }
+
+  public void deleteToken(String key) {
+    redisTemplateForToken.delete(key);
   }
 
 }
