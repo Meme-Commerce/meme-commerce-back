@@ -50,7 +50,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService
   private OAuth2User loadNaverUser(String provider, OAuth2User oAuth2User) {
     Map<String, Object> attributes = oAuth2User.getAttributes();
 
-    log.info("네이버에서 받은 유저 정보: {}", attributes);
     Map<String, Object> response
         = (Map<String, Object>) attributes.get("response");
 
@@ -91,9 +90,9 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService
 
   private OAuth2User loadKakaoUser(String provider, OAuth2User oAuth2User) {
     Map<String, Object> attributes = oAuth2User.getAttributes();
-    log.info("카카오에서 받은 유저 정보: {}", attributes);
 
-    Map<String, Object> kakaoAccount = (Map<String, Object>) attributes.get("kakao_account");
+    Map<String, Object> kakaoAccount
+        = (Map<String, Object>) attributes.get("kakao_account");
 
     if (kakaoAccount == null) {
       throw new OAuth2CustomException(GlobalExceptionCode.NOT_FOUND_RESPONSE);
@@ -125,8 +124,12 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService
         = OAuthProvider.fromCode(provider.charAt(0));
 
     // contact +82 10-7***-**** 해결해야함
-    String removePrefixContact =
-        "0" + contact.substring(4, 16);
+    String removePrefixContact;
+    if (contact.startsWith("+82")) {
+      removePrefixContact = "0" + contact.substring(contact.indexOf(" ") + 1).replaceAll("[^0-9]", "");
+    } else {
+      removePrefixContact = contact.replaceAll("[^0-9]", "");
+    }
     return validateUser(
         oAuthProvider, attributes, removePrefixContact,
         email, oauthId, name, gender, birthDate, age);
