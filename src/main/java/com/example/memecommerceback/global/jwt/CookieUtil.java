@@ -59,9 +59,7 @@ public class CookieUtil {
     Cookie[] cookies = request.getCookies();
     if (cookies == null) return null;
     for (Cookie cookie : cookies) {
-      if (name.equals(cookie.getName())) {
-        return cookie;
-      }
+      if (name.equals(cookie.getName())) return cookie;
     }
     return null;
   }
