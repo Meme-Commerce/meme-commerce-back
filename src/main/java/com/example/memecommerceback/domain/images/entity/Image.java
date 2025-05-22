@@ -1,5 +1,6 @@
 package com.example.memecommerceback.domain.images.entity;
 
+import com.example.memecommerceback.domain.users.entity.User;
 import com.example.memecommerceback.global.common.CommonEntity;
 import jakarta.persistence.*;
 import java.util.UUID;
@@ -21,26 +22,35 @@ public class Image extends CommonEntity {
   @Column(columnDefinition = "UUID", updatable = false, nullable = false)
   private UUID id;
 
+  // UUID_originalFileName.png
+  // ex) UUID_철수.jpeg
   @Column(nullable = false)
-  private String fileName;           // ex: user123_profile.png
+  private String fileName;
 
   @Column(nullable = false)
-  private String originalName;       // ex: IMG_1234.PNG
+  private String originalName;
 
   @Column(nullable = false)
-  private String url;                // S3 or CDN 경로
+  private String url;
 
   @Column(nullable = false)
-  private Long size;                 // 바이트 단위
+  private Long size;
 
   @Column(nullable = false)
-  private String contentType;        // image/png, image/jpeg 등
+  @Enumerated(EnumType.STRING)
+  private Extension extension;
 
   @Column(nullable = false)
   private Integer width;
 
   @Column(nullable = false)
   private Integer height;
+
+  @Column(nullable = false)
+  private UUID userId;
+
+  @Column(nullable = false)
+  private String ownerNickName;
 
   @PrePersist
   public void generateId() {

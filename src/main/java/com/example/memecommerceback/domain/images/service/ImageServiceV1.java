@@ -6,5 +6,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface ImageServiceV1 {
 
-  Image uploadProfileImage(MultipartFile profileImage, User user);
+  String uploadAndRegisterUserProfileImage(
+      MultipartFile profileImage, User user);
 }

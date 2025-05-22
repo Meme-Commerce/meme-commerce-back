@@ -69,6 +69,7 @@ public class UserServiceImplV1 implements UserServiceV1 {
     if (profileImage == null) {
       return null; // 이미지가 없으면 null 반환
     }
-    return imagesService.uploadProfileImage(profileImage, user).getUrl();
+
+    return imagesService.uploadAndRegisterUserProfileImage(profileImage, user);
   }
 }

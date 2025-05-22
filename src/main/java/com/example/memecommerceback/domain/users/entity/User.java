@@ -41,7 +41,7 @@ public class User extends CommonEntity {
   @Column(length = 20, unique = true)
   private String nickname;
 
-  @Column(name = "profile_image")
+  @Column(name = "profileImage")
   private String profileImage;
 
   @Enumerated(EnumType.STRING)
@@ -98,5 +98,9 @@ public class User extends CommonEntity {
 
   public void addOAuthProvider(UserOAuthProvider oAuthProvider) {
     this.oauthProviderList.add(oAuthProvider);
+  }
+
+  public void updateProfileImage(String profileImage){
+    this.profileImage = profileImage;
   }
 }

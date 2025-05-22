@@ -63,6 +63,14 @@ public enum GlobalExceptionCode {
   NOT_FOUND_PROVIDER(
       HttpStatus.BAD_REQUEST, "OAUTH-009",
       "지원하지 않거나 찾을 수 없는 공급자입니다."),
+
+  // S3
+  UPLOAD_FAIL(
+      HttpStatus.BAD_REQUEST, "AWS-001",
+      "S3 버킷에 업로드를 실패하였습니다."),
+  BLANK_FILE(
+      HttpStatus.BAD_REQUEST, "AWS-002",
+      "해당 파일은 공란입니다."),
   ;
 
   private final HttpStatus httpStatus;
