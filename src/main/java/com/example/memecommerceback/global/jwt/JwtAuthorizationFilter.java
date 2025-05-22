@@ -50,7 +50,11 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
               jwtUtils.getAuthentication(accessTokenValue));
           filterChain.doFilter(request, response);
         }
-        case EXPIRED -> jwtUtils.validateRefreshToken(accessTokenValue, response);
+        case EXPIRED -> {
+          String refreshTokenValue
+              = cookieUtils.getJwtTokenFromCookie(request, false);
+          jwtUtils.validateRefreshToken(accessTokenValue, refreshTokenValue, response);
+        }
         case FAIL -> throw new JwtCustomException(GlobalExceptionCode.MISSING_TOKEN);
       }
     } catch (JwtCustomException e) {

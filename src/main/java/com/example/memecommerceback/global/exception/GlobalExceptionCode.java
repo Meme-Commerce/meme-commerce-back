@@ -29,6 +29,12 @@ public enum GlobalExceptionCode {
   NOT_EXIST_REFRESH_TOKEN(
       HttpStatus.UNAUTHORIZED, "JWT-004",
       "요청하신 Refresh Token은 서버에 존재하지 않습니다."),
+
+  // Json Error
+  FAILED_SERIALIZATION(
+      HttpStatus.UNAUTHORIZED, "JSON-001",
+      "요청하신 Token을 변환하는 데, 실패하였습니다."),
+
   ;
 
   private final HttpStatus httpStatus;

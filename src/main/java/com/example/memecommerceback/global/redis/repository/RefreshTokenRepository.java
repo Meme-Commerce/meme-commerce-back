@@ -1,6 +1,7 @@
 package com.example.memecommerceback.global.redis.repository;
 
 import com.example.memecommerceback.global.exception.GlobalExceptionCode;
+import com.example.memecommerceback.global.exception.JsonCustomException;
 import com.example.memecommerceback.global.exception.JwtCustomException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -32,7 +33,7 @@ public class RefreshTokenRepository {
       valueString =
           !(value instanceof String) ? objectMapper.writeValueAsString(value) : (String) value;
     } catch (JsonProcessingException e) {
-      throw new RuntimeException();
+      throw new JsonCustomException(GlobalExceptionCode.FAILED_SERIALIZATION);
     }
 
     redisTemplateForToken.opsForValue().set(key, valueString);
@@ -40,10 +41,11 @@ public class RefreshTokenRepository {
   }
 
   public <T> String getByKey(String key) {
-    if (redisTemplateForToken.opsForValue().get(key) == null) {
+    Object value = redisTemplateForToken.opsForValue().get(key);
+    if (value== null) {
       throw new JwtCustomException(GlobalExceptionCode.NOT_EXIST_REFRESH_TOKEN);
     }
-    return Objects.requireNonNull(redisTemplateForToken.opsForValue().get(key)).toString();
+    return value.toString();
   }
 
 }

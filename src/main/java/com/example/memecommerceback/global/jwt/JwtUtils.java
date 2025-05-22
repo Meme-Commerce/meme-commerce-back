@@ -158,7 +158,8 @@ public class JwtUtils {
     SecurityContextHolder.getContext().setAuthentication(authentication);
   }
 
-  public void validateRefreshToken(String accessTokenValue, HttpServletResponse response) {
+  public void validateRefreshToken(
+      String accessTokenValue, String clientRefreshTokenValue, HttpServletResponse response) {
     Authentication authentication = getAuthentication(accessTokenValue);
     UserDetailsImpl userDetails
         = (UserDetailsImpl) authentication.getPrincipal();
@@ -170,10 +171,15 @@ public class JwtUtils {
         .map(GrantedAuthority::getAuthority)
         .orElseThrow(() -> new JwtCustomException(GlobalExceptionCode.MISSING_TOKEN));
 
-    String refreshTokenValue
-        = refreshTokenRepository.getByKey(
-            JwtConstants.REFRESH_TOKEN_HEADER+":"+email);
-    JwtStatus jwtStatus = validateToken(refreshTokenValue);
+    String storedRefreshToken = refreshTokenRepository.getByKey(
+        JwtConstants.REFRESH_TOKEN_HEADER+":"+email);
+
+    // 클라이언트 토큰과 저장된 토큰 비교
+    if (!storedRefreshToken.equals(clientRefreshTokenValue)) {
+      throw new JwtCustomException(GlobalExceptionCode.INVALID_TOKEN_VALUE);
+    }
+
+    JwtStatus jwtStatus = validateToken(storedRefreshToken);
     switch (jwtStatus){
       case ACCESS -> {
         setResponseCookie(email, role, response);
@@ -190,7 +196,7 @@ public class JwtUtils {
     ResponseCookie newAccessTokenCookie
         = cookieUtils.createCookie(
             JwtConstants.ACCESS_TOKEN_HEADER, newAccessToken,
-        getAccessTokenExpiration(UserRole.fromAuthority(role)));
+        getAccessTokenExpiration(UserRole.fromAuthority(role)) / 1000);
 
     response.addHeader(
         CookieConstants.SET_COOKIE, newAccessTokenCookie.toString());
