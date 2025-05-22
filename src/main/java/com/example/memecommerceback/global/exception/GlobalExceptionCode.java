@@ -18,8 +18,23 @@ public enum GlobalExceptionCode {
 
   // JWT-ERROR
   MISSING_TOKEN(
-      HttpStatus.BAD_REQUEST, "JWT-001",
+      HttpStatus.UNAUTHORIZED, "JWT-001",
       "요청에 JWT token이 포함되지 않습니다."),
+  EXPIRED_TOKEN(
+      HttpStatus.UNAUTHORIZED, "JWT-002",
+      "모든 JWT Token이 만료 되었습니다."),
+  INVALID_TOKEN_VALUE(
+      HttpStatus.UNAUTHORIZED, "JWT-003",
+      "요청하신 토큰은 JWT Token이 아닙니다."),
+  NOT_EXIST_REFRESH_TOKEN(
+      HttpStatus.UNAUTHORIZED, "JWT-004",
+      "요청하신 Refresh Token은 서버에 존재하지 않습니다."),
+
+  // Json Error
+  FAILED_SERIALIZATION(
+      HttpStatus.UNAUTHORIZED, "JSON-001",
+      "요청하신 Token을 변환하는 데, 실패하였습니다."),
+
   ;
 
   private final HttpStatus httpStatus;

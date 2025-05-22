@@ -1,49 +1,96 @@
 package com.example.memecommerceback.global.config;
 
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import com.example.memecommerceback.global.jwt.JwtAuthorizationFilter;
+import com.example.memecommerceback.global.jwt.JwtUtils;
+import com.example.memecommerceback.global.jwt.cookie.CookieUtils;
+import java.util.Arrays;
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
 
+@Configuration
+@EnableWebSecurity
+@RequiredArgsConstructor
 public class WebSecurityConfig {
 
-  // 쓸 곳 없는 메서드와 메서드 명을 한글로 적기
-  void 테스트() {
-    // System.out.println -> 불필요한 구문 잡아내는지?
-    System.out.println("안녕? 코드 레빗");
+  private final JwtUtils jwtUtils;
+  private final CookieUtils cookieUtils;
+
+/*  private final CustomLogoutHandler customLogoutHandler;
+  private final OAuth2SuccessHandler oAuth2SuccessHandler;
+  private final CustomOAuth2UserService customOAuth2UserService;
+  private final CustomLogoutSuccessHandler customLogoutSuccessHandler;*/
+
+  // private final RefreshTokenRepository refreshTokenRepository;
+
+  @Bean
+  public PasswordEncoder passwordEncoder() {
+    return new BCryptPasswordEncoder();
   }
 
-  // 해당 컴피그 파일에 필요 없는 메서드
-  public Authentication getAuthentication() {
-    // 변수 선언을 할 필요가 없었지만, 하는 경우
-    Authentication authentication
-        = SecurityContextHolder.getContext().getAuthentication();
-    return authentication;
+  @Bean
+  public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+    return configuration.getAuthenticationManager();
   }
 
-  // 쓸 곳 없는 메서드와 메서드 명을 한글로 적기
-  void 테스트2() {
-    // System.out.println -> 불필요한 구문 잡아내는지?
-    System.out.println("안녕? 코드 레빗");
+  @Bean
+  public JwtAuthorizationFilter jwtAuthorizationFilter() {
+    return new JwtAuthorizationFilter(jwtUtils, cookieUtils);
   }
 
-  // 해당 컴피그 파일에 필요 없는 메서드
-  public Authentication getAuthentication2() {
-    // 변수 선언을 할 필요가 없었지만, 하는 경우
-    Authentication authentication
-        = SecurityContextHolder.getContext().getAuthentication();
-    return authentication;
-  }
-
-  // 쓸 곳 없는 메서드와 메서드 명을 한글로 적기
-  void 테스트3() {
-    // System.out.println -> 불필요한 구문 잡아내는지?
-    System.out.println("안녕? 코드 레빗");
-  }
-
-  // 해당 컴피그 파일에 필요 없는 메서드
-  public Authentication getAuthentication3() {
-    // 변수 선언을 할 필요가 없었지만, 하는 경우
-    Authentication authentication
-        = SecurityContextHolder.getContext().getAuthentication();
-    return authentication;
+  @Bean
+  public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    http.csrf(AbstractHttpConfigurer::disable)
+        .formLogin(AbstractHttpConfigurer::disable)
+        .httpBasic(AbstractHttpConfigurer::disable)
+        .cors(cors -> cors
+            .configurationSource(request -> {
+              CorsConfiguration configuration = new CorsConfiguration();
+              configuration.setAllowedOriginPatterns(
+                  Arrays.asList(
+                      "http://localhost:5200", "http://localhost:8080"));
+              configuration.setAllowedMethods(Arrays.asList(
+                  "GET", "POST", "PATCH", "DELETE", "OPTIONS"));
+              configuration.setAllowedHeaders(Arrays.asList(
+                  "Authorization", "refreshToken",
+                  "Cache-Control", "Content-Type"));
+              configuration.setAllowCredentials(true);
+              configuration.setExposedHeaders(Arrays.asList(
+                  "Authorization","Set-Cookie"));
+              return configuration;
+            })
+        )
+        .authorizeHttpRequests((requests) -> requests
+            .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+            .requestMatchers("/api/v1/public/**").permitAll()
+            .anyRequest().authenticated()
+        )
+        .sessionManagement((session) ->
+            session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+/*        .oauth2Login(oauth2 -> oauth2
+            .userInfoEndpoint(userInfo -> userInfo
+                .userService(customOAuth2UserService) // 사용자 정보 처리
+            )
+            .successHandler(oAuth2SuccessHandler) // 로그인 성공 후 처리
+        )
+        .logout((logout) -> logout
+            .logoutUrl("/api/v1/logout")
+            .addLogoutHandler(customLogoutHandler)
+            .deleteCookies("remember-me")
+            .logoutSuccessHandler(customLogoutSuccessHandler)
+        )*/
+        .addFilterBefore(jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
+    return http.build();
   }
 }

@@ -1,15 +1,18 @@
-package com.example.memecommerceback.global.jwt;
+package com.example.memecommerceback.global.jwt.cookie;
 
 import com.example.memecommerceback.global.exception.GlobalExceptionCode;
 import com.example.memecommerceback.global.exception.JwtCustomException;
+import com.example.memecommerceback.global.jwt.JwtConstants;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseCookie;
+import org.springframework.stereotype.Component;
 
+@Component
 @RequiredArgsConstructor
-public class CookieUtil {
+public class CookieUtils {
 
   private final CookieProperties cookieProperties;
 

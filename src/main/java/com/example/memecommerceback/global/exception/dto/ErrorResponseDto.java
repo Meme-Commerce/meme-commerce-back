@@ -14,4 +14,11 @@ public class ErrorResponseDto {
 
   @Schema(description = "에러 메시지", example = "요청에 JWT token이 포함되지 않습니다.")
   private String message;
+
+  public static ErrorResponseDto of(String errorCode, String message){
+    return ErrorResponseDto.builder()
+        .errorCode(errorCode)
+        .message(message)
+        .build();
+  }
 }

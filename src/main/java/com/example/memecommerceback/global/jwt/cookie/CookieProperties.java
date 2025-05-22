@@ -1,4 +1,4 @@
-package com.example.memecommerceback.global.jwt;
+package com.example.memecommerceback.global.jwt.cookie;
 
 import lombok.Getter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
