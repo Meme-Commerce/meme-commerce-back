@@ -1,4 +1,4 @@
-package com.example.memecommerceback.domain.user.entity;
+package com.example.memecommerceback.domain.users.entity;
 
 import java.util.Arrays;
 import java.util.List;

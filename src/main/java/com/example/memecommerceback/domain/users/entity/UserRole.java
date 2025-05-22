@@ -1,7 +1,7 @@
-package com.example.memecommerceback.domain.user.entity;
+package com.example.memecommerceback.domain.users.entity;
 
-import com.example.memecommerceback.domain.user.exception.UsersCustomException;
-import com.example.memecommerceback.domain.user.exception.UsersExceptionCode;
+import com.example.memecommerceback.domain.users.exception.UserCustomException;
+import com.example.memecommerceback.domain.users.exception.UserExceptionCode;
 import lombok.Getter;
 
 @Getter
@@ -31,6 +31,6 @@ public enum UserRole {
         return role;
       }
     }
-    throw new UsersCustomException(UsersExceptionCode.NOT_EXIST_AUTHORITY);
+    throw new UserCustomException(UserExceptionCode.NOT_EXIST_AUTHORITY);
   }
 }

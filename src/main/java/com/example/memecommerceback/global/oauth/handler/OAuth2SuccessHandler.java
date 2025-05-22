@@ -1,13 +1,12 @@
 package com.example.memecommerceback.global.oauth.handler;
 
-import com.example.memecommerceback.domain.user.entity.UserRole;
-import com.example.memecommerceback.domain.user.entity.Users;
+import com.example.memecommerceback.domain.users.entity.UserRole;
+import com.example.memecommerceback.domain.users.entity.User;
 import com.example.memecommerceback.global.jwt.JwtConstants;
 import com.example.memecommerceback.global.jwt.JwtUtils;
 import com.example.memecommerceback.global.jwt.cookie.CookieConstants;
 import com.example.memecommerceback.global.jwt.cookie.CookieUtils;
 import com.example.memecommerceback.global.jwt.dto.JwtTokenDto;
-import com.example.memecommerceback.global.oauth.constant.OAuthConstants;
 import com.example.memecommerceback.global.oauth.entity.CustomOAuth2User;
 import com.example.memecommerceback.global.redis.repository.RefreshTokenRepository;
 import jakarta.servlet.ServletException;
@@ -46,7 +45,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
     // OAuth2User → 커스텀 User 엔티티로 캐스팅
     CustomOAuth2User oAuth2User
         = (CustomOAuth2User) authentication.getPrincipal();
-    Users user = oAuth2User.getUser();
+    User user = oAuth2User.getUser();
     String email = user.getEmail();
     UserRole role = user.getRole();
 

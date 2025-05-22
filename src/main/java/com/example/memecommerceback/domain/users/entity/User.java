@@ -1,4 +1,4 @@
-package com.example.memecommerceback.domain.user.entity;
+package com.example.memecommerceback.domain.users.entity;
 
 import com.example.memecommerceback.domain.userOAuthProvider.entity.UserOAuthProvider;
 import com.example.memecommerceback.global.common.CommonEntity;
@@ -27,7 +27,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "users")
-public class Users extends CommonEntity {
+public class User extends CommonEntity {
 
   // fields
   @Id

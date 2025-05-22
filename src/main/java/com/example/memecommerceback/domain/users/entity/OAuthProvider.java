@@ -1,4 +1,4 @@
-package com.example.memecommerceback.domain.user.entity;
+package com.example.memecommerceback.domain.users.entity;
 
 import com.example.memecommerceback.global.exception.GlobalExceptionCode;
 import com.example.memecommerceback.global.exception.OAuth2CustomException;

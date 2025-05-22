@@ -1,7 +1,7 @@
 package com.example.memecommerceback.global.security;
 
-import com.example.memecommerceback.domain.user.entity.UserRole;
-import com.example.memecommerceback.domain.user.entity.Users;
+import com.example.memecommerceback.domain.users.entity.UserRole;
+import com.example.memecommerceback.domain.users.entity.User;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
@@ -16,7 +16,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 @RequiredArgsConstructor
 public class UserDetailsImpl implements UserDetails, OAuth2User {
 
-  private final Users user;
+  private final User user;
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {

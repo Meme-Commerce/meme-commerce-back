@@ -1,4 +1,4 @@
-package com.example.memecommerceback.domain.user.exception;
+package com.example.memecommerceback.domain.users.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatus;
 
 @Getter
 @AllArgsConstructor
-public enum UsersExceptionCode {
+public enum UserExceptionCode {
 
   NOT_FOUND(
       HttpStatus.BAD_REQUEST, "USERS-001",

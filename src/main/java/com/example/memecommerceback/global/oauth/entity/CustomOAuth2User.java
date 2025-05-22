@@ -1,6 +1,6 @@
 package com.example.memecommerceback.global.oauth.entity;
 
-import com.example.memecommerceback.domain.user.entity.Users;
+import com.example.memecommerceback.domain.users.entity.User;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -12,10 +12,10 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 @Getter
 public class CustomOAuth2User implements OAuth2User {
 
-  private final Users user;
+  private final User user;
   private final Map<String, Object> attributes;
 
-  public CustomOAuth2User(Users user, Map<String, Object> attributes) {
+  public CustomOAuth2User(User user, Map<String, Object> attributes) {
     this.user = user;
     this.attributes = attributes;
   }
