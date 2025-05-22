@@ -9,6 +9,7 @@ import com.example.memecommerceback.global.exception.GlobalExceptionCode;
 import com.example.memecommerceback.global.exception.OAuth2CustomException;
 import com.example.memecommerceback.global.oauth.constant.OAuthConstants;
 import com.example.memecommerceback.global.oauth.entity.CustomOAuth2User;
+import com.example.memecommerceback.global.utils.ContactUtils;
 import com.example.memecommerceback.global.utils.DateUtils;
 import java.time.LocalDate;
 import java.util.List;
@@ -123,13 +124,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService
     OAuthProvider oAuthProvider
         = OAuthProvider.fromCode(provider.charAt(0));
 
-    // contact +82 10-7***-**** 해결해야함
-    String removePrefixContact;
-    if (contact.startsWith("+82")) {
-      removePrefixContact = "0" + contact.substring(contact.indexOf(" ") + 1).replaceAll("[^0-9]", "");
-    } else {
-      removePrefixContact = contact.replaceAll("[^0-9]", "");
-    }
+    String removePrefixContact = ContactUtils.normalizeContact(contact);
+
     return validateUser(
         oAuthProvider, attributes, removePrefixContact,
         email, oauthId, name, gender, birthDate, age);
