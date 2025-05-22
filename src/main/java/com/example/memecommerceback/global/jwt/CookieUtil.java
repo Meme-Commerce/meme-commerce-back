@@ -28,12 +28,12 @@ public class CookieUtil {
   public void deleteCookie(
       HttpServletResponse response, String cookieName) {
     Cookie cookie = new Cookie(cookieName, null);
-    cookie.setHttpOnly(false);
+    cookie.setHttpOnly(cookieProperties.isHttpOnly());
     cookie.setSecure(cookieProperties.isSecure());
-    cookie.setPath("/");
     if (cookieProperties.getDomain() != null) {
       cookie.setDomain(cookieProperties.getDomain());
     }
+    cookie.setPath("/");
     cookie.setMaxAge(0); // 쿠키 삭제
     response.addCookie(cookie);
   }
