@@ -24,8 +24,7 @@ public enum Error {
       Message.DATE_TIME_PARSE_ERROR),
   INVALID_ENUM_VALUE(
       Code.INPUT_INVALID_ENUM,
-      Message.INPUT_INVALID_ENUM)
-  ;
+      Message.INPUT_INVALID_ENUM);
 
   private final String code;
   private final String message;
@@ -41,6 +40,7 @@ public enum Error {
   }
 
   public static class Code {
+
     public static final String INPUT_INVALID_ENUM = "INPUT-INVALID-ENUM";
     public static final String INVALID_PARAMETER_ERROR = "INVALID-PARAMETER-ERROR";
     public static final String INVALID_DTO_MAPPING_ERROR = "INVALID-DTO-MAPPING-ERROR";
