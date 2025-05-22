@@ -3,6 +3,10 @@ package com.example.memecommerceback.global.config;
 import com.example.memecommerceback.global.jwt.JwtAuthorizationFilter;
 import com.example.memecommerceback.global.jwt.JwtUtils;
 import com.example.memecommerceback.global.jwt.cookie.CookieUtils;
+import com.example.memecommerceback.global.oauth.handler.CustomLogoutHandler;
+import com.example.memecommerceback.global.oauth.handler.CustomLogoutSuccessHandler;
+import com.example.memecommerceback.global.oauth.handler.OAuth2SuccessHandler;
+import com.example.memecommerceback.global.oauth.service.CustomOAuth2UserService;
 import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -27,12 +31,10 @@ public class WebSecurityConfig {
   private final JwtUtils jwtUtils;
   private final CookieUtils cookieUtils;
 
-/*  private final CustomLogoutHandler customLogoutHandler;
+  private final CustomLogoutHandler customLogoutHandler;
   private final OAuth2SuccessHandler oAuth2SuccessHandler;
   private final CustomOAuth2UserService customOAuth2UserService;
-  private final CustomLogoutSuccessHandler customLogoutSuccessHandler;*/
-
-  // private final RefreshTokenRepository refreshTokenRepository;
+  private final CustomLogoutSuccessHandler customLogoutSuccessHandler;
 
   @Bean
   public PasswordEncoder passwordEncoder() {
@@ -78,7 +80,7 @@ public class WebSecurityConfig {
         )
         .sessionManagement((session) ->
             session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-/*        .oauth2Login(oauth2 -> oauth2
+        .oauth2Login(oauth2 -> oauth2
             .userInfoEndpoint(userInfo -> userInfo
                 .userService(customOAuth2UserService) // 사용자 정보 처리
             )
@@ -89,7 +91,7 @@ public class WebSecurityConfig {
             .addLogoutHandler(customLogoutHandler)
             .deleteCookies("remember-me")
             .logoutSuccessHandler(customLogoutSuccessHandler)
-        )*/
+        )
         .addFilterBefore(jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
     return http.build();
   }
