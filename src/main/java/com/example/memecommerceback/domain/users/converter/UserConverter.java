@@ -52,4 +52,23 @@ public class UserConverter {
         .isAvailable(isAvailable)
         .build();
   }
+
+  public static UserResponseDto.ReadProfileDto toReadProfileDto(
+      User user){
+    return UserResponseDto.ReadProfileDto.builder()
+        .userId(user.getId())
+        .address(user.getAddress())
+        .profileImage(user.getProfileImage())
+        .name(user.getName())
+        .email(user.getEmail())
+        .nickname(user.getNickname())
+        .userRole(user.getRole())
+        .birthDate(user.getBirthDate().toString())
+        .gender(user.getGender())
+        .contact(user.getContact())
+        .age(user.getAge())
+        .createdAt(user.getCreatedAt())
+        .registeredCompanyName(user.getCompanyName())
+        .build();
+  }
 }

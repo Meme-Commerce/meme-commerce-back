@@ -115,6 +115,13 @@ public class UserServiceImplV1 implements UserServiceV1 {
   }
 
   @Override
+  @Transactional
+  public UserResponseDto.ReadProfileDto readProfile(User loginUser) {
+    User user = findById(loginUser.getId());
+    return UserConverter.toReadProfileDto(user);
+  }
+
+  @Override
   @Transactional(readOnly = true)
   public User findById(UUID loginUserId){
     return userRepository.findById(loginUserId).orElseThrow(

@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1")
-
+@Tag(name = "User API", description = "회원 API")
 public class UserController {
 
   private final UserServiceV1 userService;
@@ -77,6 +78,14 @@ public class UserController {
       @AuthenticationPrincipal UserDetailsImpl userDetails) {
     UserResponseDto.UpdateProfileDto responseDto
         = userService.updateNickname(nickname, userDetails.getUser());
+    return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+  }
+
+  @GetMapping("/users/profile")
+  public ResponseEntity<UserResponseDto.ReadProfileDto> readProfile(
+      @AuthenticationPrincipal UserDetailsImpl userDetails){
+    UserResponseDto.ReadProfileDto responseDto
+        = userService.readProfile(userDetails.getUser());
     return ResponseEntity.status(HttpStatus.OK).body(responseDto);
   }
 }
