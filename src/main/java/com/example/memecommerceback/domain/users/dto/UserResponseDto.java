@@ -26,7 +26,8 @@ public class UserResponseDto {
     private String nickname;
     @Schema(description = "나이", example = "28")
     private Integer age;
-    @Schema(description = "프로필 이미지 URL", example = "https://example-bucket.s3.ap-northeast-2.amazonaws.com/users/길동이123/profile/abc123.jpg")
+    @Schema(description = "프로필 이미지 URL",
+        example = "https://meme-commerce-bucket.s3.ap-northeast-2.amazonaws.com/users/dbnickname/profile/randomuuid_filename.png")
     private String profileImage;
     @Schema(description = "이메일", example = "hong@example.com")
     private String email;

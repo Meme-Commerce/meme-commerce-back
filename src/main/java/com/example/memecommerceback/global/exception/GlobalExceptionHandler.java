@@ -2,6 +2,7 @@ package com.example.memecommerceback.global.exception;
 
 import com.example.memecommerceback.domain.files.exception.FileCustomException;
 import com.example.memecommerceback.domain.users.exception.UserCustomException;
+import com.example.memecommerceback.global.exception.ProfanityFilterCustomException;
 import com.example.memecommerceback.global.exception.dto.CommonResponseDto;
 import com.example.memecommerceback.global.exception.dto.Error;
 import com.example.memecommerceback.global.exception.dto.ErrorResponseDto;
