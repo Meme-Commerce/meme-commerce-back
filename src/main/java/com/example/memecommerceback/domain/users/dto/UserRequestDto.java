@@ -23,10 +23,6 @@ public class UserRequestDto {
     @Size(max = 20, message = "닉네임은 20자 이내로 입력해주세요.")
     private String nickname;
 
-    @Pattern(regexp = "^[A-Za-z0-9._%+-]+@(naver.com|daum.net)$",
-        message = "허용된 이메일 도메인은 naver.com 또는 daum.net입니다.")
-    private String email;
-
     @Pattern(regexp = "^010-\\d{4}-\\d{4}$",
         message = "연락처는 010-xxxx-xxxx 형식이어야 합니다.")
     private String contact;

@@ -77,11 +77,7 @@ public class User extends CommonEntity {
   // entity method
 
   public void updateProfile(
-      String email, String contact,
-      String nickname, String address, String profileImage) {
-    if (email != null && !email.equals(this.email)) {
-      this.email = email;
-    }
+      String contact, String nickname, String address, String profileImage) {
     if (contact != null && !contact.equals(this.contact)) {
       this.contact = contact;
     }

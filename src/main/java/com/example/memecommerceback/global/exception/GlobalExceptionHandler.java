@@ -146,39 +146,25 @@ public class GlobalExceptionHandler {
             HttpStatus.BAD_REQUEST.value()));
   }
 
-  @ExceptionHandler(UserCustomException.class)
-  public ResponseEntity<CommonResponseDto<ErrorResponseDto>> handleUserCustomException(
-      UserCustomException ex) {
+  @ExceptionHandler(
+      {UserCustomException.class, FileCustomException.class,
+          ProfanityFilterCustomException.class})
+  public ResponseEntity<CommonResponseDto<ErrorResponseDto>> handleCustomException(
+      CustomException ex) {
+    String category;
+    if (ex instanceof UserCustomException) {
+      category = "회원 오류";
+    } else if (ex instanceof FileCustomException) {
+      category = "파일 오류";
+    } else if (ex instanceof ProfanityFilterCustomException) {
+      category = "비속어 오류";
+    } else {
+      category = "기타 오류";
+    }
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
         new CommonResponseDto<>(
             ErrorResponseDto.of(
-                ex.getErrorCode(),
-                ex.getMessage()),
-            "회원 오류",
-            HttpStatus.BAD_REQUEST.value()));
-  }
-
-  @ExceptionHandler(FileCustomException.class)
-  public ResponseEntity<CommonResponseDto<ErrorResponseDto>> handleFileCustomException(
-      FileCustomException ex) {
-    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-        new CommonResponseDto<>(
-            ErrorResponseDto.of(
-                ex.getErrorCode(),
-                ex.getMessage()),
-            "파일 오류",
-            HttpStatus.BAD_REQUEST.value()));
-  }
-
-  @ExceptionHandler(ProfanityFilterCustomException.class)
-  public ResponseEntity<CommonResponseDto<ErrorResponseDto>> handleProfanityCustomException(
-      ProfanityFilterCustomException ex) {
-    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-        new CommonResponseDto<>(
-            ErrorResponseDto.of(
-                ex.getErrorCode(),
-                ex.getMessage()),
-            "비속어 오류",
-            HttpStatus.BAD_REQUEST.value()));
-  }
+                ex.getErrorCode(), ex.getMessage()),
+            category, HttpStatus.BAD_REQUEST.value()));
+     }
 }

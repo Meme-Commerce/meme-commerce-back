@@ -8,10 +8,7 @@ import com.example.memecommerceback.domain.users.entity.User;
 import com.example.memecommerceback.domain.users.exception.UserCustomException;
 import com.example.memecommerceback.domain.users.exception.UserExceptionCode;
 import com.example.memecommerceback.domain.users.repository.UserRepository;
-import com.example.memecommerceback.global.jwt.JwtConstants;
-import com.example.memecommerceback.global.redis.service.RefreshTokenServiceV1;
 import com.example.memecommerceback.global.service.ProfanityFilterService;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +21,6 @@ import org.springframework.web.multipart.MultipartFile;
 public class UserServiceImplV1 implements UserServiceV1 {
 
   private final ImageServiceV1 imageService;
-  private final RefreshTokenServiceV1 refreshTokenService;
   private final ProfanityFilterService profanityFilterService;
 
   private final UserRepository userRepository;
@@ -48,7 +44,6 @@ public class UserServiceImplV1 implements UserServiceV1 {
       MultipartFile profileImage, User loginUser) {
 
     User user = findById(loginUser.getId());
-    String beforeEmail = user.getEmail();
     String beforeNickname = user.getNickname();
 
     String profileImageUrl = null;
@@ -83,7 +78,6 @@ public class UserServiceImplV1 implements UserServiceV1 {
 
     // 3. 유저 정보 업데이트 (가장 우선: 새 업로드 > 경로 이동 > 기존값)
     user.updateProfile(
-        requestDto.getEmail(),
         requestDto.getContact(),
         requestDto.getNickname(),
         requestDto.getAddress(),
@@ -91,13 +85,6 @@ public class UserServiceImplV1 implements UserServiceV1 {
             (newProfileUrl != null ? newProfileUrl : user.getProfileImage())
     );
 
-    // 4. 이메일 변경 시 refreshToken 무효화
-    if (requestDto.getEmail() != null && !requestDto.getEmail().equals(beforeEmail)) {
-      String redisKeyHeader = JwtConstants.REFRESH_TOKEN_HEADER + ":";
-      refreshTokenService.deleteToken(redisKeyHeader + beforeEmail);
-    }
-
-    // 5. 응답 반환
     return UserConverter.toUpdateProfileDto(user);
   }
 
