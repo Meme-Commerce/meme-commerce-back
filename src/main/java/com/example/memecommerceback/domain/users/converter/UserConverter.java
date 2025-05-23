@@ -45,13 +45,6 @@ public class UserConverter {
         .build();
   }
 
-  /**
-   * 요청한 닉네임의 사용 가능 여부를 나타내는 DTO를 생성합니다.
-   *
-   * @param requestNickname 확인할 닉네임
-   * @param isAvailable 닉네임 사용 가능 여부
-   * @return 닉네임과 사용 가능 여부 정보를 담은 IsAvailableNicknameDto 객체
-   */
   public static UserResponseDto.IsAvailableNicknameDto toIsAvailableNicknameDto(
       String requestNickname, boolean isAvailable){
     return UserResponseDto.IsAvailableNicknameDto.builder()
@@ -60,12 +53,6 @@ public class UserConverter {
         .build();
   }
 
-  /**
-   * User 엔티티를 상세 프로필 조회용 DTO로 변환합니다.
-   *
-   * @param user 변환할 User 엔티티
-   * @return User의 상세 정보를 담은 ReadProfileDto 객체
-   */
   public static UserResponseDto.ReadProfileDto toReadProfileDto(
       User user){
     return UserResponseDto.ReadProfileDto.builder()
