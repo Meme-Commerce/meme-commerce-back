@@ -17,7 +17,7 @@ public class ImageConverter {
         .fileName(s3ResponseDto.getFileName())
         .originalName(s3ResponseDto.getOriginalName())
         .userId(user.getId())
-        .ownerNickName(user.getNickname())
+        .ownerNickname(user.getNickname())
         .build();
   }
 }

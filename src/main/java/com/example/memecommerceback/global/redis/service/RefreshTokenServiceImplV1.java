@@ -14,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class RefreshTokenServiceImplV1 implements RefreshTokenServiceV1{
 
-  private final JwtUtils jwtUtils;
   private final RefreshTokenRepository refreshTokenRepository;
 
   @Override
@@ -25,7 +24,7 @@ public class RefreshTokenServiceImplV1 implements RefreshTokenServiceV1{
 
   @Override
   @Transactional(readOnly = true)
-  public <T> String getByKey(String key) {
+  public String getByKey(String key) {
     return refreshTokenRepository.getByKey(key);
   }
 

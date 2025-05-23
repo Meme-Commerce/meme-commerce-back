@@ -64,10 +64,15 @@ public class S3Service {
       // URL 디코딩
       String decodedUrl = URLDecoder.decode(imageUrl, StandardCharsets.UTF_8);
       // "_" 다음 문자부터 시작하여 파일 이름 추출
-      int underscoreIndex = decodedUrl.lastIndexOf("/") + 1;
-      String fileName = decodedUrl.substring(underscoreIndex);
+      String bucketUrlPart = bucket + ".s3.";
+      int pathIndex = decodedUrl.indexOf(bucketUrlPart);
+      if (pathIndex == -1) {
+        throw new AWSCustomException(GlobalExceptionCode.NOT_MATCHED_FILE_URL);
+      }
+      int keyStartIndex = decodedUrl.indexOf("/", pathIndex + bucketUrlPart.length());
+      String filePath = decodedUrl.substring(keyStartIndex + 1);
       // S3에서 파일 삭제
-      amazonS3Client.deleteObject(new DeleteObjectRequest(bucket, fileName));
+      amazonS3Client.deleteObject(new DeleteObjectRequest(bucket, filePath));
     } catch (Exception e) {
       throw new AWSCustomException(GlobalExceptionCode.NOT_MATCHED_FILE_URL);
     }
