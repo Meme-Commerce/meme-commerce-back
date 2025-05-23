@@ -84,6 +84,17 @@ public class UserController {
     return ResponseEntity.status(HttpStatus.OK).body(responseDto);
   }
 
+  @Operation(summary = "회원 프로필 조회", description = "로그인한 회원의 프로필 정보를 조회합니다.")
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "프로필 조회 성공",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = UserResponseDto.ReadProfileDto.class))),
+      @ApiResponse(responseCode = "401", description = "로그인하지 않은 사용자",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = CommonResponseDto.class))),
+      @ApiResponse(responseCode = "404", description = "회원을 찾을 수 없음",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = ErrorResponseDto.class)))})
   @GetMapping("/users/profile")
   public ResponseEntity<UserResponseDto.ReadProfileDto> readProfile(
       @AuthenticationPrincipal UserDetailsImpl userDetails){
@@ -92,6 +103,20 @@ public class UserController {
     return ResponseEntity.status(HttpStatus.OK).body(responseDto);
   }
 
+  @Operation(summary = "회원 탈퇴", description = "회원을 삭제합니다. 본인 또는 관리자만 삭제할 수 있습니다.")
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "회원 삭제 성공",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = CommonResponseDto.class))),
+      @ApiResponse(responseCode = "400", description = "권한 없음 (본인 또는 관리자가 아닌 경우)",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = ErrorResponseDto.class))),
+      @ApiResponse(responseCode = "401", description = "로그인하지 않은 사용자",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = CommonResponseDto.class))),
+      @ApiResponse(responseCode = "404", description = "회원을 찾을 수 없음",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = ErrorResponseDto.class)))})
   @DeleteMapping("/users/{userId}")
   public ResponseEntity<CommonResponseDto<Void>> deleteOne(
       @PathVariable UUID userId,

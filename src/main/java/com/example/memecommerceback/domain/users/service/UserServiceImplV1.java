@@ -100,6 +100,16 @@ public class UserServiceImplV1 implements UserServiceV1 {
         requestedNickname, isAvailable);
   }
 
+  /**
+   * 로그인한 사용자의 닉네임을 변경합니다.
+   *
+   * 닉네임이 이미 사용 중이거나 부적절한 단어가 포함된 경우 예외를 발생시킵니다.
+   *
+   * @param requestedNickname 변경할 닉네임
+   * @param loginUser 닉네임을 변경할 로그인 사용자
+   * @return 변경된 프로필 정보를 담은 DTO
+   * @throws UserCustomException 닉네임이 중복되었거나 부적절할 때 발생
+   */
   @Override
   @Transactional
   public UserResponseDto.UpdateProfileDto updateNickname(
@@ -115,6 +125,12 @@ public class UserServiceImplV1 implements UserServiceV1 {
     return UserConverter.toUpdateProfileDto(user);
   }
 
+  /**
+   * 로그인한 사용자의 프로필 정보를 조회합니다.
+   *
+   * @param loginUser 현재 로그인한 사용자
+   * @return 사용자의 프로필 정보를 담은 ReadProfileDto 객체
+   */
   @Override
   @Transactional(readOnly = true)
   public UserResponseDto.ReadProfileDto readProfile(User loginUser) {
@@ -122,6 +138,15 @@ public class UserServiceImplV1 implements UserServiceV1 {
     return UserConverter.toReadProfileDto(user);
   }
 
+  /**
+   * 지정된 사용자를 삭제합니다.
+   *
+   * 관리자이거나 본인인 경우에만 삭제가 허용되며, 프로필 이미지가 존재하면 함께 삭제됩니다.
+   *
+   * @param userId 삭제할 사용자의 UUID
+   * @param loginUser 현재 로그인한 사용자
+   * @throws UserCustomException 삭제 권한이 없는 경우 발생
+   */
   @Override
   @Transactional
   public void deleteOne(UUID userId, User loginUser) {
@@ -137,6 +162,13 @@ public class UserServiceImplV1 implements UserServiceV1 {
     userRepository.deleteById(userId);
   }
 
+  /**
+   * 주어진 ID로 사용자를 조회합니다.
+   *
+   * @param loginUserId 조회할 사용자의 UUID
+   * @return 해당 UUID에 해당하는 사용자 엔티티
+   * @throws UserCustomException 사용자를 찾을 수 없는 경우 발생
+   */
   @Override
   @Transactional(readOnly = true)
   public User findById(UUID loginUserId){
@@ -148,7 +180,6 @@ public class UserServiceImplV1 implements UserServiceV1 {
     if (profileImage == null) {
       return null; // 이미지가 없으면 null 반환
     }
-
     return imageService.uploadAndRegisterUserProfileImage(profileImage, user);
   }
 }
