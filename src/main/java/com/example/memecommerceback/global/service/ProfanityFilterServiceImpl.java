@@ -16,11 +16,15 @@ public class ProfanityFilterServiceImpl implements ProfanityFilterService {
   }
 
   public void validateNoProfanity(String text) {
-    if (badWordFiltering.blankCheck(text)) {
+    if (blankCheck(text)) {
       throw new ProfanityFilterCustomException(GlobalExceptionCode.NOT_BLANK);
     }
     if (badWordFiltering.check(text)) {
       throw new ProfanityFilterCustomException(GlobalExceptionCode.PROFANITY_DETECTED);
     }
+  }
+
+  private boolean blankCheck(String text) {
+    return text == null || text.trim().isEmpty();
   }
 }

@@ -51,5 +51,4 @@ public class RefreshTokenRepository {
   public void deleteToken(String key) {
     redisTemplateForToken.delete(key);
   }
-
 }

@@ -12,13 +12,13 @@ public class ErrorResponseDto {
   @Schema(description = "에러 코드", example = "JWT-002")
   private String errorCode;
 
-  @Schema(description = "에러 메시지", example = "요청에 JWT token이 포함되지 않습니다.")
-  private String message;
+  @Schema(description = "디테일한 에러 메시지", example = "요청에 JWT token이 포함되지 않습니다.")
+  private String details;
 
-  public static ErrorResponseDto of(String errorCode, String message){
+  public static ErrorResponseDto of(String errorCode, String details){
     return ErrorResponseDto.builder()
         .errorCode(errorCode)
-        .message(message)
+        .details(details)
         .build();
   }
 }

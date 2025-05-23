@@ -1,5 +1,8 @@
 package com.example.memecommerceback.global.exception;
 
+import com.example.memecommerceback.domain.files.exception.FileCustomException;
+import com.example.memecommerceback.domain.users.exception.UserCustomException;
+import com.example.memecommerceback.global.exception.ProfanityFilterCustomException;
 import com.example.memecommerceback.global.exception.dto.CommonResponseDto;
 import com.example.memecommerceback.global.exception.dto.Error;
 import com.example.memecommerceback.global.exception.dto.ErrorResponseDto;
@@ -16,6 +19,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 @RestControllerAdvice
@@ -26,7 +30,7 @@ public class GlobalExceptionHandler {
       AccessDeniedException ex) {
     return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
         new CommonResponseDto<>(
-            getErrorResponseDto(
+            ErrorResponseDto.of(
                 Error.AUTH_DENIED_ERROR.getCode(),
                 Error.AUTH_DENIED_ERROR.getMessage()),
             HttpStatus.FORBIDDEN.getReasonPhrase() + " : "
@@ -44,7 +48,7 @@ public class GlobalExceptionHandler {
 
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
         new CommonResponseDto<>(
-            getErrorResponseDto(
+            ErrorResponseDto.of(
                 Error.MISSING_REQUEST_PART.getCode(), detailMessage),
             HttpStatus.BAD_REQUEST.getReasonPhrase() + " : " +
                 Error.MISSING_REQUEST_PART.getMessage(),
@@ -71,7 +75,7 @@ public class GlobalExceptionHandler {
 
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
         new CommonResponseDto<>(
-            getErrorResponseDto(Error.INVALID_DTO_MAPPING_ERROR.getCode(),
+            ErrorResponseDto.of(Error.INVALID_DTO_MAPPING_ERROR.getCode(),
                 violationMessages.toString()),
             HttpStatus.BAD_REQUEST.getReasonPhrase() + " : "
                 + Error.INVALID_DTO_MAPPING_ERROR.getMessage(),
@@ -97,7 +101,7 @@ public class GlobalExceptionHandler {
 
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
         new CommonResponseDto<>(
-            getErrorResponseDto(
+            ErrorResponseDto.of(
                 Error.INVALID_PARAMETER_ERROR.getCode(),
                 violationMessages.toString()),
             HttpStatus.BAD_REQUEST.getReasonPhrase() + " : "
@@ -110,7 +114,7 @@ public class GlobalExceptionHandler {
       DateTimeParseException ex) {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
         new CommonResponseDto<>(
-            getErrorResponseDto(
+            ErrorResponseDto.of(
                 Error.DATE_TIME_PARSE_ERROR.getCode(),
                 "날짜 형식이 올바르지 않습니다: " + ex.getParsedString()),
             HttpStatus.BAD_REQUEST.getReasonPhrase() + " : " +
@@ -122,7 +126,7 @@ public class GlobalExceptionHandler {
   public ResponseEntity<CommonResponseDto<ErrorResponseDto>> handleInvalidEnum(Exception e) {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
         new CommonResponseDto<>(
-            getErrorResponseDto(
+            ErrorResponseDto.of(
                 Error.INVALID_ENUM_VALUE.getCode(),
                 "잘못된 입력을 하셨습니다. : " + e.getMessage()),
             HttpStatus.BAD_REQUEST.getReasonPhrase() + " : " +
@@ -130,22 +134,37 @@ public class GlobalExceptionHandler {
             HttpStatus.BAD_REQUEST.value()));
   }
 
-  // JWT TOKEN 관련 커스텀 예외 처리
-  /*@ExceptionHandler(JwtCustomException.class)
-  public ResponseEntity<CommonResponseDto<ErrorResponseDto>> handleJwtException(
-      JwtCustomException ex) {
-    return ResponseEntity.status(ex.getHttpStatus()).body(
+  @ExceptionHandler(MaxUploadSizeExceededException.class)
+  public ResponseEntity<CommonResponseDto<ErrorResponseDto>> handleMaxSizeException(
+      MaxUploadSizeExceededException ex) {
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
         new CommonResponseDto<>(
-            getErrorResponseDto(ex.getErrorCode(), ex.getMessage()),
-            ex.getHttpStatus().getReasonPhrase()+ " : "
-                + Error.JWT_AUTHENTICATION_ERROR.getMessage(),
-            ex.getHttpStatus().value()));
-  }*/
-
-  private ErrorResponseDto getErrorResponseDto(String errorCode, String message) {
-    return ErrorResponseDto.builder()
-        .errorCode(errorCode)
-        .message(message)
-        .build();
+            ErrorResponseDto.of(
+                Error.UPLOAD_EXCEED_FILE_SIZE.getCode(),
+                ex.getMessage()),
+            Error.UPLOAD_EXCEED_FILE_SIZE.getMessage(),
+            HttpStatus.BAD_REQUEST.value()));
   }
+
+  @ExceptionHandler(
+      {UserCustomException.class, FileCustomException.class,
+          ProfanityFilterCustomException.class})
+  public ResponseEntity<CommonResponseDto<ErrorResponseDto>> handleCustomException(
+      CustomException ex) {
+    String category;
+    if (ex instanceof UserCustomException) {
+      category = "회원 오류";
+    } else if (ex instanceof FileCustomException) {
+      category = "파일 오류";
+    } else if (ex instanceof ProfanityFilterCustomException) {
+      category = "비속어 오류";
+    } else {
+      category = "기타 오류";
+    }
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+        new CommonResponseDto<>(
+            ErrorResponseDto.of(
+                ex.getErrorCode(), ex.getMessage()),
+            category, HttpStatus.BAD_REQUEST.value()));
+     }
 }

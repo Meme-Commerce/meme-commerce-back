@@ -63,6 +63,21 @@ public enum GlobalExceptionCode {
   NOT_FOUND_PROVIDER(
       HttpStatus.BAD_REQUEST, "OAUTH-009",
       "지원하지 않거나 찾을 수 없는 공급자입니다."),
+
+  // S3
+  UPLOAD_FAIL(
+      HttpStatus.BAD_REQUEST, "AWS-001",
+      "S3 버킷에 업로드를 실패하였습니다."),
+  BLANK_FILE(
+      HttpStatus.BAD_REQUEST, "AWS-002",
+      "해당 파일은 공란입니다."),
+  NOT_MATCHED_FILE_URL(
+      HttpStatus.BAD_REQUEST, "AWS-003",
+      "요청하신 URL이 잘못되었습니다."),
+  ALREADY_EXISTS_FILE_URL(
+      HttpStatus.BAD_REQUEST, "AWS-004",
+      "요청하신 닉네임과 중복되는 파일 경로가 존재합니다."
+          + " 다른 닉네임으로 저장해주시길 바랍니다."),
   ;
 
   private final HttpStatus httpStatus;

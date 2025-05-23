@@ -1,10 +1,10 @@
 package com.example.memecommerceback.global.oauth.service;
 
-import com.example.memecommerceback.domain.user.converter.UsersConverter;
-import com.example.memecommerceback.domain.user.entity.OAuthProvider;
-import com.example.memecommerceback.domain.user.entity.Users;
-import com.example.memecommerceback.domain.user.service.UsersServiceV1;
 import com.example.memecommerceback.domain.userOAuthProvider.converter.UserOAuthProviderConverter;
+import com.example.memecommerceback.domain.users.converter.UserConverter;
+import com.example.memecommerceback.domain.users.entity.OAuthProvider;
+import com.example.memecommerceback.domain.users.entity.User;
+import com.example.memecommerceback.domain.users.service.UserServiceV1;
 import com.example.memecommerceback.global.exception.GlobalExceptionCode;
 import com.example.memecommerceback.global.exception.OAuth2CustomException;
 import com.example.memecommerceback.global.oauth.constant.OAuthConstants;
@@ -14,6 +14,7 @@ import com.example.memecommerceback.global.utils.DateUtils;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -29,7 +30,7 @@ import org.springframework.stereotype.Service;
 public class CustomOAuth2UserService extends DefaultOAuth2UserService
     implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
 
-  private final UsersServiceV1 usersService;
+  private final UserServiceV1 usersService;
 
   @Override
   public OAuth2User loadUser(OAuth2UserRequest request) throws OAuth2AuthenticationException {
@@ -136,34 +137,30 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService
       String contact, String email, String oauthId, String name,
       String gender, LocalDate birthDate, Integer age) {
 
-    List<Users> duplicatedContactUserList
-        = usersService.findByContactFetchOAuth(contact);
+    Optional<User> userOpt = usersService.findByContactFetchOAuth(contact);
 
-    for (Users user : duplicatedContactUserList) {
+    if (userOpt.isPresent()) {
+      User user = userOpt.get();
       boolean exists = user.getOauthProviderList().stream()
           .anyMatch(p -> p.getProvider().equals(oAuthProvider));
       if (exists) {
+        // 이미 해당 provider 연동된 사용자
+        return new CustomOAuth2User(user, attributes);
+      } else {
+        // 기존 유저에 새로운 provider 연동
+        user.addOAuthProvider(
+            UserOAuthProviderConverter.toEntity(user, oauthId, oAuthProvider)
+        );
+        usersService.save(user);
         return new CustomOAuth2User(user, attributes);
       }
-    }
-
-    // 연동된 provider가 없을 때 → 정책적으로 처리
-    if (duplicatedContactUserList.isEmpty()) {
-      // 신규 유저 생성
-      Users newUser
-          = UsersConverter.toEntity(
-          email, oauthId, oAuthProvider,
-          name, gender, contact, birthDate, age);
+    } else {
+      // 연동된 유저가 없으면 → 신규 유저 생성
+      User newUser = UserConverter.toEntity(
+          email, oauthId, oAuthProvider, name, gender, contact, birthDate, age
+      );
       usersService.save(newUser);
       return new CustomOAuth2User(newUser, attributes);
-    } else {
-      // 기존 유저에 새로운 provider 연동
-      Users existingUser = duplicatedContactUserList.get(0);
-      existingUser.addOAuthProvider(
-          UserOAuthProviderConverter.toEntity(existingUser, oauthId, oAuthProvider)
-      );
-      usersService.save(existingUser);
-      return new CustomOAuth2User(existingUser, attributes);
     }
   }
 

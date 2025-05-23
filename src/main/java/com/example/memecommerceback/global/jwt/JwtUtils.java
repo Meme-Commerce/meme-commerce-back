@@ -1,6 +1,6 @@
 package com.example.memecommerceback.global.jwt;
 
-import com.example.memecommerceback.domain.user.entity.UserRole;
+import com.example.memecommerceback.domain.users.entity.UserRole;
 import com.example.memecommerceback.global.exception.GlobalExceptionCode;
 import com.example.memecommerceback.global.exception.JwtCustomException;
 import com.example.memecommerceback.global.exception.dto.CommonResponseDto;
