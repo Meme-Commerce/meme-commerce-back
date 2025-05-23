@@ -24,7 +24,11 @@ public enum Error {
       Message.DATE_TIME_PARSE_ERROR),
   INVALID_ENUM_VALUE(
       Code.INPUT_INVALID_ENUM,
-      Message.INPUT_INVALID_ENUM);
+      Message.INPUT_INVALID_ENUM),
+  UPLOAD_EXCEED_FILE_SIZE(
+      Code.UPLOAD_EXCEED_FILE_SIZE,
+      Message.UPLOAD_EXCEED_FILE_SIZE)
+  ;
 
   private final String code;
   private final String message;
@@ -41,12 +45,13 @@ public enum Error {
 
   public static class Code {
 
-    public static final String INPUT_INVALID_ENUM = "INPUT-INVALID-ENUM";
+    public static final String INPUT_INVALID_ENUM = "INPUT-INVALID-ENUM-ERROR";
     public static final String INVALID_PARAMETER_ERROR = "INVALID-PARAMETER-ERROR";
     public static final String INVALID_DTO_MAPPING_ERROR = "INVALID-DTO-MAPPING-ERROR";
     public static final String AUTH_ERROR = "AUTH-ERROR";
     public static final String REQUEST_PART_ERROR = "REQUEST-PART-ERROR";
     public static final String DATE_TIME_PARSE_ERROR = "DATE-TIME-PARSE-ERROR";
+    public static final String UPLOAD_EXCEED_FILE_SIZE = "EXCEED-FILE-SIZE-ERROR";
   }
 
   public static class Message {
@@ -58,5 +63,6 @@ public enum Error {
     public static final String MISSING_REQUEST_PART = "요청 파트 누락";
     public static final String DATE_TIME_PARSE_ERROR = "요청한 날짜 형식이 올바르지 않습니다.";
     public static final String INPUT_INVALID_ENUM = "해당 입력값은 열거형 타입에 맞는 값이 없습니다.";
+    public static final String UPLOAD_EXCEED_FILE_SIZE = "서버에서 허용할 수 있는 용량을 초과하였습니다.";
   }
 }

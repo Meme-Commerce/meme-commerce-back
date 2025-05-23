@@ -71,6 +71,9 @@ public enum GlobalExceptionCode {
   BLANK_FILE(
       HttpStatus.BAD_REQUEST, "AWS-002",
       "해당 파일은 공란입니다."),
+  NOT_MATCHED_FILE_URL(
+      HttpStatus.BAD_REQUEST, "AWS-003",
+      "요청하신 URL이 잘못되었습니다."),
   ;
 
   private final HttpStatus httpStatus;

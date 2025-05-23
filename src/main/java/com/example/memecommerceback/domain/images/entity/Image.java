@@ -46,17 +46,15 @@ public class Image extends CommonEntity {
   @Column(nullable = false)
   private Integer height;
 
-  @Column(nullable = false)
+  @Column(nullable = false, unique = true)
   private UUID userId;
 
-  @Column(nullable = false)
-  private String ownerNickName;
+  @Column(nullable = false, unique = true)
+  private String ownerNickname;
 
-  @PrePersist
-  public void generateId() {
-    if (id == null) {
-      this.id = UUID.randomUUID();
-    }
+  public void updateProfile(String ownerNickname, String url){
+    this.ownerNickname = ownerNickname;
+    this.url = url;
   }
 }
 

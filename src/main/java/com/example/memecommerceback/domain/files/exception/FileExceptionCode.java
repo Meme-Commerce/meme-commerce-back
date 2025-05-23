@@ -17,6 +17,9 @@ public enum FileExceptionCode {
   NICKNAME_REQUIRED_FOR_PROFILE_UPLOAD(
       HttpStatus.BAD_REQUEST, "FILE-003",
       "파일을 업로드 하기 전, 닉네임을 정하셔야 합니다."),
+  FILE_IS_REQUIRED(
+      HttpStatus.BAD_REQUEST, "FILE-004",
+      "등록을 위해 파일이 필요합니다."),
   ;
 
   private final HttpStatus httpStatus;

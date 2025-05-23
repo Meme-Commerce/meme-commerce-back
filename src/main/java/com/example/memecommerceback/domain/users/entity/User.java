@@ -41,7 +41,7 @@ public class User extends CommonEntity {
   @Column(length = 20, unique = true)
   private String nickname;
 
-  @Column(name = "profileImage")
+  @Column(name = "profile_image")
   private String profileImage;
 
   @Enumerated(EnumType.STRING)
@@ -75,21 +75,25 @@ public class User extends CommonEntity {
   private List<UserOAuthProvider> oauthProviderList = new ArrayList<>();
 
   // entity method
-  @PrePersist
-  public void generateId() {
-    if (id == null) {
-      this.id = UUID.randomUUID();
-    }
-  }
 
   public void updateProfile(
       String email, String contact,
       String nickname, String address, String profileImage) {
-    this.email = email;
-    this.contact = contact;
-    this.nickname = nickname;
-    this.address = address;
-    this.profileImage = profileImage;
+    if (email != null && !email.equals(this.email)) {
+      this.email = email;
+    }
+    if (contact != null && !contact.equals(this.contact)) {
+      this.contact = contact;
+    }
+    if (nickname != null && !nickname.equals(this.nickname)) {
+      this.nickname = nickname;
+    }
+    if (address != null && !address.equals(this.address)) {
+      this.address = address;
+    }
+    if (profileImage != null && !profileImage.equals(this.profileImage)) {
+      this.profileImage = profileImage;
+    }
   }
 
   public void updateRole(UserRole role) {

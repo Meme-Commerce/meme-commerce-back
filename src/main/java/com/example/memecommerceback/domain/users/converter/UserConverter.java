@@ -15,7 +15,6 @@ public class UserConverter {
       String email, String oauthId, OAuthProvider provider, String name,
       String gender, String contact, LocalDate birthDate, Integer age) {
     User user = User.builder()
-        .id(UUID.randomUUID())
         .email(email)
         .role(UserRole.USER)
         .name(name)

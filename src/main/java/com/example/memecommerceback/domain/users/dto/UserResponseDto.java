@@ -15,7 +15,7 @@ public class UserResponseDto {
   @Builder
   @NoArgsConstructor
   @AllArgsConstructor
-  @Schema(name = "UsersResponseDto.UpdateProfileDto",
+  @Schema(name = "UserResponseDto.UpdateProfileDto",
       description = "회원 개인 정보 수정 응답 DTO")
   public static class UpdateProfileDto {
     private UUID userId;

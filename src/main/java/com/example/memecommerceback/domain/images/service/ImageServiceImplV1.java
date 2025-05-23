@@ -8,6 +8,7 @@ import com.example.memecommerceback.domain.images.repository.ImageRepository;
 import com.example.memecommerceback.domain.users.entity.User;
 import com.example.memecommerceback.global.awsS3.dto.S3ResponseDto;
 import com.example.memecommerceback.global.awsS3.service.S3Service;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +24,10 @@ public class ImageServiceImplV1 implements ImageServiceV1 {
   @Override
   @Transactional
   public String uploadAndRegisterUserProfileImage(MultipartFile profileImage, User user) {
+    if(profileImage == null || profileImage.isEmpty()){
+      throw new FileCustomException(FileExceptionCode.FILE_IS_REQUIRED);
+    }
+
     if(user.getNickname() == null){
       throw new FileCustomException(
           FileExceptionCode.NICKNAME_REQUIRED_FOR_PROFILE_UPLOAD);
@@ -34,6 +39,24 @@ public class ImageServiceImplV1 implements ImageServiceV1 {
     return image.getUrl();
   }
 
+  @Override
+  @Transactional
+  public void deleteProfile(UUID userId) {
+    Image image = imageRepository.findByUserId(userId).orElseThrow(
+        ()-> new FileCustomException(FileExceptionCode.NOT_FOUND));
+    s3Service.deleteProfile(image.getUrl());
+    imageRepository.deleteById(image.getId());
+  }
+
+  @Override
+  @Transactional
+  public String changeProfilePath(String beforeNickname, String afterNickname) {
+    Image image = imageRepository.findByOwnerNickname(beforeNickname).orElseThrow(
+        ()-> new FileCustomException(FileExceptionCode.NOT_FOUND));
+    String newUrl = s3Service.changePath(beforeNickname, afterNickname);
+    image.updateProfile(afterNickname, newUrl);
+    return newUrl;
+  }
 
   public Image createAndSaveImage(
       S3ResponseDto s3ResponseDto, User user){
