@@ -15,6 +15,7 @@ import java.util.Set;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -143,6 +144,19 @@ public class GlobalExceptionHandler {
                 Error.UPLOAD_EXCEED_FILE_SIZE.getCode(),
                 ex.getMessage()),
             Error.UPLOAD_EXCEED_FILE_SIZE.getMessage(),
+            HttpStatus.BAD_REQUEST.value()));
+  }
+
+  @ExceptionHandler(UsernameNotFoundException.class)
+  public ResponseEntity<CommonResponseDto<ErrorResponseDto>> handleUsernameNotFoundException(
+      UsernameNotFoundException ex) {
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+        new CommonResponseDto<>(
+            ErrorResponseDto.of(
+                Error.NOT_FOUND_USER.getCode(),
+                // 해당 부분이 더 디테일한 메세지임으로 위로 변경
+                Error.NOT_FOUND_USER.getMessage()),
+            ex.getMessage(),
             HttpStatus.BAD_REQUEST.value()));
   }
 

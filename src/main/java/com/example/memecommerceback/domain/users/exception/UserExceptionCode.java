@@ -21,6 +21,9 @@ public enum UserExceptionCode {
   REQUEST_DUPLICATE_NICKNAME(
       HttpStatus.BAD_REQUEST, "USER-004",
       "요청하신 닉네임은 중복 닉네임입니다. "),
+  ONLY_SELF_OR_ADMIN_CAN_DELETE(
+      HttpStatus.BAD_REQUEST, "USER-005",
+      "오직 자신 또는 관리자만 회원을 탈퇴할 권한이 있습니다."),
   ;
 
   private final HttpStatus httpStatus;

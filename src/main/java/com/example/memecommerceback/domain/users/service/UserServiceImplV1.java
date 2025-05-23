@@ -5,6 +5,7 @@ import com.example.memecommerceback.domain.users.converter.UserConverter;
 import com.example.memecommerceback.domain.users.dto.UserRequestDto;
 import com.example.memecommerceback.domain.users.dto.UserResponseDto;
 import com.example.memecommerceback.domain.users.entity.User;
+import com.example.memecommerceback.domain.users.entity.UserRole;
 import com.example.memecommerceback.domain.users.exception.UserCustomException;
 import com.example.memecommerceback.domain.users.exception.UserExceptionCode;
 import com.example.memecommerceback.domain.users.repository.UserRepository;
@@ -115,10 +116,20 @@ public class UserServiceImplV1 implements UserServiceV1 {
   }
 
   @Override
-  @Transactional
+  @Transactional(readOnly = true)
   public UserResponseDto.ReadProfileDto readProfile(User loginUser) {
     User user = findById(loginUser.getId());
     return UserConverter.toReadProfileDto(user);
+  }
+
+  @Override
+  @Transactional
+  public void deleteOne(UUID userId, User loginUser) {
+    if(!loginUser.getRole().equals(UserRole.ADMIN)
+        && !loginUser.getId().equals(userId)){
+      throw new UserCustomException(UserExceptionCode.ONLY_SELF_OR_ADMIN_CAN_DELETE);
+    }
+    userRepository.deleteById(userId);
   }
 
   @Override
