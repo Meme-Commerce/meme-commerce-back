@@ -85,6 +85,12 @@ public class UserController {
             responseDto, "이용 가능한 회원 닉네임 조회 성공", HttpStatus.OK.value()));
   }
 
+  /**
+   * 인증된 사용자의 닉네임을 수정합니다.
+   *
+   * @param nickname 새로 설정할 닉네임 (2~20자, 영문/숫자/한글만 허용)
+   * @return 수정된 프로필 정보를 반환합니다.
+   */
   @PatchMapping("/users/nickname")
   public ResponseEntity<CommonResponseDto<UserResponseDto.UpdateProfileDto>> updateNickname(
       @RequestParam @Pattern(
@@ -99,6 +105,12 @@ public class UserController {
             responseDto, "닉네임 수정 성공", HttpStatus.OK.value()));
   }
 
+  /**
+   * 인증된 사용자의 프로필 정보를 조회합니다.
+   *
+   * @param userDetails 인증된 사용자 정보
+   * @return 사용자의 프로필 정보를 담은 응답
+   */
   @GetMapping("/users/profile")
   public ResponseEntity<CommonResponseDto<UserResponseDto.ReadProfileDto>> readProfile(
       @AuthenticationPrincipal UserDetailsImpl userDetails){
@@ -109,6 +121,13 @@ public class UserController {
             responseDto, "회원 프로필 조회 성공", HttpStatus.OK.value()));
   }
 
+  /**
+   * 지정된 UUID를 가진 사용자를 삭제합니다.
+   *
+   * @param userId 삭제할 사용자의 UUID
+   * @param userDetails 인증된 사용자 정보
+   * @return 삭제 성공 메시지를 포함한 응답 객체
+   */
   @DeleteMapping("/users/{userId}")
   public ResponseEntity<CommonResponseDto<Void>> deleteOne(
       @PathVariable UUID userId,
