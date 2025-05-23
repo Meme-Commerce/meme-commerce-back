@@ -129,6 +129,11 @@ public class UserServiceImplV1 implements UserServiceV1 {
         && !loginUser.getId().equals(userId)){
       throw new UserCustomException(UserExceptionCode.ONLY_SELF_OR_ADMIN_CAN_DELETE);
     }
+    if (userRepository.findById(userId).isPresent() &&
+        userRepository.findById(userId).get().getProfileImage() != null) {
+      imageService.deleteProfile(userId);
+    }
+
     userRepository.deleteById(userId);
   }
 
