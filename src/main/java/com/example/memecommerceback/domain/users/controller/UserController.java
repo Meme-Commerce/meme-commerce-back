@@ -11,14 +11,18 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -28,7 +32,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1")
-
+@Tag(name = "User API", description = "회원 API")
 public class UserController {
 
   private final UserServiceV1 userService;
@@ -78,5 +82,23 @@ public class UserController {
     UserResponseDto.UpdateProfileDto responseDto
         = userService.updateNickname(nickname, userDetails.getUser());
     return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+  }
+
+  @GetMapping("/users/profile")
+  public ResponseEntity<UserResponseDto.ReadProfileDto> readProfile(
+      @AuthenticationPrincipal UserDetailsImpl userDetails){
+    UserResponseDto.ReadProfileDto responseDto
+        = userService.readProfile(userDetails.getUser());
+    return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+  }
+
+  @DeleteMapping("/users/{userId}")
+  public ResponseEntity<CommonResponseDto<Void>> deleteOne(
+      @PathVariable UUID userId,
+      @AuthenticationPrincipal UserDetailsImpl userDetails){
+    userService.deleteOne(userId, userDetails.getUser());
+    return ResponseEntity.status(HttpStatus.OK).body(
+        new CommonResponseDto<>(
+            null, "회원 탈퇴 성공", HttpStatus.OK.value()));
   }
 }

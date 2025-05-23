@@ -24,4 +24,8 @@ public interface UserServiceV1 {
 
   UserResponseDto.UpdateProfileDto updateNickname(
       String requestedNickname, User loginUser);
+
+  UserResponseDto.ReadProfileDto readProfile(User loginUser);
+
+  void deleteOne(UUID userId, User loginUser);
 }
