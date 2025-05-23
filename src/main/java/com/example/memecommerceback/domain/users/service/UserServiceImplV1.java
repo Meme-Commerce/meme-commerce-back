@@ -10,7 +10,9 @@ import com.example.memecommerceback.domain.users.exception.UserExceptionCode;
 import com.example.memecommerceback.domain.users.repository.UserRepository;
 import com.example.memecommerceback.global.jwt.JwtConstants;
 import com.example.memecommerceback.global.redis.service.RefreshTokenServiceV1;
+import com.example.memecommerceback.global.service.ProfanityFilterService;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,8 +24,10 @@ import org.springframework.web.multipart.MultipartFile;
 public class UserServiceImplV1 implements UserServiceV1 {
 
   private final ImageServiceV1 imageService;
-  private final UserRepository userRepository;
   private final RefreshTokenServiceV1 refreshTokenService;
+  private final ProfanityFilterService profanityFilterService;
+
+  private final UserRepository userRepository;
 
   @Override
   @Transactional
@@ -33,7 +37,7 @@ public class UserServiceImplV1 implements UserServiceV1 {
 
   @Override
   @Transactional
-  public List<User> findByContactFetchOAuth(String contact) {
+  public Optional<User> findByContactFetchOAuth(String contact) {
     return userRepository.findByContactFetchOAuth(contact);
   }
 
@@ -54,6 +58,14 @@ public class UserServiceImplV1 implements UserServiceV1 {
       if (user.getProfileImage() != null) {
         imageService.deleteProfile(user.getId());
       }
+      if(user.getNickname() == null){
+        throw new UserCustomException(UserExceptionCode.NEED_TO_REGISTER_NICKNAME);
+      }
+      // 여기서 닉네임이 바뀌지 않은 채 프로필 사진 업로드 하려고 함.
+      if (requestDto.getNickname() != null
+          && !user.getNickname().equals(requestDto.getNickname())) {
+        user.updateNickname(requestDto.getNickname());
+      }
       profileImageUrl = getProfileImageUrl(profileImage, user); // 새로 업로드된 URL
     }
 
@@ -62,7 +74,8 @@ public class UserServiceImplV1 implements UserServiceV1 {
     if (profileImage == null
         && requestDto.getNickname() != null
         && !requestDto.getNickname().equals(beforeNickname)) {
-      newProfileUrl = imageService.changeProfilePath(beforeNickname, requestDto.getNickname());
+      newProfileUrl = imageService.changeProfilePath(
+          profileImage, beforeNickname, requestDto.getNickname());
     }
 
     // 3. 유저 정보 업데이트 (가장 우선: 새 업로드 > 경로 이동 > 기존값)
@@ -82,6 +95,32 @@ public class UserServiceImplV1 implements UserServiceV1 {
     }
 
     // 5. 응답 반환
+    return UserConverter.toUpdateProfileDto(user);
+  }
+
+  @Override
+  @Transactional
+  public UserResponseDto.IsAvailableNicknameDto isAvailableNickname(
+      String requestedNickname){
+    boolean isAvailable
+        = !userRepository.existsByNickname(requestedNickname);
+    profanityFilterService.validateNoProfanity(requestedNickname);
+    return UserConverter.toIsAvailableNicknameDto(
+        requestedNickname, isAvailable);
+  }
+
+  @Override
+  @Transactional
+  public UserResponseDto.UpdateProfileDto updateNickname(
+      String requestedNickname, User loginUser){
+    User user = findById(loginUser.getId());
+    boolean isAvailable
+        = !userRepository.existsByNickname(requestedNickname);
+    if(!isAvailable){
+      throw new UserCustomException(UserExceptionCode.REQUEST_DUPLICATE_NICKNAME);
+    }
+    profanityFilterService.validateNoProfanity(requestedNickname);
+    user.updateNickname(requestedNickname);
     return UserConverter.toUpdateProfileDto(user);
   }
 

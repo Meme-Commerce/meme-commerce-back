@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 public interface UserRepository extends JpaRepository<User, UUID> {
   Optional<User> findByEmail(String email);
   @Query("SELECT DISTINCT u FROM User u LEFT JOIN FETCH u.oauthProviderList WHERE u.contact = :contact")
-  List<User> findByContactFetchOAuth(@Param("contact") String contact);
+  Optional<User> findByContactFetchOAuth(@Param("contact") String contact);
+  Boolean existsByNickname(String nickname);
 }
 

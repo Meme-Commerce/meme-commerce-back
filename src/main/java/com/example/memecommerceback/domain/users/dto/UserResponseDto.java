@@ -30,4 +30,13 @@ public class UserResponseDto {
     private String address;
     private String birthDate;
   }
+
+  @Getter
+  @Builder
+  @AllArgsConstructor
+  @NoArgsConstructor
+  public static class IsAvailableNicknameDto {
+    private String requestNickname;
+    private boolean isAvailable;
+  }
 }

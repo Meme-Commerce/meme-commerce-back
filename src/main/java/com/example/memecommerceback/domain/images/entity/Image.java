@@ -49,7 +49,6 @@ public class Image extends CommonEntity {
   @Column(nullable = false, unique = true)
   private UUID userId;
 
-  @Column(nullable = false, unique = true)
   private String ownerNickname;
 
   public void updateProfile(String ownerNickname, String url){

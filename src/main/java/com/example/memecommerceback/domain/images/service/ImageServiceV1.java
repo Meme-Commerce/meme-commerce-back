@@ -11,5 +11,6 @@ public interface ImageServiceV1 {
 
   void deleteProfile(UUID userId);
 
-  String changeProfilePath(String beforeNickname, String afterNickname);
+  String changeProfilePath(
+      MultipartFile profileImage, String beforeNickname, String afterNickname);
 }

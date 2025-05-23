@@ -1,5 +1,7 @@
 package com.example.memecommerceback.global.exception;
 
+import com.example.memecommerceback.domain.files.exception.FileCustomException;
+import com.example.memecommerceback.domain.users.exception.UserCustomException;
 import com.example.memecommerceback.global.exception.dto.CommonResponseDto;
 import com.example.memecommerceback.global.exception.dto.Error;
 import com.example.memecommerceback.global.exception.dto.ErrorResponseDto;
@@ -140,6 +142,42 @@ public class GlobalExceptionHandler {
                 Error.UPLOAD_EXCEED_FILE_SIZE.getCode(),
                 ex.getMessage()),
             Error.UPLOAD_EXCEED_FILE_SIZE.getMessage(),
+            HttpStatus.BAD_REQUEST.value()));
+  }
+
+  @ExceptionHandler(UserCustomException.class)
+  public ResponseEntity<CommonResponseDto<ErrorResponseDto>> handleUserCustomException(
+      UserCustomException ex) {
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+        new CommonResponseDto<>(
+            ErrorResponseDto.of(
+                ex.getErrorCode(),
+                ex.getMessage()),
+            "회원 오류",
+            HttpStatus.BAD_REQUEST.value()));
+  }
+
+  @ExceptionHandler(FileCustomException.class)
+  public ResponseEntity<CommonResponseDto<ErrorResponseDto>> handleFileCustomException(
+      FileCustomException ex) {
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+        new CommonResponseDto<>(
+            ErrorResponseDto.of(
+                ex.getErrorCode(),
+                ex.getMessage()),
+            "회원 오류",
+            HttpStatus.BAD_REQUEST.value()));
+  }
+
+  @ExceptionHandler(ProfanityFilterCustomException.class)
+  public ResponseEntity<CommonResponseDto<ErrorResponseDto>> handleProfanityCustomException(
+      ProfanityFilterCustomException ex) {
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+        new CommonResponseDto<>(
+            ErrorResponseDto.of(
+                ex.getErrorCode(),
+                ex.getMessage()),
+            "비속어 오류",
             HttpStatus.BAD_REQUEST.value()));
   }
 }

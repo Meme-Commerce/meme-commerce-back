@@ -79,39 +79,43 @@ public class S3Service {
   }
 
   public String changePath(String beforeNickname, String afterNickname) {
-    // 1. 기존 경로의 파일 리스트를 조회 (profile 폴더에 여러 파일 있을 수 있음)
     String oldPrefix = "users/" + beforeNickname + "/profile/";
     String newPrefix = "users/" + afterNickname + "/profile/";
 
-    // S3에서 해당 경로의 파일 목록을 불러온다
-    var objectListing = amazonS3Client.listObjects(bucket, oldPrefix);
-
-    if (objectListing.getObjectSummaries().isEmpty()) {
-      log.warn("기존 프로필 이미지가 존재하지 않습니다: {}", oldPrefix);
-      throw new AWSCustomException(GlobalExceptionCode.NOT_MATCHED_FILE_URL);
+    // 1. afterNickname 경로가 이미 존재하면 에러 (다른 사용자가 이미 사용 중)
+    var afterListing = amazonS3Client.listObjects(bucket, newPrefix);
+    if (!afterListing.getObjectSummaries().isEmpty()) {
+      log.warn("afterNickname 경로에 이미 파일이 존재합니다: {}", newPrefix);
+      throw new AWSCustomException(GlobalExceptionCode.ALREADY_EXISTS_FILE_URL);
     }
 
-    String newUrl = null;
+    // 2. beforeNickname 경로 확인
+    var beforeListing = amazonS3Client.listObjects(bucket, oldPrefix);
+    if (!beforeListing.getObjectSummaries().isEmpty()) {
+      // 2-1. before 경로의 모든 파일을 after 경로로 이동
+      String newUrl = null;
+      for (var s3Object : beforeListing.getObjectSummaries()) {
+        String oldKey = s3Object.getKey();
+        String fileName = oldKey.substring(oldPrefix.length());
+        String newKey = newPrefix + fileName;
 
-    for (var s3Object : objectListing.getObjectSummaries()) {
-      String oldKey = s3Object.getKey();
-      String fileName = oldKey.substring(oldPrefix.length());
-      String newKey = newPrefix + fileName;
+        amazonS3Client.copyObject(bucket, oldKey, bucket, newKey);
+        amazonS3Client.deleteObject(bucket, oldKey);
 
-      // 1. Copy
-      amazonS3Client.copyObject(bucket, oldKey, bucket, newKey);
-      // 2. Delete original
-      amazonS3Client.deleteObject(bucket, oldKey);
-
-      log.info("프로필 이미지 경로 변경: {} → {}", oldKey, newKey);
-
-      newUrl = amazonS3Client.getUrl(bucket, newKey).toString();
+        log.info("프로필 이미지 경로 변경: {} → {}", oldKey, newKey);
+        newUrl = amazonS3Client.getUrl(bucket, newKey).toString();
+      }
+      if (newUrl == null) {
+        throw new AWSCustomException(GlobalExceptionCode.UPLOAD_FAIL);
+      }
+      return newUrl;
     }
-    if (newUrl == null) {
-      throw new AWSCustomException(GlobalExceptionCode.UPLOAD_FAIL);
-    }
-    return newUrl;
+
+    log.warn("beforeNickname, afterNickname 모두 해당 경로에 이미지가 존재하지 않습니다.");
+    // 필요하다면 기본값 or null or 예외 처리 (업로드 분기에서 저장)
+    return null;
   }
+
 
   private String createUUIDFile(MultipartFile file){
     String originalFilename = file.getOriginalFilename();

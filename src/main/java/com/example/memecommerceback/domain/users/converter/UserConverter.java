@@ -35,12 +35,21 @@ public class UserConverter {
         .address(user.getAddress())
         .profileImage(user.getProfileImage())
         .name(user.getName())
+        .email(user.getEmail())
         .nickname(user.getNickname())
         .userRole(user.getRole())
         .birthDate(user.getBirthDate().toString())
         .gender(user.getGender())
         .contact(user.getContact())
         .age(user.getAge())
+        .build();
+  }
+
+  public static UserResponseDto.IsAvailableNicknameDto toIsAvailableNicknameDto(
+      String requestNickname, boolean isAvailable){
+    return UserResponseDto.IsAvailableNicknameDto.builder()
+        .requestNickname(requestNickname)
+        .isAvailable(isAvailable)
         .build();
   }
 }

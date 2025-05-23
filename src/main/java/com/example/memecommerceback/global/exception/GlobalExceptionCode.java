@@ -74,6 +74,10 @@ public enum GlobalExceptionCode {
   NOT_MATCHED_FILE_URL(
       HttpStatus.BAD_REQUEST, "AWS-003",
       "요청하신 URL이 잘못되었습니다."),
+  ALREADY_EXISTS_FILE_URL(
+      HttpStatus.BAD_REQUEST, "AWS-004",
+      "요청하신 닉네임과 중복되는 파일 경로가 존재합니다."
+          + " 다른 닉네임으로 저장해주시길 바랍니다."),
   ;
 
   private final HttpStatus httpStatus;

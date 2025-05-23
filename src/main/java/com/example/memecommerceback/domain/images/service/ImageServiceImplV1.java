@@ -35,6 +35,10 @@ public class ImageServiceImplV1 implements ImageServiceV1 {
 
     S3ResponseDto s3ResponseDto
         = s3Service.uploadProfile(profileImage, user.getNickname());
+    Image originalImage = findByUserIdGet(user.getId());
+    if(originalImage != null){
+      return originalImage.getUrl();
+    }
     Image image = createAndSaveImage(s3ResponseDto, user);
     return image.getUrl();
   }
@@ -42,19 +46,20 @@ public class ImageServiceImplV1 implements ImageServiceV1 {
   @Override
   @Transactional
   public void deleteProfile(UUID userId) {
-    Image image = imageRepository.findByUserId(userId).orElseThrow(
-        ()-> new FileCustomException(FileExceptionCode.NOT_FOUND));
+    Image image = findByUserId(userId);
     s3Service.deleteProfile(image.getUrl());
     imageRepository.deleteById(image.getId());
   }
 
   @Override
   @Transactional
-  public String changeProfilePath(String beforeNickname, String afterNickname) {
-    Image image = imageRepository.findByOwnerNickname(beforeNickname).orElseThrow(
-        ()-> new FileCustomException(FileExceptionCode.NOT_FOUND));
+  public String changeProfilePath(MultipartFile profileImage, String beforeNickname, String afterNickname) {
+    Image image = imageRepository.findByOwnerNickname(beforeNickname).orElse(null);
+    if(image == null && profileImage != null && !profileImage.isEmpty()){
+      return s3Service.uploadProfile(profileImage, afterNickname).getUrl();
+    }
     String newUrl = s3Service.changePath(beforeNickname, afterNickname);
-    image.updateProfile(afterNickname, newUrl);
+    if(image != null) image.updateProfile(afterNickname, newUrl);
     return newUrl;
   }
 
@@ -63,5 +68,14 @@ public class ImageServiceImplV1 implements ImageServiceV1 {
     Image image = ImageConverter.toEntity(s3ResponseDto, user);
     imageRepository.save(image);
     return image;
+  }
+
+  public Image findByUserId(UUID userId){
+    return imageRepository.findByUserId(userId).orElseThrow(
+        ()-> new FileCustomException(FileExceptionCode.NOT_FOUND));
+  }
+
+  public Image findByUserIdGet(UUID userId){
+    return imageRepository.findByUserId(userId).orElse(null);
   }
 }
