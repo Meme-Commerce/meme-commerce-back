@@ -3,6 +3,7 @@ package com.example.memecommerceback.domain.images.service;
 import com.example.memecommerceback.domain.files.exception.FileCustomException;
 import com.example.memecommerceback.domain.files.exception.FileExceptionCode;
 import com.example.memecommerceback.domain.images.converter.ImageConverter;
+import com.example.memecommerceback.domain.images.entity.Extension;
 import com.example.memecommerceback.domain.images.entity.Image;
 import com.example.memecommerceback.domain.images.repository.ImageRepository;
 import com.example.memecommerceback.domain.users.entity.User;
@@ -33,6 +34,9 @@ public class ImageServiceImplV1 implements ImageServiceV1 {
           FileExceptionCode.NICKNAME_REQUIRED_FOR_PROFILE_UPLOAD);
     }
 
+    String originalFilename = profileImage.getOriginalFilename();
+    Extension.extractFromFilename(originalFilename);
+
     S3ResponseDto s3ResponseDto
         = s3Service.uploadProfile(profileImage, user.getNickname());
     Image originalImage = findByUserIdGet(user.getId());
@@ -59,6 +63,8 @@ public class ImageServiceImplV1 implements ImageServiceV1 {
   public String changeProfilePath(MultipartFile profileImage, String beforeNickname, String afterNickname) {
     Image image = imageRepository.findByOwnerNickname(beforeNickname).orElse(null);
     if(image == null && profileImage != null && !profileImage.isEmpty()){
+      String originalFilename = profileImage.getOriginalFilename();
+      Extension.extractFromFilename(originalFilename);
       return s3Service.uploadProfile(profileImage, afterNickname).getUrl();
     }
     String newUrl = s3Service.changePath(beforeNickname, afterNickname);

@@ -19,7 +19,8 @@ public class UserRequestDto {
       description = "회원 개인 정보 수정 요청 DTO")
   public static class UpdateProfileDto {
 
-    @Pattern(regexp = "^[A-Za-z0-9]{1,20}$", message = "닉네임은 영어와 숫자만 입력할 수 있습니다.")
+    @Pattern(regexp = "^[A-Za-z0-9가-힣]{1,20}$",
+        message = "닉네임은 한글, 영어, 숫자만 입력할 수 있습니다.")
     @Size(max = 20, message = "닉네임은 20자 이내로 입력해주세요.")
     private String nickname;
 
