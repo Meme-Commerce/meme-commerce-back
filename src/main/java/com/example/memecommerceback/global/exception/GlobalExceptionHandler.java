@@ -147,19 +147,6 @@ public class GlobalExceptionHandler {
             HttpStatus.BAD_REQUEST.value()));
   }
 
-  @ExceptionHandler(UsernameNotFoundException.class)
-  public ResponseEntity<CommonResponseDto<ErrorResponseDto>> handleUsernameNotFoundException(
-      UsernameNotFoundException ex) {
-    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-        new CommonResponseDto<>(
-            ErrorResponseDto.of(
-                Error.NOT_FOUND_USER.getCode(),
-                // 해당 부분이 더 디테일한 메세지임으로 위로 변경
-                Error.NOT_FOUND_USER.getMessage()),
-            ex.getMessage(),
-            HttpStatus.BAD_REQUEST.value()));
-  }
-
   @ExceptionHandler(
       {UserCustomException.class, FileCustomException.class,
           ProfanityFilterCustomException.class})
