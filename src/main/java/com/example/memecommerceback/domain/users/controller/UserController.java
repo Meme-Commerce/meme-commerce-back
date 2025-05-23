@@ -52,28 +52,41 @@ public class UserController {
       @ApiResponse(responseCode = "403", description = "권한 없음",
           content = @Content(mediaType = "application/json",
               schema = @Schema(implementation = CommonResponseDto.class)))})
-  public ResponseEntity<UserResponseDto.UpdateProfileDto> updateProfile(
+  public ResponseEntity<CommonResponseDto<UserResponseDto.UpdateProfileDto>> updateProfile(
       @RequestPart(name = "data") @Valid UserRequestDto.UpdateProfileDto requestDto,
       @RequestPart(required = false, name = "image") MultipartFile profileImage,
       @AuthenticationPrincipal UserDetailsImpl userDetails) {
     UserResponseDto.UpdateProfileDto responseDto
         = userService.updateProfile(requestDto, profileImage, userDetails.getUser());
-    return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+    return ResponseEntity.status(HttpStatus.OK).body(
+        new CommonResponseDto<>(
+            responseDto, "회원의 개인 정보 수정 성공", HttpStatus.OK.value()));
   }
 
   @GetMapping("/users/available-nickname")
-  public ResponseEntity<UserResponseDto.IsAvailableNicknameDto> isAvailableNickname(
+  @Operation(summary = "이용 가능한 닉네임 조회",
+      description = "모든 사용자는 이용 가능한 닉네임을 조회할 수 있습니다.")
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "이용 가능한 닉네임 조회 성공",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = UserResponseDto.IsAvailableNicknameDto.class))),
+      @ApiResponse(responseCode = "400", description = "유효하지 않은 입력 또는 유저 없음",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = ErrorResponseDto.class))),})
+  public ResponseEntity<CommonResponseDto<UserResponseDto.IsAvailableNicknameDto>> isAvailableNickname(
       @RequestParam @Pattern(
           regexp = "^[a-zA-Z0-9가-힣]{2,20}$",
           message = "닉네임은 2~20자, 영문/숫자/한글만 허용됩니다.")
       String nickname){
     UserResponseDto.IsAvailableNicknameDto responseDto
         = userService.isAvailableNickname(nickname);
-    return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+    return ResponseEntity.status(HttpStatus.OK).body(
+        new CommonResponseDto<>(
+            responseDto, "이용 가능한 회원 닉네임 조회 성공", HttpStatus.OK.value()));
   }
 
   @PatchMapping("/users/nickname")
-  public ResponseEntity<UserResponseDto.UpdateProfileDto> updateNickname(
+  public ResponseEntity<CommonResponseDto<UserResponseDto.UpdateProfileDto>> updateNickname(
       @RequestParam @Pattern(
           regexp = "^[a-zA-Z0-9가-힣]{2,20}$",
           message = "닉네임은 2~20자, 영문/숫자/한글만 허용됩니다.")
@@ -81,15 +94,19 @@ public class UserController {
       @AuthenticationPrincipal UserDetailsImpl userDetails) {
     UserResponseDto.UpdateProfileDto responseDto
         = userService.updateNickname(nickname, userDetails.getUser());
-    return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+    return ResponseEntity.status(HttpStatus.OK).body(
+        new CommonResponseDto<>(
+            responseDto, "닉네임 수정 성공", HttpStatus.OK.value()));
   }
 
   @GetMapping("/users/profile")
-  public ResponseEntity<UserResponseDto.ReadProfileDto> readProfile(
+  public ResponseEntity<CommonResponseDto<UserResponseDto.ReadProfileDto>> readProfile(
       @AuthenticationPrincipal UserDetailsImpl userDetails){
     UserResponseDto.ReadProfileDto responseDto
         = userService.readProfile(userDetails.getUser());
-    return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+    return ResponseEntity.status(HttpStatus.OK).body(
+        new CommonResponseDto<>(
+            responseDto, "회원 프로필 조회 성공", HttpStatus.OK.value()));
   }
 
   @DeleteMapping("/users/{userId}")
