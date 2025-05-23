@@ -55,5 +55,10 @@ public class Image extends CommonEntity {
     this.ownerNickname = ownerNickname;
     this.url = url;
   }
+
+  public void updateImage(String url, String fileName){
+      this.url = url;
+      this.fileName = fileName;
+  }
 }
 

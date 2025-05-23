@@ -31,7 +31,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 public class UserController {
 
-  private final UserServiceV1 usersService;
+  private final UserServiceV1 userService;
 
   @PatchMapping(value = "/users/profile", consumes = "multipart/form-data")
   @Operation(summary = "회원의 개인 정보 수정", description = "자기 자신은 개인 정보를 수정할 수 있습니다.")
@@ -53,7 +53,7 @@ public class UserController {
       @RequestPart(required = false, name = "image") MultipartFile profileImage,
       @AuthenticationPrincipal UserDetailsImpl userDetails) {
     UserResponseDto.UpdateProfileDto responseDto
-        = usersService.updateProfile(requestDto, profileImage, userDetails.getUser());
+        = userService.updateProfile(requestDto, profileImage, userDetails.getUser());
     return ResponseEntity.status(HttpStatus.OK).body(responseDto);
   }
 
@@ -64,7 +64,7 @@ public class UserController {
           message = "닉네임은 2~20자, 영문/숫자/한글만 허용됩니다.")
       String nickname){
     UserResponseDto.IsAvailableNicknameDto responseDto
-        = usersService.isAvailableNickname(nickname);
+        = userService.isAvailableNickname(nickname);
     return ResponseEntity.status(HttpStatus.OK).body(responseDto);
   }
 
@@ -76,7 +76,7 @@ public class UserController {
       String nickname,
       @AuthenticationPrincipal UserDetailsImpl userDetails) {
     UserResponseDto.UpdateProfileDto responseDto
-        = usersService.updateNickname(nickname, userDetails.getUser());
+        = userService.updateNickname(nickname, userDetails.getUser());
     return ResponseEntity.status(HttpStatus.OK).body(responseDto);
   }
 }

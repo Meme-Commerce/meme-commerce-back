@@ -55,18 +55,21 @@ public class UserServiceImplV1 implements UserServiceV1 {
 
     // 1. 새 프로필 이미지가 있는 경우: 기존 이미지 삭제 후 새 이미지 업로드
     if (profileImage != null) {
-      if (user.getProfileImage() != null) {
-        imageService.deleteProfile(user.getId());
+      if (user.getNickname() == null) {
+        throw new UserCustomException(
+            UserExceptionCode.NEED_TO_REGISTER_NICKNAME);
       }
-      if(user.getNickname() == null){
-        throw new UserCustomException(UserExceptionCode.NEED_TO_REGISTER_NICKNAME);
-      }
-      // 여기서 닉네임이 바뀌지 않은 채 프로필 사진 업로드 하려고 함.
+
       if (requestDto.getNickname() != null
           && !user.getNickname().equals(requestDto.getNickname())) {
         user.updateNickname(requestDto.getNickname());
       }
-      profileImageUrl = getProfileImageUrl(profileImage, user); // 새로 업로드된 URL
+
+      profileImageUrl = getProfileImageUrl(profileImage, user);
+
+      if (profileImageUrl != null && user.getProfileImage() != null) {
+        imageService.deleteProfile(user.getId());
+      }
     }
 
     // 2. 닉네임만 변경 & 새 프로필 이미지는 없는 경우: 기존 이미지 경로 이동, 새 URL 할당

@@ -18,16 +18,27 @@ public class UserResponseDto {
   @Schema(name = "UserResponseDto.UpdateProfileDto",
       description = "회원 개인 정보 수정 응답 DTO")
   public static class UpdateProfileDto {
+    @Schema(description = "사용자 ID", example = "a1b2c3d4-e5f6-7890-abcd-ef1234567890")
     private UUID userId;
+    @Schema(description = "이름", example = "홍길동")
     private String name;
+    @Schema(description = "닉네임", example = "길동이123")
     private String nickname;
+    @Schema(description = "나이", example = "28")
     private Integer age;
+    @Schema(description = "프로필 이미지 URL", example = "https://example-bucket.s3.ap-northeast-2.amazonaws.com/users/길동이123/profile/abc123.jpg")
     private String profileImage;
+    @Schema(description = "이메일", example = "hong@example.com")
     private String email;
+    @Schema(description = "성별", example = "MALE")
     private Gender gender;
+    @Schema(description = "사용자 역할", example = "USER")
     private UserRole userRole;
+    @Schema(description = "연락처", example = "010-1234-5678")
     private String contact;
+    @Schema(description = "주소", example = "서울특별시 강남구 테헤란로 123")
     private String address;
+    @Schema(description = "생년월일", example = "1995-05-15")
     private String birthDate;
   }
 
@@ -35,8 +46,12 @@ public class UserResponseDto {
   @Builder
   @AllArgsConstructor
   @NoArgsConstructor
+  @Schema(name = "UserResponseDto.IsAvailableNicknameDto",
+      description = "닉네임 사용 가능 여부 응답 DTO")
   public static class IsAvailableNicknameDto {
+    @Schema(description = "요청한 닉네임", example = "길동이")
     private String requestNickname;
+    @Schema(description = "닉네임 사용 가능 여부", example = "true")
     private boolean isAvailable;
   }
 }

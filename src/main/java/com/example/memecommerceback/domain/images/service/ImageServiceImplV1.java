@@ -37,7 +37,10 @@ public class ImageServiceImplV1 implements ImageServiceV1 {
         = s3Service.uploadProfile(profileImage, user.getNickname());
     Image originalImage = findByUserIdGet(user.getId());
     if(originalImage != null){
-      return originalImage.getUrl();
+       s3Service.deleteProfile(originalImage.getUrl());
+       originalImage.updateImage(
+           s3ResponseDto.getUrl(), s3ResponseDto.getFileName());
+       return originalImage.getUrl();
     }
     Image image = createAndSaveImage(s3ResponseDto, user);
     return image.getUrl();

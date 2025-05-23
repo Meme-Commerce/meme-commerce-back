@@ -165,7 +165,7 @@ public class GlobalExceptionHandler {
             ErrorResponseDto.of(
                 ex.getErrorCode(),
                 ex.getMessage()),
-            "회원 오류",
+            "파일 오류",
             HttpStatus.BAD_REQUEST.value()));
   }
 
