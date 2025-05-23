@@ -52,53 +52,28 @@ public class UserController {
       @ApiResponse(responseCode = "403", description = "권한 없음",
           content = @Content(mediaType = "application/json",
               schema = @Schema(implementation = CommonResponseDto.class)))})
-  public ResponseEntity<CommonResponseDto<UserResponseDto.UpdateProfileDto>> updateProfile(
+  public ResponseEntity<UserResponseDto.UpdateProfileDto> updateProfile(
       @RequestPart(name = "data") @Valid UserRequestDto.UpdateProfileDto requestDto,
       @RequestPart(required = false, name = "image") MultipartFile profileImage,
       @AuthenticationPrincipal UserDetailsImpl userDetails) {
     UserResponseDto.UpdateProfileDto responseDto
         = userService.updateProfile(requestDto, profileImage, userDetails.getUser());
-    return ResponseEntity.status(HttpStatus.OK).body(
-        new CommonResponseDto<>(
-            responseDto, "회원의 개인 정보 수정 성공", HttpStatus.OK.value()));
+    return ResponseEntity.status(HttpStatus.OK).body(responseDto);
   }
 
   @GetMapping("/users/available-nickname")
-  @Operation(summary = "이용 가능한 닉네임 조회",
-      description = "모든 사용자는 이용 가능한 닉네임을 조회할 수 있습니다.")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "이용 가능한 닉네임 조회 성공",
-          content = @Content(mediaType = "application/json",
-              schema = @Schema(implementation = UserResponseDto.IsAvailableNicknameDto.class))),
-      @ApiResponse(responseCode = "400", description = "유효하지 않은 입력 또는 유저 없음",
-          content = @Content(mediaType = "application/json",
-              schema = @Schema(implementation = ErrorResponseDto.class))),})
-  public ResponseEntity<CommonResponseDto<UserResponseDto.IsAvailableNicknameDto>> isAvailableNickname(
+  public ResponseEntity<UserResponseDto.IsAvailableNicknameDto> isAvailableNickname(
       @RequestParam @Pattern(
           regexp = "^[a-zA-Z0-9가-힣]{2,20}$",
           message = "닉네임은 2~20자, 영문/숫자/한글만 허용됩니다.")
       String nickname){
     UserResponseDto.IsAvailableNicknameDto responseDto
         = userService.isAvailableNickname(nickname);
-    return ResponseEntity.status(HttpStatus.OK).body(
-        new CommonResponseDto<>(
-            responseDto, "이용 가능한 회원 닉네임 조회 성공", HttpStatus.OK.value()));
+    return ResponseEntity.status(HttpStatus.OK).body(responseDto);
   }
 
   @PatchMapping("/users/nickname")
-  @Operation(summary = "회원의 닉네임 생성/수정",
-      description = "로그인한 사용자는 최초 1회에 한하여 닉네임을 생성하거나 개인정보의 닉네임을 수정할 수 있다.")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "회원의 닉네임 생성/수정 성공",
-          content = @Content(mediaType = "application/json",
-              schema = @Schema(implementation = UserResponseDto.UpdateProfileDto.class))),
-      @ApiResponse(responseCode = "401", description = "로그인하지 않은 사용자",
-          content = @Content(mediaType = "application/json",
-              schema = @Schema(implementation = CommonResponseDto.class))),
-      @ApiResponse(responseCode = "400", description = "유효하지 않은 입력 또는 유저 없음",
-          content = @Content(mediaType = "application/json",
-              schema = @Schema(implementation = ErrorResponseDto.class))),})
-  public ResponseEntity<CommonResponseDto<UserResponseDto.UpdateProfileDto>> updateNickname(
+  public ResponseEntity<UserResponseDto.UpdateProfileDto> updateNickname(
       @RequestParam @Pattern(
           regexp = "^[a-zA-Z0-9가-힣]{2,20}$",
           message = "닉네임은 2~20자, 영문/숫자/한글만 허용됩니다.")
@@ -106,21 +81,42 @@ public class UserController {
       @AuthenticationPrincipal UserDetailsImpl userDetails) {
     UserResponseDto.UpdateProfileDto responseDto
         = userService.updateNickname(nickname, userDetails.getUser());
-    return ResponseEntity.status(HttpStatus.OK).body(
-        new CommonResponseDto<>(
-            responseDto, "닉네임 수정 성공", HttpStatus.OK.value()));
+    return ResponseEntity.status(HttpStatus.OK).body(responseDto);
   }
 
+  @Operation(summary = "회원 프로필 조회", description = "로그인한 회원의 프로필 정보를 조회합니다.")
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "프로필 조회 성공",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = UserResponseDto.ReadProfileDto.class))),
+      @ApiResponse(responseCode = "401", description = "로그인하지 않은 사용자",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = CommonResponseDto.class))),
+      @ApiResponse(responseCode = "404", description = "회원을 찾을 수 없음",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = ErrorResponseDto.class)))})
   @GetMapping("/users/profile")
-  public ResponseEntity<CommonResponseDto<UserResponseDto.ReadProfileDto>> readProfile(
+  public ResponseEntity<UserResponseDto.ReadProfileDto> readProfile(
       @AuthenticationPrincipal UserDetailsImpl userDetails){
     UserResponseDto.ReadProfileDto responseDto
         = userService.readProfile(userDetails.getUser());
-    return ResponseEntity.status(HttpStatus.OK).body(
-        new CommonResponseDto<>(
-            responseDto, "회원 프로필 조회 성공", HttpStatus.OK.value()));
+    return ResponseEntity.status(HttpStatus.OK).body(responseDto);
   }
 
+  @Operation(summary = "회원 탈퇴", description = "회원을 삭제합니다. 본인 또는 관리자만 삭제할 수 있습니다.")
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "회원 삭제 성공",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = CommonResponseDto.class))),
+      @ApiResponse(responseCode = "400", description = "권한 없음 (본인 또는 관리자가 아닌 경우)",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = ErrorResponseDto.class))),
+      @ApiResponse(responseCode = "401", description = "로그인하지 않은 사용자",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = CommonResponseDto.class))),
+      @ApiResponse(responseCode = "404", description = "회원을 찾을 수 없음",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = ErrorResponseDto.class)))})
   @DeleteMapping("/users/{userId}")
   public ResponseEntity<CommonResponseDto<Void>> deleteOne(
       @PathVariable UUID userId,
