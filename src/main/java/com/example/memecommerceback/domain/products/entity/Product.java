@@ -80,4 +80,15 @@ public class Product extends CommonEntity {
   public void addImageList(List<Image> imageList){
     this.imageList.addAll(imageList);
   }
+
+  public void updateStatus(ProductStatus status){
+    this.status = status;
+  }
+
+  public void updateStatusAndDate(
+      ProductStatus status, LocalDateTime sellStartDate, LocalDateTime sellEndDate){
+    this.status = status;
+    this.sellStartDate = sellStartDate;
+    this.sellEndDate = sellEndDate;
+  }
 }

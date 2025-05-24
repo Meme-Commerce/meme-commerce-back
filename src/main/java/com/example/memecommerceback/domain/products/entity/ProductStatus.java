@@ -12,7 +12,8 @@ public enum ProductStatus {
   HIDDEN(Status.HIDDEN),
   PENDING(Status.PENDING),
   ON_SALE(Status.ON_SALE),
-  RESALE_SOON(Status.RESALE_SOON);
+  RESALE_SOON(Status.RESALE_SOON),
+  REJECTED(Status.REJECTED);
 
   private final String status;
 
@@ -32,6 +33,7 @@ public enum ProductStatus {
     public static final String ON_SALE = "ON_SALE";
     // 곧 재판매 예정 상태
     public static final String RESALE_SOON = "RESALE_SOON";
+    public static final String REJECTED = "REJECTED";
   }
 
   public static ProductStatus fromStatus(String status) {

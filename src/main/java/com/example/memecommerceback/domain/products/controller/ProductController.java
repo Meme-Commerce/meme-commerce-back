@@ -7,13 +7,17 @@ import com.example.memecommerceback.global.exception.dto.CommonResponseDto;
 import com.example.memecommerceback.global.security.UserDetailsImpl;
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -35,6 +39,23 @@ public class ProductController {
     ProductResponseDto.RegisterOneDto responseDto
         = productService.registerOne(
             requestDto, productImageList, userDetails.getUser());
+    return ResponseEntity.status(HttpStatus.OK).body(
+        new CommonResponseDto<>(
+            responseDto,
+            "성공적으로 상품 등록하였습니다. 검수 후, 다시 안내 드리겠습니다.",
+            HttpStatus.OK.value()));
+  }
+
+  @PatchMapping(value = "/products/{productId}")
+  @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
+  public ResponseEntity<
+      CommonResponseDto<ProductResponseDto.UpdateOneStatusDto>> updateOneStatusByAdmin(
+          @PathVariable UUID productId,
+          @RequestParam String status,
+      @AuthenticationPrincipal UserDetailsImpl userDetails){
+    ProductResponseDto.UpdateOneStatusDto responseDto
+        = productService.updateOneStatusByAdmin(
+            productId, status, userDetails.getUser());
     return ResponseEntity.status(HttpStatus.OK).body(
         new CommonResponseDto<>(
             responseDto,

@@ -29,4 +29,16 @@ public class ProductResponseDto {
     private ProductStatus status;
     private LocalDateTime createdAt;
   }
+
+  @Getter
+  @Builder
+  @AllArgsConstructor
+  @NoArgsConstructor
+  public static class UpdateOneStatusDto {
+    private UUID productId;
+    private String name;
+    private ProductStatus status;
+    private LocalDateTime createdAt;
+    private LocalDateTime modifiedAt;
+  }
 }

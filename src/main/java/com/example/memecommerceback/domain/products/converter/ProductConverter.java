@@ -36,4 +36,15 @@ public class ProductConverter {
         .status(product.getStatus())
         .build();
   }
+
+  public static ProductResponseDto.UpdateOneStatusDto toUpdateOneStatusDto(
+      Product product){
+    return ProductResponseDto.UpdateOneStatusDto.builder()
+        .productId(product.getId())
+        .name(product.getName())
+        .status(product.getStatus())
+        .modifiedAt(product.getModifiedAt())
+        .createdAt(product.getCreatedAt())
+        .build();
+  }
 }
