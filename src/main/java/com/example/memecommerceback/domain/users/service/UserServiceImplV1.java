@@ -125,13 +125,14 @@ public class UserServiceImplV1 implements UserServiceV1 {
   @Override
   @Transactional
   public void deleteOne(UUID userId, User loginUser) {
+    User user = findById(userId);
     if(!loginUser.getRole().equals(UserRole.ADMIN)
         && !loginUser.getId().equals(userId)){
       throw new UserCustomException(UserExceptionCode.ONLY_SELF_OR_ADMIN_CAN_DELETE);
     }
-    if (userRepository.findById(userId).isPresent() &&
-        userRepository.findById(userId).get().getProfileImage() != null) {
-      imageService.deleteS3Object(loginUser.getProfileImage());
+
+    if (user.getProfileImage() != null) {
+      imageService.deleteS3Object(user.getProfileImage());
     }
 
     userRepository.deleteById(userId);

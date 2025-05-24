@@ -74,5 +74,9 @@ public class Image extends CommonEntity {
       this.url = url;
       this.fileName = fileName;
   }
+
+  public void registerProduct(Product product){
+    this.product = product;
+  }
 }
 

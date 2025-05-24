@@ -6,6 +6,7 @@ import com.example.memecommerceback.domain.images.converter.ImageConverter;
 import com.example.memecommerceback.domain.images.entity.Extension;
 import com.example.memecommerceback.domain.images.entity.Image;
 import com.example.memecommerceback.domain.images.repository.ImageRepository;
+import com.example.memecommerceback.domain.products.entity.Product;
 import com.example.memecommerceback.domain.users.entity.User;
 import com.example.memecommerceback.global.awsS3.dto.S3ResponseDto;
 import com.example.memecommerceback.global.awsS3.service.S3Service;
@@ -76,7 +77,6 @@ public class ImageServiceImplV1 implements ImageServiceV1 {
       Extension.extractFromFilename(originalFilename);
     }
 
-    // ✅ try-catch 제거: 단순히 S3 업로드 + DB 저장만
     List<S3ResponseDto> uploadedImages = s3Service.uploadProductImageList(productImageList, user.getNickname());
     List<Image> imageList = ImageConverter.toEntityList(uploadedImages, user);
     return imageRepository.saveAll(imageList);
@@ -133,8 +133,9 @@ public class ImageServiceImplV1 implements ImageServiceV1 {
   @Transactional
   public List<Image> toEntityListAndSaveAll(
       List<S3ResponseDto> uploadedImageList, User loginUser) {
-    return imageRepository.saveAll(
-        ImageConverter.toEntityList(uploadedImageList, loginUser));
+    List<Image> imageList
+        = ImageConverter.toEntityList(uploadedImageList, loginUser);
+    return imageRepository.saveAll(imageList);
   }
 
   @Override

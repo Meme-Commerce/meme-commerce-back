@@ -39,9 +39,13 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
       ProductRequestDto.RegisterOneDto requestDto,
       List<MultipartFile> productImageList, User loginUser) {
 
+    // 1. 요청한 판매 시작일/마감일 검증
     DateUtils.validateDateTime(requestDto.getSellStartDate(), requestDto.getSellEndDate());
+
+    // 2. 제목/설명에 비속어가 들어갔는지?
     validateProfanityText(requestDto.getName(), requestDto.getDescription(), loginUser);
 
+    // 3. 상품을 만듦.
     Product product = ProductConverter.toEntity(requestDto, loginUser);
 
     List<S3ResponseDto> uploadedImages = null;
@@ -110,7 +114,6 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
       product.updateStatusAndDate(afterStatus, null, null);
     }
 
-    // ✅ 안전한 이미지 교체 - 전체 보상 처리
     List<S3ResponseDto> uploadedImages = null;
     List<Image> newImageList = null;
 
