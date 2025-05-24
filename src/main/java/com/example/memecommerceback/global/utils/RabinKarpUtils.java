@@ -11,6 +11,9 @@ public class RabinKarpUtils {
 
   // 모든 슬라이딩 윈도우 해시 집합 구하기
   public static Set<Integer> getAllWindowHashes(String s, int windowSize) {
+    if(windowSize <= 0){
+      throw new IllegalArgumentException("윈도우 크기는 0이상이여야 합니다.");
+    }
     Set<Integer> hashes = new HashSet<>();
     if (s.length() < windowSize) {
       hashes.add(rabinKarpHash(s));
