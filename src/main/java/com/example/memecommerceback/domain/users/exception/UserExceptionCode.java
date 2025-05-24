@@ -9,7 +9,7 @@ import org.springframework.http.HttpStatus;
 public enum UserExceptionCode {
 
   NOT_FOUND(
-      HttpStatus.BAD_REQUEST, "USER-001",
+      HttpStatus.NOT_FOUND, "USER-001",
       "해당 유저를 찾을 수 없습니다."),
   NOT_EXIST_AUTHORITY(
       HttpStatus.BAD_REQUEST, "USER-002",

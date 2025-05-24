@@ -8,6 +8,7 @@ import com.example.memecommerceback.global.exception.dto.ErrorResponseDto;
 import com.example.memecommerceback.global.security.UserDetailsImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -42,13 +43,13 @@ public class UserController {
   @ApiResponses({
       @ApiResponse(responseCode = "200", description = "회원의 개인 정보 수정 성공",
           content = @Content(mediaType = "application/json",
-              schema = @Schema(implementation = CommonResponseDto.class))),
+              schema = @Schema(implementation = UserResponseDto.UpdateProfileDto.class))),
       @ApiResponse(responseCode = "400", description = "유효하지 않은 입력 또는 유저 없음",
           content = @Content(mediaType = "application/json",
               schema = @Schema(implementation = ErrorResponseDto.class))),
       @ApiResponse(responseCode = "401", description = "로그인하지 않은 사용자",
           content = @Content(mediaType = "application/json",
-              schema = @Schema(implementation = CommonResponseDto.class))),})
+              schema = @Schema(implementation = ErrorResponseDto.class))),})
   public ResponseEntity<CommonResponseDto<UserResponseDto.UpdateProfileDto>> updateProfile(
       @RequestPart(name = "data") @Valid UserRequestDto.UpdateProfileDto requestDto,
       @RequestPart(required = false, name = "image") MultipartFile profileImage,
@@ -65,13 +66,13 @@ public class UserController {
   @ApiResponses({
       @ApiResponse(responseCode = "200", description = "회원의 개인 정보 수정 성공",
           content = @Content(mediaType = "application/json",
-              schema = @Schema(implementation = CommonResponseDto.class))),
+              schema = @Schema(implementation = UserResponseDto.IsAvailableNicknameDto.class))),
       @ApiResponse(responseCode = "400", description = "유효하지 않은 입력 또는 유저 없음",
           content = @Content(mediaType = "application/json",
               schema = @Schema(implementation = ErrorResponseDto.class))),
       @ApiResponse(responseCode = "401", description = "로그인하지 않은 사용자",
           content = @Content(mediaType = "application/json",
-              schema = @Schema(implementation = CommonResponseDto.class))),})
+              schema = @Schema(implementation = ErrorResponseDto.class))),})
   public ResponseEntity<CommonResponseDto<UserResponseDto.IsAvailableNicknameDto>> isAvailableNickname(
       @RequestParam @Pattern(
           regexp = "^[a-zA-Z0-9가-힣]{2,20}$",
@@ -91,13 +92,13 @@ public class UserController {
   @ApiResponses({
       @ApiResponse(responseCode = "200", description = "회원 닉네임 수정 성공",
           content = @Content(mediaType = "application/json",
-              schema = @Schema(implementation = CommonResponseDto.class))),
+              schema = @Schema(implementation = UserResponseDto.UpdateProfileDto.class))),
       @ApiResponse(responseCode = "400", description = "유효하지 않은 입력 또는 유저 없음",
           content = @Content(mediaType = "application/json",
               schema = @Schema(implementation = ErrorResponseDto.class))),
       @ApiResponse(responseCode = "401", description = "로그인하지 않은 사용자",
           content = @Content(mediaType = "application/json",
-              schema = @Schema(implementation = CommonResponseDto.class))),})
+              schema = @Schema(implementation = ErrorResponseDto.class))),})
   public ResponseEntity<CommonResponseDto<UserResponseDto.UpdateProfileDto>> updateNickname(
       @RequestParam @Pattern(
           regexp = "^[a-zA-Z0-9가-힣]{2,20}$",
@@ -115,13 +116,13 @@ public class UserController {
   @ApiResponses({
       @ApiResponse(responseCode = "200", description = "프로필 조회 성공",
           content = @Content(mediaType = "application/json",
-              schema = @Schema(implementation = CommonResponseDto.class))),
+              schema = @Schema(implementation = UserResponseDto.ReadProfileDto.class))),
       @ApiResponse(responseCode = "400", description = "유효하지 않은 입력 또는 유저 없음",
           content = @Content(mediaType = "application/json",
               schema = @Schema(implementation = ErrorResponseDto.class))),
       @ApiResponse(responseCode = "401", description = "로그인하지 않은 사용자",
           content = @Content(mediaType = "application/json",
-              schema = @Schema(implementation = CommonResponseDto.class))),})
+              schema = @Schema(implementation = ErrorResponseDto.class))),})
   @GetMapping("/users/profile")
   public ResponseEntity<CommonResponseDto<UserResponseDto.ReadProfileDto>> readProfile(
       @AuthenticationPrincipal UserDetailsImpl userDetails){
@@ -142,7 +143,7 @@ public class UserController {
               schema = @Schema(implementation = ErrorResponseDto.class))),
       @ApiResponse(responseCode = "401", description = "로그인하지 않은 사용자",
           content = @Content(mediaType = "application/json",
-              schema = @Schema(implementation = CommonResponseDto.class))),})
+              schema = @Schema(implementation = ErrorResponseDto.class))),})
   @DeleteMapping("/users/{userId}")
   public ResponseEntity<CommonResponseDto<Void>> deleteOne(
       @PathVariable UUID userId,
