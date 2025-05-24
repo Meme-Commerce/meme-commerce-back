@@ -12,6 +12,7 @@ import com.example.memecommerceback.domain.products.exception.ProductCustomExcep
 import com.example.memecommerceback.domain.products.exception.ProductExceptionCode;
 import com.example.memecommerceback.domain.products.repository.ProductRepository;
 import com.example.memecommerceback.domain.users.entity.User;
+import com.example.memecommerceback.global.awsS3.dto.S3ResponseDto;
 import com.example.memecommerceback.global.service.ProfanityFilterService;
 import com.example.memecommerceback.global.utils.DateUtils;
 import com.example.memecommerceback.global.utils.RabinKarpUtils;
@@ -30,7 +31,6 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
 
   private final ImageServiceV1 imageService;
   private final ProfanityFilterService profanityFilterService;
-
   private final ProductRepository productRepository;
 
   @Override
@@ -39,82 +39,40 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
       ProductRequestDto.RegisterOneDto requestDto,
       List<MultipartFile> productImageList, User loginUser) {
 
-    DateUtils.validateDateTime(
-        requestDto.getSellStartDate(), requestDto.getSellEndDate());
-
-    validateProfanityText(
-        requestDto.getName(), requestDto.getDescription(), loginUser);
+    DateUtils.validateDateTime(requestDto.getSellStartDate(), requestDto.getSellEndDate());
+    validateProfanityText(requestDto.getName(), requestDto.getDescription(), loginUser);
 
     Product product = ProductConverter.toEntity(requestDto, loginUser);
 
+    List<S3ResponseDto> uploadedImages = null;
     List<Image> imageList = null;
+
     try {
-      // 1. 이미지 업로드
-      imageList = imageService.uploadAndRegisterProductImage(productImageList, loginUser);
+      // 1. S3 업로드 먼저 (트랜잭션 외부)
+      uploadedImages = imageService.uploadProductImageList(
+          productImageList, loginUser.getNickname());
 
-      // 2. 상품과 이미지 연결
+      // 2. DB 작업들 (트랜잭션 내부 - 실패 시 롤백)
+      imageList = imageService.toEntityListAndSaveAll(uploadedImages, loginUser);
+
       product.addImageList(imageList);
-
-      // 3. 상품 저장 (실패 가능 지점)
       productRepository.save(product);
 
-      // TODO Hashtag, Category 연동 및 상품 등록 알림 (판매자 -> 관리자)
-
     } catch (Exception e) {
-      // 상품 저장 실패 시 업로드된 이미지들 정리
-      if (imageList != null && !imageList.isEmpty()) {
-        try {
-          // S3에서 이미지 삭제
-          for (Image image : imageList) {
-            // S3Service의 deleteS3Object 호출 필요
-            imageService.deleteS3Object(image.getUrl());
+      // 3. S3 업로드는 성공했지만 DB 작업 실패 시 S3 정리
+      if (uploadedImages != null && !uploadedImages.isEmpty()) {
+        for (S3ResponseDto dto : uploadedImages) {
+          try {
+            imageService.deleteS3Object(dto.getUrl());
+          } catch (Exception cleanupEx) {
+            log.warn("S3 보상 삭제 실패: {}", dto.getUrl(), cleanupEx);
           }
-          // DB에서 이미지 삭제
-          imageService.deleteAll(imageList);
-        } catch (Exception cleanupException) {
-          log.error("상품 등록 실패 후 이미지 정리 실패: {}",
-              cleanupException.getMessage(), cleanupException);
         }
       }
-      throw e; // 원본 예외 재발생하여 트랜잭션 롤백
+      throw e;
     }
 
-    return ProductConverter.toRegisterOneDto(
-        product, loginUser.getName(), imageList);
-  }
-
-  @Override
-  @Transactional
-  public ProductResponseDto.UpdateOneStatusDto updateOneStatusByAdmin(
-      UUID productId, String requestedStatus, User admin) {
-    Product product = findById(productId);
-    ProductStatus status = ProductStatus.fromStatus(requestedStatus);
-
-    if(product.getStatus().equals(status)){
-      throw new ProductCustomException(ProductExceptionCode.REQUEST_SAME_STATUS);
-    }
-
-    switch (status) {
-      case REJECTED, HIDDEN ->
-        product.updateStatusAndDate(status, null, null);
-      case RESALE_SOON, ON_SALE -> {
-        // 재검증
-        DateUtils.validateDateTime(
-            product.getSellStartDate(), product.getSellEndDate());
-        product.updateStatus(status);
-      }
-      case PENDING, TEMP_OUT_OF_STOCK ->
-        // 초기 상태 = PENDING
-        // TEMP_OUT_OF_STOCK = 재고가 떨어졌을 때만 변경 될 수 있는 상태
-        throw new ProductCustomException(
-            ProductExceptionCode.CANNOT_MODIFY_STATUS);
-      default -> throw new ProductCustomException(
-          ProductExceptionCode.UNKNOWN_STATUS);
-    }
-
-    // TODO: 관리자가 어떤 상태로 변경했는지에 대한 알림 (관리자 -> 상품 판매자)
-    //  거절했다면 어떤 이유로 거절했는지 상세
-    return ProductConverter.toUpdateOneStatusDto(product);
+    return ProductConverter.toRegisterOneDto(product, loginUser.getName(), imageList);
   }
 
   @Override
@@ -122,6 +80,7 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
   public ProductResponseDto.UpdateOneDto updateOneBySeller(
       UUID productId, ProductRequestDto.UpdateOneDto requestDto,
       List<MultipartFile> multipartFileList, User seller) {
+
     Product product = findById(productId);
 
     if (!product.getOwner().getId().equals(seller.getId())) {
@@ -131,7 +90,7 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
     ProductStatus beforeStatus = product.getStatus();
     ProductStatus afterStatus = requestDto.getStatus();
 
-    if(product.getStatus().equals(afterStatus)){
+    if (product.getStatus().equals(afterStatus)) {
       throw new ProductCustomException(ProductExceptionCode.REQUEST_SAME_STATUS);
     }
 
@@ -139,83 +98,101 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
       throw new ProductCustomException(ProductExceptionCode.CANNOT_MODIFY_STATUS);
     }
 
-    validateProfanityText(
-        requestDto.getName(), requestDto.getDescription(), seller);
+    validateProfanityText(requestDto.getName(), requestDto.getDescription(), seller);
 
-    if (afterStatus == ProductStatus.RESALE_SOON
-        || afterStatus == ProductStatus.ON_SALE) {
-      if(requestDto.getSellStartDate() == null || requestDto.getSellEndDate() == null){
+    if (afterStatus == ProductStatus.RESALE_SOON || afterStatus == ProductStatus.ON_SALE) {
+      if (requestDto.getSellStartDate() == null || requestDto.getSellEndDate() == null) {
         throw new ProductCustomException(ProductExceptionCode.NEED_TO_SELL_DATE);
       }
-      DateUtils.validateDateTime(
-          requestDto.getSellStartDate(), requestDto.getSellEndDate());
-      product.updateStatusAndDate(
-          afterStatus, requestDto.getSellStartDate(), requestDto.getSellEndDate());
+      DateUtils.validateDateTime(requestDto.getSellStartDate(), requestDto.getSellEndDate());
+      product.updateStatusAndDate(afterStatus, requestDto.getSellStartDate(), requestDto.getSellEndDate());
     } else if (afterStatus == ProductStatus.HIDDEN) {
-      product.updateStatusAndDate(
-          afterStatus, null, null);
+      product.updateStatusAndDate(afterStatus, null, null);
     }
 
-    // 안전한 이미지 교체: 업로드 먼저, 삭제 나중에
+    // ✅ 안전한 이미지 교체 - 전체 보상 처리
+    List<S3ResponseDto> uploadedImages = null;
     List<Image> newImageList = null;
-    try {
-      // 1. 새 이미지 먼저 업로드
-      newImageList = imageService.uploadAndRegisterProductImage(multipartFileList, seller);
 
-      // 2. 업로드 성공 시에만 기존 이미지 삭제
+    try {
+      // 1. 새 이미지 S3 업로드
+      uploadedImages = imageService.uploadProductImageList(multipartFileList, seller.getNickname());
+
+      // 2. DB 작업들
+      newImageList = imageService.toEntityListAndSaveAll(uploadedImages, seller);
+
+      // 3. 업로드 성공 시에만 기존 이미지 삭제
       imageService.deleteProductImageList(product.getId(), seller.getId());
 
-      // 3. 새 이미지와 상품 연결
+      // 4. 새 이미지와 상품 연결
       product.addImageList(newImageList);
 
     } catch (Exception e) {
-      if (newImageList != null && !newImageList.isEmpty()) {
-        try {
-          for (Image image : newImageList) {
-            imageService.deleteS3Object(image.getUrl());
+      // 보상 처리
+      if (uploadedImages != null && !uploadedImages.isEmpty()) {
+        for (S3ResponseDto dto : uploadedImages) {
+          try {
+            imageService.deleteS3Object(dto.getUrl());
+          } catch (Exception cleanupEx) {
+            log.warn("S3 보상 삭제 실패: {}", dto.getUrl(), cleanupEx);
           }
-          imageService.deleteAll(newImageList);
-        } catch (Exception cleanupException) {
-          log.error("새 이미지 정리 실패: {}", cleanupException.getMessage(), cleanupException);
         }
       }
       throw e;
     }
-    return ProductConverter.toUpdateOneDto(
-        product, seller.getName(), newImageList);
+
+    return ProductConverter.toUpdateOneDto(product, seller.getName(), newImageList);
   }
 
   @Override
   @Transactional
-  public Product findById(UUID productId){
+  public ProductResponseDto.UpdateOneStatusDto updateOneStatusByAdmin(
+      UUID productId, String requestedStatus, User admin) {
+    Product product = findById(productId);
+    ProductStatus status = ProductStatus.fromStatus(requestedStatus);
+
+    if (product.getStatus().equals(status)) {
+      throw new ProductCustomException(ProductExceptionCode.REQUEST_SAME_STATUS);
+    }
+
+    switch (status) {
+      case REJECTED, HIDDEN -> product.updateStatusAndDate(status, null, null);
+      case RESALE_SOON, ON_SALE -> {
+        DateUtils.validateDateTime(product.getSellStartDate(), product.getSellEndDate());
+        product.updateStatus(status);
+      }
+      case PENDING, TEMP_OUT_OF_STOCK ->
+          throw new ProductCustomException(ProductExceptionCode.CANNOT_MODIFY_STATUS);
+      default -> throw new ProductCustomException(ProductExceptionCode.UNKNOWN_STATUS);
+    }
+
+    return ProductConverter.toUpdateOneStatusDto(product);
+  }
+
+  @Override
+  @Transactional
+  public Product findById(UUID productId) {
     return productRepository.findById(productId).orElseThrow(
         () -> new ProductCustomException(ProductExceptionCode.NOT_FOUND));
   }
 
-  private void validateProfanityText(
-      String newTitle, String newDescription, User user){
-    profanityFilterService.validateListNoProfanity(
-        List.of(newTitle, newDescription));
+  private void validateProfanityText(String newTitle, String newDescription, User user) {
+    profanityFilterService.validateListNoProfanity(List.of(newTitle, newDescription));
 
-    List<ProductTitleDescriptionProjection> myProducts =
-        productRepository.findAllByOwner(user);
+    List<ProductTitleDescriptionProjection> myProducts = productRepository.findAllByOwner(user);
 
     for (ProductTitleDescriptionProjection p : myProducts) {
-      double titleSimilarity
-          = RabinKarpUtils.slidingWindowSimilarity(
+      double titleSimilarity = RabinKarpUtils.slidingWindowSimilarity(
           newTitle, p.getName(), RabinKarpUtils.WINDOW_SIZE);
       if (titleSimilarity >= RabinKarpUtils.SIMILARITY_THRESHOLD) {
-        throw new ProductCustomException(
-            ProductExceptionCode.SIMILAR_PRODUCT_TITLE_EXISTS);
+        throw new ProductCustomException(ProductExceptionCode.SIMILAR_PRODUCT_TITLE_EXISTS);
       }
-      // 설명(description) 유사도 판단
+
       double descSimilarity = RabinKarpUtils.slidingWindowSimilarity(
           newDescription, p.getDescription(), RabinKarpUtils.WINDOW_SIZE);
       if (descSimilarity >= RabinKarpUtils.SIMILARITY_THRESHOLD) {
-        throw new ProductCustomException(
-            ProductExceptionCode.SIMILAR_PRODUCT_DESCRIPTION_EXISTS);
+        throw new ProductCustomException(ProductExceptionCode.SIMILAR_PRODUCT_DESCRIPTION_EXISTS);
       }
     }
   }
 }
-
