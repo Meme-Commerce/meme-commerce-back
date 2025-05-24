@@ -59,7 +59,7 @@ public class ProductController {
     return ResponseEntity.status(HttpStatus.OK).body(
         new CommonResponseDto<>(
             responseDto,
-            "성공적으로 상품 등록하였습니다. 검수 후, 다시 안내 드리겠습니다.",
+            "성공적으로 상품 상태를 변경하였습니다.",
             HttpStatus.OK.value()));
   }
 }
