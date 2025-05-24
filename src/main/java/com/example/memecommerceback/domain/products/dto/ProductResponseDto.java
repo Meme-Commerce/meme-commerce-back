@@ -34,6 +34,25 @@ public class ProductResponseDto {
   @Builder
   @AllArgsConstructor
   @NoArgsConstructor
+  public static class UpdateOneDto {
+    private UUID productId;
+    private String name;
+    private String description;
+    private Long price;
+    private String ownerName;
+    private List<ImageResponseDto> imageResponseDtoList;
+    // private List<CategoryResponseDto.ReadOneDto> categoryList;
+    // private List<HashtagResponseDto.ReadOneDto> hashtagList;
+    private Long stock;
+    private String registeredCompanyName;
+    private ProductStatus status;
+    private LocalDateTime createdAt;
+  }
+
+  @Getter
+  @Builder
+  @AllArgsConstructor
+  @NoArgsConstructor
   public static class UpdateOneStatusDto {
     private UUID productId;
     private String name;

@@ -12,6 +12,7 @@ import com.example.memecommerceback.domain.products.exception.ProductCustomExcep
 import com.example.memecommerceback.domain.products.exception.ProductExceptionCode;
 import com.example.memecommerceback.domain.products.repository.ProductRepository;
 import com.example.memecommerceback.domain.users.entity.User;
+import com.example.memecommerceback.global.service.ProfanityFilterService;
 import com.example.memecommerceback.global.utils.DateUtils;
 import com.example.memecommerceback.global.utils.RabinKarpUtils;
 import java.util.List;
@@ -26,6 +27,8 @@ import org.springframework.web.multipart.MultipartFile;
 public class ProductServiceImplV1 implements ProductServiceV1 {
 
   private final ImageServiceV1 imageService;
+  private final ProfanityFilterService profanityFilterService;
+
   private final ProductRepository productRepository;
 
   @Override
@@ -37,28 +40,8 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
     DateUtils.validateDateTime(
         requestDto.getSellStartDate(), requestDto.getSellEndDate());
 
-    String newTitle = requestDto.getName();
-    String newDescription = requestDto.getDescription();
-
-    List<ProductTitleDescriptionProjection> myProducts =
-        productRepository.findAllByOwner(loginUser);
-
-    for (ProductTitleDescriptionProjection p : myProducts) {
-      double titleSimilarity
-          = RabinKarpUtils.slidingWindowSimilarity(
-              newTitle, p.getName(), RabinKarpUtils.WINDOW_SIZE);
-      if (titleSimilarity >= RabinKarpUtils.SIMILARITY_THRESHOLD) {
-        throw new ProductCustomException(
-            ProductExceptionCode.SIMILAR_PRODUCT_TITLE_EXISTS);
-      }
-      // 설명(description) 유사도 판단
-      double descSimilarity = RabinKarpUtils.slidingWindowSimilarity(
-          newDescription, p.getDescription(), RabinKarpUtils.WINDOW_SIZE);
-      if (descSimilarity >= RabinKarpUtils.SIMILARITY_THRESHOLD) {
-        throw new ProductCustomException(
-            ProductExceptionCode.SIMILAR_PRODUCT_DESCRIPTION_EXISTS);
-      }
-    }
+    validateProfanityText(
+        requestDto.getName(), requestDto.getDescription(), loginUser);
 
     Product product = ProductConverter.toEntity(requestDto, loginUser);
 
@@ -84,21 +67,19 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
     }
 
     switch (status) {
-      case REJECTED, HIDDEN -> {
+      case REJECTED, HIDDEN ->
         product.updateStatusAndDate(status, null, null);
-      }
       case RESALE_SOON, ON_SALE -> {
         // 재검증
         DateUtils.validateDateTime(
             product.getSellStartDate(), product.getSellEndDate());
         product.updateStatus(status);
       }
-      case PENDING, TEMP_OUT_OF_STOCK -> {
+      case PENDING, TEMP_OUT_OF_STOCK ->
         // 초기 상태 = PENDING
         // TEMP_OUT_OF_STOCK = 재고가 떨어졌을 때만 변경 될 수 있는 상태
         throw new ProductCustomException(
             ProductExceptionCode.CANNOT_MODIFY_STATUS);
-      }
       default -> throw new ProductCustomException(
           ProductExceptionCode.UNKNOWN_STATUS);
     }
@@ -110,9 +91,82 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
 
   @Override
   @Transactional
+  public ProductResponseDto.UpdateOneDto updateOneBySeller(
+      UUID productId, ProductRequestDto.UpdateOneDto requestDto,
+      List<MultipartFile> multipartFileList, User seller) {
+    Product product = findById(productId);
+
+    if (!product.getOwner().getId().equals(seller.getId())) {
+      throw new ProductCustomException(ProductExceptionCode.NOT_OWNER);
+    }
+
+    ProductStatus beforeStatus = product.getStatus();
+    ProductStatus afterStatus = requestDto.getStatus();
+
+    if(product.getStatus().equals(afterStatus)){
+      throw new ProductCustomException(ProductExceptionCode.REQUEST_SAME_STATUS);
+    }
+
+    if (!beforeStatus.canSellerChangeTo(afterStatus)) {
+      throw new ProductCustomException(ProductExceptionCode.CANNOT_MODIFY_STATUS);
+    }
+
+    validateProfanityText(
+        requestDto.getName(), requestDto.getDescription(), seller);
+
+    if (afterStatus == ProductStatus.RESALE_SOON
+        || afterStatus == ProductStatus.ON_SALE) {
+      if(requestDto.getSellStartDate() == null || requestDto.getSellEndDate() == null){
+        throw new ProductCustomException(ProductExceptionCode.NEED_TO_SELL_DATE);
+      }
+      DateUtils.validateDateTime(
+          requestDto.getSellStartDate(), requestDto.getSellEndDate());
+      product.updateStatusAndDate(
+          afterStatus, requestDto.getSellStartDate(), requestDto.getSellEndDate());
+    } else if (afterStatus == ProductStatus.HIDDEN) {
+      product.updateStatusAndDate(
+          afterStatus, null, null);
+    }
+
+    imageService.deleteProductImageList(product.getId(), seller.getId());
+    List<Image> productImageList
+        = imageService.uploadAndRegisterProductImage(multipartFileList, seller);
+    product.addImageList(productImageList);
+    return ProductConverter.toUpdateOneDto(
+        product, seller.getName(), productImageList);
+  }
+
+  @Override
+  @Transactional
   public Product findById(UUID productId){
     return productRepository.findById(productId).orElseThrow(
         () -> new ProductCustomException(ProductExceptionCode.NOT_FOUND));
+  }
+
+  private void validateProfanityText(
+      String newTitle, String newDescription, User user){
+    profanityFilterService.validateListNoProfanity(
+        List.of(newTitle, newDescription));
+
+    List<ProductTitleDescriptionProjection> myProducts =
+        productRepository.findAllByOwner(user);
+
+    for (ProductTitleDescriptionProjection p : myProducts) {
+      double titleSimilarity
+          = RabinKarpUtils.slidingWindowSimilarity(
+          newTitle, p.getName(), RabinKarpUtils.WINDOW_SIZE);
+      if (titleSimilarity >= RabinKarpUtils.SIMILARITY_THRESHOLD) {
+        throw new ProductCustomException(
+            ProductExceptionCode.SIMILAR_PRODUCT_TITLE_EXISTS);
+      }
+      // 설명(description) 유사도 판단
+      double descSimilarity = RabinKarpUtils.slidingWindowSimilarity(
+          newDescription, p.getDescription(), RabinKarpUtils.WINDOW_SIZE);
+      if (descSimilarity >= RabinKarpUtils.SIMILARITY_THRESHOLD) {
+        throw new ProductCustomException(
+            ProductExceptionCode.SIMILAR_PRODUCT_DESCRIPTION_EXISTS);
+      }
+    }
   }
 }
 

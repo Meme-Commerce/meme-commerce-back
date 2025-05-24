@@ -23,6 +23,9 @@ public enum FileExceptionCode {
   NOT_REGISTER_OVER_MAX_PRODUCT_IMAGES(
       HttpStatus.BAD_REQUEST, "FILE-005",
       "상품 파일 등록은 최대 5개까지입니다."),
+  FAILED_DELETE_IMAGE_S3(
+      HttpStatus.BAD_REQUEST, "FILE-006",
+      "S3 버킷에서 이미지 파일을 삭제하는데, 실패하였습니다"),
   ;
 
   private final HttpStatus httpStatus;

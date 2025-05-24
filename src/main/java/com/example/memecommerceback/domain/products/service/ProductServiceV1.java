@@ -16,5 +16,9 @@ public interface ProductServiceV1 {
   ProductResponseDto.UpdateOneStatusDto updateOneStatusByAdmin(
       UUID productId, String requestedStatus, User Admin);
 
+  ProductResponseDto.UpdateOneDto updateOneBySeller(
+      UUID productId, ProductRequestDto.UpdateOneDto requestDto,
+      List<MultipartFile> multipartFileList, User seller);
+
   Product findById(UUID productId);
 }

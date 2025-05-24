@@ -78,6 +78,7 @@ public class Product extends CommonEntity {
 
   // entity methods
   public void addImageList(List<Image> imageList){
+    this.imageList.clear();
     this.imageList.addAll(imageList);
   }
 

@@ -50,7 +50,7 @@ public class ImageServiceImplV1 implements ImageServiceV1 {
       Image originalImage = findByUserIdGet(user.getId());
       if (originalImage != null) {
         // 이전 이미지 S3에서 삭제
-        s3Service.deleteProfile(originalImage.getUrl());
+        s3Service.deleteS3Object(originalImage.getUrl());
         // DB 정보만 새 이미지로 업데이트
         originalImage.updateImage(
             s3ResponseDto.getUrl(),
@@ -67,7 +67,7 @@ public class ImageServiceImplV1 implements ImageServiceV1 {
       // 4. 예외 발생 시 S3에 업로드된 파일 보상(Undo) 삭제
       if (s3ResponseDto != null) {
         try {
-          s3Service.deleteProfile(s3ResponseDto.getUrl());
+          s3Service.deleteS3Object(s3ResponseDto.getUrl());
         } catch (Exception ex) {
           log.warn("S3 보상 삭제 실패: {}", s3ResponseDto.getUrl(), ex);
         }
@@ -80,7 +80,7 @@ public class ImageServiceImplV1 implements ImageServiceV1 {
   @Transactional
   public void deleteProfile(UUID userId) {
     Image image = findByUserId(userId);
-    s3Service.deleteProfile(image.getUrl());
+    s3Service.deleteS3Object(image.getUrl());
     imageRepository.deleteById(image.getId());
   }
 
@@ -140,12 +140,34 @@ public class ImageServiceImplV1 implements ImageServiceV1 {
       // 4. 예외 발생 시 S3에 업로드된 모든 파일 보상(삭제)
       for (S3ResponseDto dto : uploadedImages) {
         try {
-          s3Service.deleteProfile(dto.getUrl());
+          s3Service.deleteS3Object(dto.getUrl());
         } catch (Exception deleteEx) {
           log.warn("S3 상품 이미지 보상 삭제 실패: {}", dto.getUrl(), deleteEx);
         }
       }
       throw e; // 예외 재전파 (DB 트랜잭션 롤백)
+    }
+  }
+
+  @Override
+  @Transactional
+  public void deleteProductImageList(UUID productId, UUID userId) {
+    List<Image> imageList = imageRepository.findAllByProductId(productId);
+    List<Image> deletedImages = new ArrayList<>(); // 보상 복구용
+    List<String> deletedUrls = new ArrayList<>();
+    try {
+      for (Image image : imageList) {
+        // 권한 체크 등 필요하다면 추가
+        s3Service.deleteS3Object(image.getUrl());
+        deletedImages.add(image);
+        deletedUrls.add(image.getUrl());
+      }
+      imageRepository.deleteAllById(
+          imageList.stream().map(Image::getId).toList());
+    } catch (Exception e) {
+      log.error("상품 이미지 일괄 삭제 보상 필요: S3 삭제 성공, DB 삭제 실패"
+          + " (productId: {}, userId: {})", productId, userId, e);
+      throw new FileCustomException(FileExceptionCode.FAILED_DELETE_IMAGE_S3);
     }
   }
 

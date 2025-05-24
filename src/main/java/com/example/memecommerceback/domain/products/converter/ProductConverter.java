@@ -47,4 +47,19 @@ public class ProductConverter {
         .createdAt(product.getCreatedAt())
         .build();
   }
+
+  public static ProductResponseDto.UpdateOneDto toUpdateOneDto(
+      Product product, String ownerName, List<Image> productImageList){
+    return ProductResponseDto.UpdateOneDto.builder()
+        .productId(product.getId())
+        .createdAt(product.getCreatedAt())
+        .name(product.getName())
+        .description(product.getDescription())
+        .stock(product.getStock())
+        .price(product.getPrice())
+        .ownerName(ownerName)
+        .imageResponseDtoList(ImageConverter.toResponseDtoList(productImageList))
+        .status(product.getStatus())
+        .build();
+  }
 }

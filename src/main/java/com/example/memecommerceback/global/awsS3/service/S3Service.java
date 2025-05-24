@@ -66,11 +66,9 @@ public class S3Service {
   }
 
   @Transactional(propagation = Propagation.NOT_SUPPORTED)
-  public void deleteProfile(String imageUrl){
+  public void deleteS3Object(String imageUrl) {
     try {
-      // URL 디코딩
       String decodedUrl = URLDecoder.decode(imageUrl, StandardCharsets.UTF_8);
-      // "_" 다음 문자부터 시작하여 파일 이름 추출
       String bucketUrlPart = bucket + ".s3.";
       int pathIndex = decodedUrl.indexOf(bucketUrlPart);
       if (pathIndex == -1) {
@@ -78,9 +76,10 @@ public class S3Service {
       }
       int keyStartIndex = decodedUrl.indexOf("/", pathIndex + bucketUrlPart.length());
       String filePath = decodedUrl.substring(keyStartIndex + 1);
-      // S3에서 파일 삭제
       amazonS3Client.deleteObject(new DeleteObjectRequest(bucket, filePath));
+      log.info("S3 이미지 삭제 완료: {}", filePath);
     } catch (Exception e) {
+      log.error("S3 이미지 삭제 실패: {}", imageUrl, e);
       throw new AWSCustomException(GlobalExceptionCode.NOT_MATCHED_FILE_URL);
     }
   }

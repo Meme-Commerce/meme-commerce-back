@@ -3,6 +3,8 @@ package com.example.memecommerceback.domain.products.entity;
 import com.example.memecommerceback.domain.products.exception.ProductCustomException;
 import com.example.memecommerceback.domain.products.exception.ProductExceptionCode;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import lombok.Getter;
 
 @Getter
@@ -45,16 +47,21 @@ public enum ProductStatus {
     throw new ProductCustomException(ProductExceptionCode.UNKNOWN_STATUS);
   }
 
-  public static List<ProductStatus> getStatusList() {
-    return List.of(
-        ProductStatus.PENDING, ProductStatus.ON_SALE,
-        ProductStatus.HIDDEN, ProductStatus.RESALE_SOON, ProductStatus.TEMP_OUT_OF_STOCK);
-  }
+  // 판매자 상태 전이 정책
+  public static final Map<ProductStatus, Set<ProductStatus>>
+      // ON_SALE은 해당 시간에 ON_SALE로 자동으로 변경되도록 함.
+      // TEMP_OUT_OF_STOCK은 재고가 0이 되면 자동으로 변경되도록 함.
+      SELLER_ALLOWED_TRANSITIONS = Map.of(
+          HIDDEN, Set.of(RESALE_SOON),
+          ON_SALE, Set.of(HIDDEN, RESALE_SOON),
+          RESALE_SOON, Set.of(HIDDEN),
+          TEMP_OUT_OF_STOCK, Set.of(HIDDEN, RESALE_SOON)
+  );
 
-  public static List<ProductStatus> getAllowedStatusList() {
-    return List.of(
-        ProductStatus.ON_SALE, ProductStatus.RESALE_SOON,
-        ProductStatus.TEMP_OUT_OF_STOCK);
+  // 검증 메서드
+  public boolean canSellerChangeTo(ProductStatus to) {
+    return SELLER_ALLOWED_TRANSITIONS
+        .getOrDefault(this, Set.of()).contains(to);
   }
 }
 

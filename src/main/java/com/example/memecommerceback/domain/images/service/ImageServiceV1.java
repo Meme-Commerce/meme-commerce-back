@@ -18,4 +18,6 @@ public interface ImageServiceV1 {
 
   List<Image> uploadAndRegisterProductImage(
       List<MultipartFile> profileImageList, User user);
+
+  void deleteProductImageList(UUID productId, UUID userId);
 }
