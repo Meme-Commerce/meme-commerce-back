@@ -20,4 +20,8 @@ public interface ImageServiceV1 {
       List<MultipartFile> profileImageList, User user);
 
   void deleteProductImageList(UUID productId, UUID userId);
+
+  void deleteS3Object(String url);
+
+  void deleteAll(List<Image> newImageList);
 }

@@ -153,20 +153,15 @@ public class ImageServiceImplV1 implements ImageServiceV1 {
   @Transactional
   public void deleteProductImageList(UUID productId, UUID userId) {
     List<Image> imageList = imageRepository.findAllByProductId(productId);
-    List<Image> deletedImages = new ArrayList<>(); // 보상 복구용
-    List<String> deletedUrls = new ArrayList<>();
     try {
+      imageRepository.deleteAllById(
+          imageList.stream().map(Image::getId).toList());
       for (Image image : imageList) {
         // 권한 체크 등 필요하다면 추가
         s3Service.deleteS3Object(image.getUrl());
-        deletedImages.add(image);
-        deletedUrls.add(image.getUrl());
       }
-      imageRepository.deleteAllById(
-          imageList.stream().map(Image::getId).toList());
     } catch (Exception e) {
-      log.error("상품 이미지 일괄 삭제 보상 필요: S3 삭제 성공, DB 삭제 실패"
-          + " (productId: {}, userId: {})", productId, userId, e);
+      log.error("상품 이미지 삭제 실패 (productId: {}, userId: {})", productId, userId, e);
       throw new FileCustomException(FileExceptionCode.FAILED_DELETE_IMAGE_S3);
     }
   }
@@ -179,5 +174,17 @@ public class ImageServiceImplV1 implements ImageServiceV1 {
 
   public Image findByUserIdGet(UUID userId){
     return imageRepository.findByUserId(userId).orElse(null);
+  }
+
+  @Override
+  @Transactional
+  public void deleteS3Object(String url){
+    s3Service.deleteS3Object(url);
+  }
+
+  @Override
+  @Transactional
+  public void deleteAll(List<Image> imageList){
+    imageRepository.deleteAll(imageList);
   }
 }

@@ -18,10 +18,12 @@ import com.example.memecommerceback.global.utils.RabinKarpUtils;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ProductServiceImplV1 implements ProductServiceV1 {
@@ -45,12 +47,38 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
 
     Product product = ProductConverter.toEntity(requestDto, loginUser);
 
-    List<Image> imageList
-        = imageService.uploadAndRegisterProductImage(productImageList, loginUser);
+    List<Image> imageList = null;
+    try {
+      // 1. 이미지 업로드
+      imageList = imageService.uploadAndRegisterProductImage(productImageList, loginUser);
 
-    // TODO Hashtag, Category 연동 및 상품 등록 알림 (판매자 -> 관리자)
-    product.addImageList(imageList);
-    productRepository.save(product);
+      // 2. 상품과 이미지 연결
+      product.addImageList(imageList);
+
+      // 3. 상품 저장 (실패 가능 지점)
+      productRepository.save(product);
+
+      // TODO Hashtag, Category 연동 및 상품 등록 알림 (판매자 -> 관리자)
+
+    } catch (Exception e) {
+      // 상품 저장 실패 시 업로드된 이미지들 정리
+      if (imageList != null && !imageList.isEmpty()) {
+        try {
+          // S3에서 이미지 삭제
+          for (Image image : imageList) {
+            // S3Service의 deleteS3Object 호출 필요
+            imageService.deleteS3Object(image.getUrl());
+          }
+          // DB에서 이미지 삭제
+          imageService.deleteAll(imageList);
+        } catch (Exception cleanupException) {
+          log.error("상품 등록 실패 후 이미지 정리 실패: {}",
+              cleanupException.getMessage(), cleanupException);
+        }
+      }
+      throw e; // 원본 예외 재발생하여 트랜잭션 롤백
+    }
+
     return ProductConverter.toRegisterOneDto(
         product, loginUser.getName(), imageList);
   }
@@ -128,12 +156,33 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
           afterStatus, null, null);
     }
 
-    imageService.deleteProductImageList(product.getId(), seller.getId());
-    List<Image> productImageList
-        = imageService.uploadAndRegisterProductImage(multipartFileList, seller);
-    product.addImageList(productImageList);
+    // 안전한 이미지 교체: 업로드 먼저, 삭제 나중에
+    List<Image> newImageList = null;
+    try {
+      // 1. 새 이미지 먼저 업로드
+      newImageList = imageService.uploadAndRegisterProductImage(multipartFileList, seller);
+
+      // 2. 업로드 성공 시에만 기존 이미지 삭제
+      imageService.deleteProductImageList(product.getId(), seller.getId());
+
+      // 3. 새 이미지와 상품 연결
+      product.addImageList(newImageList);
+
+    } catch (Exception e) {
+      if (newImageList != null && !newImageList.isEmpty()) {
+        try {
+          for (Image image : newImageList) {
+            imageService.deleteS3Object(image.getUrl());
+          }
+          imageService.deleteAll(newImageList);
+        } catch (Exception cleanupException) {
+          log.error("새 이미지 정리 실패: {}", cleanupException.getMessage(), cleanupException);
+        }
+      }
+      throw e;
+    }
     return ProductConverter.toUpdateOneDto(
-        product, seller.getName(), productImageList);
+        product, seller.getName(), newImageList);
   }
 
   @Override
