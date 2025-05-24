@@ -20,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -32,7 +33,7 @@ public class S3Service {
   @Value("${cloud.aws.s3.bucket}")
   private String bucket;
 
-  @Transactional
+  @Transactional(propagation = Propagation.NOT_SUPPORTED)
   public S3ResponseDto uploadProfile(
       MultipartFile profileImage, String nickname){
     try {
@@ -64,7 +65,7 @@ public class S3Service {
     throw new AWSCustomException(GlobalExceptionCode.UPLOAD_FAIL);
   }
 
-  @Transactional
+  @Transactional(propagation = Propagation.NOT_SUPPORTED)
   public void deleteProfile(String imageUrl){
     try {
       // URL 디코딩
@@ -84,7 +85,7 @@ public class S3Service {
     }
   }
 
-  @Transactional
+  @Transactional(propagation = Propagation.NOT_SUPPORTED)
   public String changePath(String beforenickname, String afternickname) {
     String oldPrefix = S3Utils.USER_PREFIX + beforenickname + S3Utils.PROFILE_PREFIX;
     String newPrefix = S3Utils.USER_PREFIX + afternickname + S3Utils.PROFILE_PREFIX;
@@ -123,7 +124,7 @@ public class S3Service {
     return null;
   }
 
-  @Transactional
+  @Transactional(propagation = Propagation.NOT_SUPPORTED)
   public List<S3ResponseDto> uploadProductImageList(
       List<MultipartFile> productImageList, String nickname){
     List<S3ResponseDto> s3ResponseDtoList = new ArrayList<>();
@@ -159,7 +160,6 @@ public class S3Service {
     }
     return s3ResponseDtoList;
   }
-
 
   private String createUUIDFile(MultipartFile file){
     String originalFilename = file.getOriginalFilename();

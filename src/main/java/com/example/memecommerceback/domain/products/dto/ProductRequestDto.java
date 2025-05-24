@@ -26,6 +26,7 @@ public class ProductRequestDto {
     @Positive(message = "음수 또는 0은 사용할 수 없고 최소 100원 부터 입력 가능합니다.")
     @Min(value = 100, message = "최소 가격은 100원 이상입니다.")
     private Long price;
+    @Size(max = 200, message = "설명은 200자까지 입력 가능합니다.")
     @NotNull(message = "설명은 필수 입력란입니다.")
     private String description;
     @NotNull(message = "판매 시작 일은 필수 입력란입니다.")

@@ -9,13 +9,17 @@ import com.example.memecommerceback.domain.images.repository.ImageRepository;
 import com.example.memecommerceback.domain.users.entity.User;
 import com.example.memecommerceback.global.awsS3.dto.S3ResponseDto;
 import com.example.memecommerceback.global.awsS3.service.S3Service;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ImageServiceImplV1 implements ImageServiceV1 {
@@ -26,29 +30,50 @@ public class ImageServiceImplV1 implements ImageServiceV1 {
   @Override
   @Transactional
   public String uploadAndRegisterUserProfileImage(MultipartFile profileImage, User user) {
-    if(profileImage == null || profileImage.isEmpty()){
+    if (profileImage == null || profileImage.isEmpty()) {
       throw new FileCustomException(FileExceptionCode.FILE_IS_REQUIRED);
     }
 
-    if(user.getNickname() == null){
-      throw new FileCustomException(
-          FileExceptionCode.NICKNAME_REQUIRED_FOR_PROFILE_UPLOAD);
+    if (user.getNickname() == null) {
+      throw new FileCustomException(FileExceptionCode.NICKNAME_REQUIRED_FOR_PROFILE_UPLOAD);
     }
 
     String originalFilename = profileImage.getOriginalFilename();
     Extension.extractFromFilename(originalFilename);
 
-    S3ResponseDto s3ResponseDto
-        = s3Service.uploadProfile(profileImage, user.getNickname());
-    Image originalImage = findByUserIdGet(user.getId());
-    if(originalImage != null){
-       s3Service.deleteProfile(originalImage.getUrl());
-       originalImage.updateImage(
-           s3ResponseDto.getUrl(), s3ResponseDto.getFileName());
-       return originalImage.getUrl();
+    S3ResponseDto s3ResponseDto = null;
+    try {
+      // 1. S3 업로드 (트랜잭션 비적용)
+      s3ResponseDto = s3Service.uploadProfile(profileImage, user.getNickname());
+
+      // 2. 기존 이미지가 있다면 S3에서 삭제, DB 엔티티 정보 갱신
+      Image originalImage = findByUserIdGet(user.getId());
+      if (originalImage != null) {
+        // 이전 이미지 S3에서 삭제
+        s3Service.deleteProfile(originalImage.getUrl());
+        // DB 정보만 새 이미지로 업데이트
+        originalImage.updateImage(
+            s3ResponseDto.getUrl(),
+            s3ResponseDto.getFileName()
+        );
+        return originalImage.getUrl();
+      }
+
+      // 3. 신규 이미지 DB 저장
+      Image image = createAndSaveImage(s3ResponseDto, user);
+      return image.getUrl();
+
+    } catch (Exception e) {
+      // 4. 예외 발생 시 S3에 업로드된 파일 보상(Undo) 삭제
+      if (s3ResponseDto != null) {
+        try {
+          s3Service.deleteProfile(s3ResponseDto.getUrl());
+        } catch (Exception ex) {
+          log.warn("S3 보상 삭제 실패: {}", s3ResponseDto.getUrl(), ex);
+        }
+      }
+      throw e;
     }
-    Image image = createAndSaveImage(s3ResponseDto, user);
-    return image.getUrl();
   }
 
   @Override
@@ -82,15 +107,46 @@ public class ImageServiceImplV1 implements ImageServiceV1 {
     return image;
   }
 
+  @Override
+  @Transactional
   public List<Image> uploadAndRegisterProductImage(
       List<MultipartFile> productImageList, User user) {
-    if(productImageList.size() > 5){
-      throw new FileCustomException(
-          FileExceptionCode.NOT_REGISTER_OVER_MAX_PRODUCT_IMAGES);
+    if (productImageList == null || productImageList.isEmpty()) {
+      throw new FileCustomException(FileExceptionCode.FILE_IS_REQUIRED);
     }
-    List<S3ResponseDto> s3ResponseDtoList
-        = s3Service.uploadProductImageList(productImageList, user.getNickname());
-    return ImageConverter.toEntityList(s3ResponseDtoList, user);
+    if (user.getNickname() == null) {
+      throw new FileCustomException(FileExceptionCode.NICKNAME_REQUIRED_FOR_PROFILE_UPLOAD);
+    }
+
+    List<S3ResponseDto> uploadedImages = new ArrayList<>();
+    List<Image> savedImages = new ArrayList<>();
+    try {
+      // 1. S3에 여러 이미지 업로드 (트랜잭션 비적용)
+      uploadedImages = s3Service.uploadProductImageList(productImageList, user.getNickname());
+
+      // 2. DB에 각 이미지 엔티티 등록/저장 (여기서 실패할 수 있음)
+      for (S3ResponseDto s3Dto : uploadedImages) {
+        Image image = Image.builder()
+            .url(s3Dto.getUrl())
+            .fileName(s3Dto.getFileName())
+            .ownerNickname(user.getNickname())
+            .build();
+        savedImages.add(imageRepository.save(image));
+      }
+      // 3. 성공한 경우 DB 엔티티 리스트 반환
+      return savedImages;
+
+    } catch (Exception e) {
+      // 4. 예외 발생 시 S3에 업로드된 모든 파일 보상(삭제)
+      for (S3ResponseDto dto : uploadedImages) {
+        try {
+          s3Service.deleteProfile(dto.getUrl());
+        } catch (Exception deleteEx) {
+          log.warn("S3 상품 이미지 보상 삭제 실패: {}", dto.getUrl(), deleteEx);
+        }
+      }
+      throw e; // 예외 재전파 (DB 트랜잭션 롤백)
+    }
   }
 
   @Transactional(readOnly = true)

@@ -9,7 +9,7 @@ import org.springframework.http.HttpStatus;
 public enum FileExceptionCode {
 
   NOT_FOUND(
-      HttpStatus.BAD_REQUEST, "FILE-001",
+      HttpStatus.NOT_FOUND, "FILE-001",
       "찾을 수 없는 파일입니다."),
   NOT_SUPPORTED_EXTENSION(
       HttpStatus.BAD_REQUEST, "FILE-002",

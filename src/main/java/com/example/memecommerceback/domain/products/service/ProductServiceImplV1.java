@@ -54,7 +54,7 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
           newDescription, p.getDescription(), RabinKarpUtils.WINDOW_SIZE);
       if (descSimilarity >= RabinKarpUtils.SIMILARITY_THRESHOLD) {
         throw new ProductCustomException(
-            ProductExceptionCode.SIMILAR_PRODUCT_TITLE_EXISTS);
+            ProductExceptionCode.SIMILAR_PRODUCT_DESCRIPTION_EXISTS);
       }
     }
 

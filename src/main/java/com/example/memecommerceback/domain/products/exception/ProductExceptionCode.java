@@ -9,7 +9,7 @@ import org.springframework.http.HttpStatus;
 public enum ProductExceptionCode {
 
   NOT_FOUND(
-      HttpStatus.BAD_REQUEST, "PRODUCT-001",
+      HttpStatus.NOT_FOUND, "PRODUCT-001",
       "해당 상품을 찾을 수 없습니다."),
   UNKNOWN_STATUS(
       HttpStatus.BAD_REQUEST, "PRODUCT-002",

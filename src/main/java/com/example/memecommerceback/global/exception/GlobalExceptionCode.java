@@ -61,7 +61,7 @@ public enum GlobalExceptionCode {
       HttpStatus.BAD_GATEWAY, "OAUTH-008",
       "제공자 응답에서 response contact 필드를 찾을 수 없습니다."),
   NOT_FOUND_PROVIDER(
-      HttpStatus.BAD_REQUEST, "OAUTH-009",
+      HttpStatus.NOT_FOUND, "OAUTH-009",
       "지원하지 않거나 찾을 수 없는 공급자입니다."),
 
   // AWS S3 ERROR

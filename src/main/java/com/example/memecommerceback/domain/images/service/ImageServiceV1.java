@@ -17,5 +17,5 @@ public interface ImageServiceV1 {
       MultipartFile profileImage, String beforeNickname, String afterNickname);
 
   List<Image> uploadAndRegisterProductImage(
-      List<MultipartFile> profileImage, User user);
+      List<MultipartFile> profileImageList, User user);
 }

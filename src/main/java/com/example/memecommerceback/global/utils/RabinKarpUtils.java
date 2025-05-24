@@ -6,6 +6,7 @@ import java.util.Set;
 public class RabinKarpUtils {
   public static final int WINDOW_SIZE = 5;
   public static final double SIMILARITY_THRESHOLD = 90.0;
+  public static final long MOD = 1000000007L;
   private static final int PRIME = 101;
 
   // 모든 슬라이딩 윈도우 해시 집합 구하기
@@ -24,23 +25,29 @@ public class RabinKarpUtils {
 
   // Rabin-Karp 해시 함수
   public static int rabinKarpHash(String s) {
-    int hash = 0, pow = 1;
+    long hash = 0, pow = 1;
     for (char c : s.toCharArray()) {
-      hash += c * pow;
-      pow *= PRIME;
+      hash = (hash + (c * pow) % MOD) % MOD;
+      pow = (pow * PRIME) % MOD;
     }
-    return hash;
+    return (int)hash;
   }
 
   // 윈도우 해시 겹침 비율(%) 계산
   public static double slidingWindowSimilarity(String a, String b, int windowSize) {
+    if (a == null || b == null)
+      throw new IllegalArgumentException("입력 문자열은 null일 수 없습니다");
     Set<Integer> hashesA = getAllWindowHashes(a, windowSize);
     Set<Integer> hashesB = getAllWindowHashes(b, windowSize);
-    int common = 0;
-    for (int h : hashesA) {
-      if (hashesB.contains(h)) common++;
-    }
-    if (hashesA.isEmpty()) return 0.0;
-    return (double) common / hashesA.size() * 100.0;
+
+    Set<Integer> intersection = new HashSet<>(hashesA);
+    intersection.retainAll(hashesB);
+
+    Set<Integer> union = new HashSet<>(hashesA);
+    union.addAll(hashesB);
+
+    if (union.isEmpty()) return 0.0;
+    return (double) intersection.size() / union.size() * 100.0;
   }
+
 }
