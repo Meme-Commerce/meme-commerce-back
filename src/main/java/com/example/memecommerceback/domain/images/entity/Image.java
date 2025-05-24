@@ -56,7 +56,7 @@ public class Image extends CommonEntity {
   @Column(nullable = false)
   private Integer height;
 
-  @Column(nullable = false, unique = true)
+  @Column(nullable = false)
   private UUID userId;
 
   private String ownerNickname;

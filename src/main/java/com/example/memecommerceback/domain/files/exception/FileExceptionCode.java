@@ -20,6 +20,9 @@ public enum FileExceptionCode {
   FILE_IS_REQUIRED(
       HttpStatus.BAD_REQUEST, "FILE-004",
       "등록을 위해 파일이 필요합니다."),
+  NOT_REGISTER_OVER_MAX_PRODUCT_IMAGES(
+      HttpStatus.BAD_REQUEST, "FILE-005",
+      "상품 파일 등록은 최대 5개까지입니다."),
   ;
 
   private final HttpStatus httpStatus;

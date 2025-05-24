@@ -9,6 +9,7 @@ import com.example.memecommerceback.domain.images.repository.ImageRepository;
 import com.example.memecommerceback.domain.users.entity.User;
 import com.example.memecommerceback.global.awsS3.dto.S3ResponseDto;
 import com.example.memecommerceback.global.awsS3.service.S3Service;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -72,6 +73,8 @@ public class ImageServiceImplV1 implements ImageServiceV1 {
     return newUrl;
   }
 
+
+  @Transactional
   public Image createAndSaveImage(
       S3ResponseDto s3ResponseDto, User user){
     Image image = ImageConverter.toEntity(s3ResponseDto, user);
@@ -79,6 +82,18 @@ public class ImageServiceImplV1 implements ImageServiceV1 {
     return image;
   }
 
+  public List<Image> uploadAndRegisterProductImage(
+      List<MultipartFile> productImageList, User user) {
+    if(productImageList.size() > 5){
+      throw new FileCustomException(
+          FileExceptionCode.NOT_REGISTER_OVER_MAX_PRODUCT_IMAGES);
+    }
+    List<S3ResponseDto> s3ResponseDtoList
+        = s3Service.uploadProductImageList(productImageList, user.getNickname());
+    return ImageConverter.toEntityList(s3ResponseDtoList, user);
+  }
+
+  @Transactional(readOnly = true)
   public Image findByUserId(UUID userId){
     return imageRepository.findByUserId(userId).orElseThrow(
         ()-> new FileCustomException(FileExceptionCode.NOT_FOUND));
