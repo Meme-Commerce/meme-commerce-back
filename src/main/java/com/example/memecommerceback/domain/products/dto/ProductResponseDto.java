@@ -51,12 +51,6 @@ public class ProductResponseDto {
 
     @Schema(description = "Creation timestamp", example = "2025-05-15T10:15:30")
     private LocalDateTime createdAt;
-
-    @Schema(description = "Product sell start date", example = "2025-05-20T10:00:00")
-    private LocalDateTime sellStartDate;
-
-    @Schema(description = "Product sell end date", example = "2025-05-30T23:59:59")
-    private LocalDateTime sellEndDate;
   }
 
   @Getter
@@ -98,12 +92,6 @@ public class ProductResponseDto {
 
     @Schema(description = "Creation timestamp", example = "2025-05-15T10:15:30")
     private LocalDateTime createdAt;
-
-    @Schema(description = "Product sell start date", example = "2025-05-20T10:00:00")
-    private LocalDateTime sellStartDate;
-
-    @Schema(description = "Product sell end date", example = "2025-05-30T23:59:59")
-    private LocalDateTime sellEndDate;
   }
 
   @Getter
@@ -127,12 +115,6 @@ public class ProductResponseDto {
 
     @Schema(description = "Last modified timestamp", example = "2025-05-16T11:20:45")
     private LocalDateTime modifiedAt;
-
-    @Schema(description = "Product sell start date", example = "2025-05-20T10:00:00")
-    private LocalDateTime sellStartDate;
-
-    @Schema(description = "Product sell end date", example = "2025-05-30T23:59:59")
-    private LocalDateTime sellEndDate;
   }
 
   @Getter
@@ -177,11 +159,41 @@ public class ProductResponseDto {
 
     @Schema(description = "Creation timestamp", example = "2025-05-15T10:15:30")
     private LocalDateTime createdAt;
+  }
+}
+    private UUID productId;
 
-    @Schema(description = "Product sell start date", example = "2025-05-20T10:00:00")
-    private LocalDateTime sellStartDate;
+    @Schema(description = "Name of the product", example = "Vintage Lamp")
+    private String name;
 
-    @Schema(description = "Product sell end date", example = "2025-05-30T23:59:59")
-    private LocalDateTime sellEndDate;
+    @Schema(description = "Description of the product", example = "A beautiful antique lamp")
+    private String description;
+
+    @Schema(description = "Price in Wons", example = "15000")
+    private Long price;
+
+    @Schema(description = "Name of the product owner", example = "John Doe")
+    private String ownerName;
+
+    @Schema(description = "List of product images", example = "[]")
+    private List<ImageResponseDto> imageResponseDtoList;
+
+    // private List<CategoryResponseDto.ReadOneDto> categoryList;
+    // private List<HashtagResponseDto.ReadOneDto> hashtagList;
+
+    @Schema(description = "Available stock count", example = "100")
+    private Long stock;
+
+    @Schema(description = "Number of likes", example = "42")
+    private Integer likeCount;
+
+    @Schema(description = "Number of views", example = "100")
+    private Integer viewCount;
+
+    @Schema(description = "Current status of the product", example = "PENDING")
+    private ProductStatus status;
+
+    @Schema(description = "Creation timestamp", example = "2025-05-15T10:15:30")
+    private LocalDateTime createdAt;
   }
 }
