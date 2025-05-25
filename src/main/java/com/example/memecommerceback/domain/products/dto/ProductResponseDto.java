@@ -113,7 +113,7 @@ public class ProductResponseDto {
     @Schema(description = "상품명", example = "빈티지 램프")
     private String name;
 
-    @Schema(description = "변경된 상품 상태", example = "AVAILABLE")
+    @Schema(description = "변경된 상품 상태", example = "PENDING")
     private ProductStatus status;
 
     @Schema(description = "생성 시각", example = "2025-05-15T10:15:30")
