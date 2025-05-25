@@ -80,7 +80,7 @@ public class ProductController {
     return ResponseEntity.status(HttpStatus.OK).body(
         new CommonResponseDto<>(
             responseDto,
-            "성공적으로 판매자가 상품 상태를 변경하였습니다.",
+            "성공적으로 판매자가 상품 정보를 수정하였습니다.",
             HttpStatus.OK.value()));
   }
 
