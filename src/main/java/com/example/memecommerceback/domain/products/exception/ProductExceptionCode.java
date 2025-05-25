@@ -27,16 +27,16 @@ public enum ProductExceptionCode {
       HttpStatus.BAD_REQUEST, "PRODUCT-006",
       "변경할 수 없는 상태로 요청하였습니다."),
   NOT_OWNER(
-      HttpStatus.BAD_REQUEST, "PRODUCT-007",
+      HttpStatus.FORBIDDEN, "PRODUCT-007",
       "상품의 주인이 아닙니다."),
   NEED_TO_SELL_DATE(
       HttpStatus.BAD_REQUEST, "PRODUCT-008",
       "상품을 판매 또는 재판매 할 경우, 다시 판매 시작일, 마감일을 적으셔야합니다."),
   UNAUTHORIZED_READ(
-      HttpStatus.BAD_REQUEST, "PRODUCT-009",
+      HttpStatus.FORBIDDEN, "PRODUCT-009",
       "해당 유저는 읽을 권한이 없습니다."),
   UNAUTHORIZED_DELETE(
-      HttpStatus.BAD_REQUEST, "PRODUCT-010",
+      HttpStatus.FORBIDDEN, "PRODUCT-010",
       "해당 유저는 삭제할 권한이 없습니다."
   ),
   ;

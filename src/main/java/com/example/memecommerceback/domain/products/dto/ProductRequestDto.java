@@ -68,6 +68,7 @@ public class ProductRequestDto {
   @AllArgsConstructor
   @NoArgsConstructor
   public static class DeleteDto {
+    @Size(min = 1, message = "삭제할 상품을 최소 1개 이상 선택해주세요.")
     @NotNull(message = "삭제하려는 아이디 리스트는 필수 입력란입니다.")
     private List<UUID> productIdList;
   }
