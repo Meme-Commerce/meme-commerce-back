@@ -3,6 +3,7 @@ package com.example.memecommerceback.domain.products.repository;
 
 import com.example.memecommerceback.domain.products.dto.ProductTitleDescriptionProjection;
 import com.example.memecommerceback.domain.products.entity.Product;
+import com.example.memecommerceback.domain.products.entity.ProductStatus;
 import com.example.memecommerceback.domain.users.entity.User;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -11,6 +12,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ProductRepository extends JpaRepository<Product, UUID> ,ProductRepositoryQuery {
   List<ProductTitleDescriptionProjection> findAllByOwner(User owner);
-  List<Product> findAllBySellStartDateAfter(LocalDateTime now);
+  List<Product> findAllByStatusAndSellStartDateBefore(
+      ProductStatus status, LocalDateTime now);
   List<Product> findAllBySellEndDateBefore(LocalDateTime now);
 }

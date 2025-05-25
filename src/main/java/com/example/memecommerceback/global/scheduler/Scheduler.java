@@ -35,17 +35,19 @@ public class Scheduler {
         dailyScheduler.execute(DailyJobType.SETTLEMENT);
     }
 
-    @Scheduled(cron = "0 0 15 * * SUN")
+    // 매주 00:05 실행
+    @Scheduled(cron = "0 0 5 * * SUN")
     public void executeWeeklyTask() {
         weeklyScheduler.execute();
     }
 
-    @Scheduled(cron = "0 0 15 1 * *")
+    // 매년 1월 00:10 실행
+    @Scheduled(cron = "0 0 10 1 * *")
     public void executeMonthlyTask() {
         monthlyScheduler.execute();
     }
 
-    // 매년 1월 1일 00:00 실행
+    // 매년 1월 1일 00:15 실행
     @Scheduled(cron = "0 0 15 1 1 *")
     public void executeYearlyTask() {
         yearlyScheduler.execute();

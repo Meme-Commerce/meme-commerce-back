@@ -201,8 +201,8 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
   @Transactional
   public void updateOnSaleStatus(){
     List<Product> updateStatusList
-        = productRepository.findAllBySellStartDateAfter(
-            LocalDateTime.now());
+        = productRepository.findAllByStatusAndSellStartDateBefore(
+            ProductStatus.RESALE_SOON, LocalDateTime.now());
     for(Product product : updateStatusList) {
       product.updateStatus(ProductStatus.HIDDEN);
     }
@@ -212,10 +212,10 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
   @Transactional
   public void updateHiddenStatus(){
     List<Product> updateStatusList
-        = productRepository.findAllBySellEndDateBefore(
-            LocalDateTime.now());
+        = productRepository.findAllBySellEndDateBefore(LocalDateTime.now());
     for(Product product : updateStatusList) {
-      product.updateStatus(ProductStatus.HIDDEN);
+      product.updateStatusAndDate(
+          ProductStatus.HIDDEN, null, null);
     }
   }
 
