@@ -2,7 +2,6 @@ package com.example.memecommerceback.domain.products.controller;
 
 import com.example.memecommerceback.domain.products.dto.ProductRequestDto;
 import com.example.memecommerceback.domain.products.dto.ProductResponseDto;
-import com.example.memecommerceback.domain.products.dto.ProductResponseDto.ReadOneDto;
 import com.example.memecommerceback.domain.products.service.ProductServiceV1;
 import com.example.memecommerceback.global.exception.dto.CommonResponseDto;
 import com.example.memecommerceback.global.security.UserDetailsImpl;
@@ -15,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -142,7 +142,13 @@ public class ProductController {
             page, size, sortList, statusList);
     return ResponseEntity.status(HttpStatus.OK).body(
         new CommonResponseDto<>(
-            responseDtoPage, "성공적으로 판매자가 자신의 상품 페이지를 조회하였습니다.",
+            responseDtoPage, "성공적으로 관리자가 자신의 상품 페이지를 조회하였습니다.",
             HttpStatus.OK.value()));
+  }
+
+  @PreAuthorize("hasAnyAuthority('ROLE_ADMIN' || 'ROLE_SELLER')")
+  @DeleteMapping("/products")
+  public ResponseEntity<CommonResponseDto<Void>> deleteMany(){
+    return null;
   }
 }

@@ -2,7 +2,6 @@ package com.example.memecommerceback.domain.products.repository;
 
 import com.example.memecommerceback.domain.products.entity.Product;
 import com.example.memecommerceback.domain.products.entity.ProductStatus;
-
 import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.Page;

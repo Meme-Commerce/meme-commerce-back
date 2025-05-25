@@ -26,8 +26,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Order;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -135,18 +133,17 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
     List<Image> newImageList = null;
 
     try {
-      // 1. 새 이미지 S3 업로드
-      uploadedImages = imageService.uploadProductImageList(multipartFileList, seller.getNickname());
-
-      // 2. DB 작업들
-      newImageList = imageService.toEntityListAndSaveAll(uploadedImages, seller);
-
-      // 3. 업로드 성공 시에만 기존 이미지 삭제
-      imageService.deleteProductImageList(product.getId(), seller.getId());
-
-      // 4. 새 이미지와 상품 연결
-      product.addImageList(newImageList);
-
+      if (multipartFileList != null && !multipartFileList.isEmpty()) {
+        // 1. 새 이미지 S3 업로드
+        uploadedImages = imageService.uploadProductImageList(multipartFileList,
+            seller.getNickname());
+        // 2. DB 작업들
+        newImageList = imageService.toEntityListAndSaveAll(uploadedImages, seller);
+        // 3. 업로드 성공 시에만 기존 이미지 삭제
+        imageService.deleteProductImageList(product.getId(), seller.getId());
+        // 4. 새 이미지와 상품 연결
+        product.addImageList(newImageList);
+      }
     } catch (Exception e) {
       // 보상 처리
       if (uploadedImages != null && !uploadedImages.isEmpty()) {

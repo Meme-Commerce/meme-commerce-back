@@ -2,7 +2,6 @@ package com.example.memecommerceback.domain.products.service;
 
 import com.example.memecommerceback.domain.products.dto.ProductRequestDto;
 import com.example.memecommerceback.domain.products.dto.ProductResponseDto;
-import com.example.memecommerceback.domain.products.dto.ProductResponseDto.ReadOneDto;
 import com.example.memecommerceback.domain.products.entity.Product;
 import com.example.memecommerceback.domain.users.entity.User;
 import java.util.List;
