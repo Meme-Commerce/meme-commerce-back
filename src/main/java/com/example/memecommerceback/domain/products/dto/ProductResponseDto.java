@@ -19,43 +19,40 @@ public class ProductResponseDto {
   @Schema(name = "ProductResponseDto.RegisterOneDto",
       description = "상품 하나 등록 응답 DTO")
   public static class RegisterOneDto {
-    @Schema(description = "Identifier of the created product", example = "d290f1ee-6c54-4b01-90e6-d701748f0851")
+    @Schema(description = "생성된 상품의 식별자", example = "d290f1ee-6c54-4b01-90e6-d701748f0851")
     private UUID productId;
 
-    @Schema(description = "Name of the product", example = "Vintage Lamp")
+    @Schema(description = "상품명", example = "빈티지 램프")
     private String name;
 
-    @Schema(description = "Description of the product", example = "A beautiful antique lamp")
+    @Schema(description = "상품 설명", example = "아름다운 앤티크 램프")
     private String description;
 
-    @Schema(description = "Price in Wons", example = "15000")
+    @Schema(description = "상품 가격(원)", example = "15000")
     private Long price;
 
-    @Schema(description = "Name of the product owner", example = "John Doe")
+    @Schema(description = "상품 소유자명", example = "홍길동")
     private String ownerName;
 
-    @Schema(description = "List of product images", example = "[]")
+    @Schema(description = "상품 이미지 리스트", example = "[]")
     private List<ImageResponseDto> imageResponseDtoList;
 
-    // private List<CategoryResponseDto.ReadOneDto> categoryList;
-    // private List<HashtagResponseDto.ReadOneDto> hashtagList;
-
-    @Schema(description = "Available stock count", example = "100")
+    @Schema(description = "상품 재고 수량", example = "100")
     private Long stock;
 
-    @Schema(description = "Registered company name", example = "Acme Corp")
+    @Schema(description = "등록된 회사명", example = "홍길동상사")
     private String registeredCompanyName;
 
-    @Schema(description = "Current status of the product", example = "PENDING")
+    @Schema(description = "상품 상태", example = "PENDING")
     private ProductStatus status;
 
-    @Schema(description = "Creation timestamp", example = "2025-05-15T10:15:30")
+    @Schema(description = "생성 시각", example = "2025-05-15T10:15:30")
     private LocalDateTime createdAt;
 
-    @Schema(description = "Product sell start date", example = "2025-05-20T10:00:00")
+    @Schema(description = "상품 판매 시작일 (ISO 8601 형식의 날짜/시간)", example = "2025-05-20T10:00:00")
     private LocalDateTime sellStartDate;
 
-    @Schema(description = "Product sell end date", example = "2025-05-30T23:59:59")
+    @Schema(description = "상품 판매 종료일 (ISO 8601 형식의 날짜/시간)", example = "2025-05-30T23:59:59")
     private LocalDateTime sellEndDate;
   }
 
@@ -66,43 +63,40 @@ public class ProductResponseDto {
   @Schema(name = "ProductResponseDto.UpdateOneDto",
       description = "상품 하나 수정 응답 DTO")
   public static class UpdateOneDto {
-    @Schema(description = "Identifier of the product", example = "d290f1ee-6c54-4b01-90e6-d701748f0851")
+    @Schema(description = "상품 식별자", example = "d290f1ee-6c54-4b01-90e6-d701748f0851")
     private UUID productId;
 
-    @Schema(description = "Name of the product", example = "Vintage Lamp")
+    @Schema(description = "상품명", example = "빈티지 램프")
     private String name;
 
-    @Schema(description = "Description of the product", example = "A beautiful antique lamp")
+    @Schema(description = "상품 설명", example = "아름다운 앤티크 램프")
     private String description;
 
-    @Schema(description = "Price in Wons", example = "15000")
+    @Schema(description = "상품 가격(원)", example = "15000")
     private Long price;
 
-    @Schema(description = "Name of the product owner", example = "John Doe")
+    @Schema(description = "상품 소유자명", example = "홍길동")
     private String ownerName;
 
-    @Schema(description = "List of product images", example = "[]")
+    @Schema(description = "상품 이미지 리스트", example = "[]")
     private List<ImageResponseDto> imageResponseDtoList;
 
-    // private List<CategoryResponseDto.ReadOneDto> categoryList;
-    // private List<HashtagResponseDto.ReadOneDto> hashtagList;
-
-    @Schema(description = "Available stock count", example = "100")
+    @Schema(description = "상품 재고 수량", example = "100")
     private Long stock;
 
-    @Schema(description = "Registered company name", example = "Acme Corp")
+    @Schema(description = "등록된 회사명", example = "홍길동상사")
     private String registeredCompanyName;
 
-    @Schema(description = "Current status of the product", example = "PENDING")
+    @Schema(description = "상품 상태", example = "PENDING")
     private ProductStatus status;
 
-    @Schema(description = "Creation timestamp", example = "2025-05-15T10:15:30")
+    @Schema(description = "생성 시각", example = "2025-05-15T10:15:30")
     private LocalDateTime createdAt;
 
-    @Schema(description = "Product sell start date", example = "2025-05-20T10:00:00")
+    @Schema(description = "상품 판매 시작일 (ISO 8601 형식의 날짜/시간)", example = "2025-05-20T10:00:00")
     private LocalDateTime sellStartDate;
 
-    @Schema(description = "Product sell end date", example = "2025-05-30T23:59:59")
+    @Schema(description = "상품 판매 종료일 (ISO 8601 형식의 날짜/시간)", example = "2025-05-30T23:59:59")
     private LocalDateTime sellEndDate;
   }
 
@@ -113,25 +107,25 @@ public class ProductResponseDto {
   @Schema(name = "ProductResponseDto.UpdateOneStatusDto",
       description = "상품 하나 상태 수정 응답 DTO")
   public static class UpdateOneStatusDto {
-    @Schema(description = "Identifier of the product", example = "d290f1ee-6c54-4b01-90e6-d701748f0851")
+    @Schema(description = "상품 식별자", example = "d290f1ee-6c54-4b01-90e6-d701748f0851")
     private UUID productId;
 
-    @Schema(description = "Name of the product", example = "Vintage Lamp")
+    @Schema(description = "상품명", example = "빈티지 램프")
     private String name;
 
-    @Schema(description = "Updated status of the product", example = "AVAILABLE")
+    @Schema(description = "변경된 상품 상태", example = "AVAILABLE")
     private ProductStatus status;
 
-    @Schema(description = "Creation timestamp", example = "2025-05-15T10:15:30")
+    @Schema(description = "생성 시각", example = "2025-05-15T10:15:30")
     private LocalDateTime createdAt;
 
-    @Schema(description = "Last modified timestamp", example = "2025-05-16T11:20:45")
+    @Schema(description = "최종 수정 시각", example = "2025-05-16T11:20:45")
     private LocalDateTime modifiedAt;
 
-    @Schema(description = "Product sell start date", example = "2025-05-20T10:00:00")
+    @Schema(description = "상품 판매 시작일 (ISO 8601 형식의 날짜/시간)", example = "2025-05-20T10:00:00")
     private LocalDateTime sellStartDate;
 
-    @Schema(description = "Product sell end date", example = "2025-05-30T23:59:59")
+    @Schema(description = "상품 판매 종료일 (ISO 8601 형식의 날짜/시간)", example = "2025-05-30T23:59:59")
     private LocalDateTime sellEndDate;
   }
 
@@ -142,46 +136,43 @@ public class ProductResponseDto {
   @Schema(name = "ProductResponseDto.ReadOneDto",
       description = "상품 하나 조회 응답 DTO")
   public static class ReadOneDto {
-    @Schema(description = "Identifier of the product", example = "d290f1ee-6c54-4b01-90e6-d701748f0851")
+    @Schema(description = "상품 식별자", example = "d290f1ee-6c54-4b01-90e6-d701748f0851")
     private UUID productId;
 
-    @Schema(description = "Name of the product", example = "Vintage Lamp")
+    @Schema(description = "상품명", example = "빈티지 램프")
     private String name;
 
-    @Schema(description = "Description of the product", example = "A beautiful antique lamp")
+    @Schema(description = "상품 설명", example = "아름다운 앤티크 램프")
     private String description;
 
-    @Schema(description = "Price in Wons", example = "15000")
+    @Schema(description = "상품 가격(원)", example = "15000")
     private Long price;
 
-    @Schema(description = "Name of the product owner", example = "John Doe")
+    @Schema(description = "상품 소유자명", example = "홍길동")
     private String ownerName;
 
-    @Schema(description = "List of product images", example = "[]")
+    @Schema(description = "상품 이미지 리스트", example = "[]")
     private List<ImageResponseDto> imageResponseDtoList;
 
-    // private List<CategoryResponseDto.ReadOneDto> categoryList;
-    // private List<HashtagResponseDto.ReadOneDto> hashtagList;
-
-    @Schema(description = "Available stock count", example = "100")
+    @Schema(description = "상품 재고 수량", example = "100")
     private Long stock;
 
-    @Schema(description = "Number of likes", example = "42")
+    @Schema(description = "상품 좋아요 수", example = "42")
     private Integer likeCount;
 
-    @Schema(description = "Number of views", example = "100")
+    @Schema(description = "상품 조회수", example = "100")
     private Integer viewCount;
 
-    @Schema(description = "Current status of the product", example = "PENDING")
+    @Schema(description = "상품 상태", example = "PENDING")
     private ProductStatus status;
 
-    @Schema(description = "Creation timestamp", example = "2025-05-15T10:15:30")
+    @Schema(description = "생성 시각", example = "2025-05-15T10:15:30")
     private LocalDateTime createdAt;
 
-    @Schema(description = "Product sell start date", example = "2025-05-20T10:00:00")
+    @Schema(description = "상품 판매 시작일 (ISO 8601 형식의 날짜/시간)", example = "2025-05-20T10:00:00")
     private LocalDateTime sellStartDate;
 
-    @Schema(description = "Product sell end date", example = "2025-05-30T23:59:59")
+    @Schema(description = "상품 판매 종료일 (ISO 8601 형식의 날짜/시간)", example = "2025-05-30T23:59:59")
     private LocalDateTime sellEndDate;
   }
 }
