@@ -22,4 +22,14 @@ public class CategoryRequestDto {
             message = "한글로 1~20자까지 입력 가능합니다.")
             String> nameList;
   }
+
+  @Getter
+  @Builder
+  @AllArgsConstructor
+  @NoArgsConstructor
+  public static class DeleteDto {
+    @NotNull(message = "삭제할 카테고리 아이디 리스트는 필수 입력 값입니다.")
+    @Size(min = 1, message = "최소 1개의 카테고리 아이디를 입력해야 합니다.")
+    private List<Long> categoryIdList;
+  }
 }

@@ -7,11 +7,8 @@ import com.example.memecommerceback.global.exception.dto.CommonResponseDto;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -54,6 +51,17 @@ public class CategoryController {
     return ResponseEntity.status(HttpStatus.OK).body(
         new CommonResponseDto<>(
             responseDto, "카테고리 하나 수정 성공하셨습니다.",
+            HttpStatus.OK.value()));
+  }
+
+  @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+  @PostMapping("/categories/delete")
+  public ResponseEntity<CommonResponseDto<Void>> delete(
+          @RequestBody @Valid CategoryRequestDto.DeleteDto requestDto){
+    categoryService.delete(requestDto);
+    return ResponseEntity.status(HttpStatus.OK).body(
+        new CommonResponseDto<>(
+            null, "카테고리 리스트를 삭제 하였습니다.",
             HttpStatus.OK.value()));
   }
 }

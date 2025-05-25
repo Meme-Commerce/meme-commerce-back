@@ -7,8 +7,14 @@ import com.example.memecommerceback.domain.categories.entity.Category;
 import com.example.memecommerceback.domain.categories.exception.CategoryCustomException;
 import com.example.memecommerceback.domain.categories.exception.CategoryExceptionCode;
 import com.example.memecommerceback.domain.categories.repository.CategoryRepository;
+import com.example.memecommerceback.domain.products.entity.Product;
+import com.example.memecommerceback.domain.products.exception.ProductCustomException;
+import com.example.memecommerceback.domain.products.exception.ProductExceptionCode;
 import com.example.memecommerceback.global.service.ProfanityFilterService;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,6 +46,29 @@ public class CategoryServiceImplV1 implements CategoryServiceV1{
     profanityFilterService.validateNoProfanity(name);
     category.update(name);
     return CategoryConverter.toUpdateOneDto(category);
+  }
+
+  @Override
+  @Transactional
+  public void delete(CategoryRequestDto.DeleteDto requestDto) {
+    List<Long> requestedIdList = requestDto.getCategoryIdList();
+    List<Category> categoryList
+        = categoryRepository.findAllById(requestedIdList);
+
+    Set<Long> foundIdList = categoryList.stream()
+        .map(Category::getId)
+        .collect(Collectors.toSet());
+
+    Set<Long> notFoundIdList = requestedIdList.stream()
+        .filter(id -> !foundIdList.contains(id))
+        .collect(Collectors.toSet());
+
+    if (!notFoundIdList.isEmpty()) {
+      throw new CategoryCustomException(CategoryExceptionCode.NOT_FOUND,
+          "요청하신 카테고리 아이디 [ " + notFoundIdList + " ]에 대한 카테고리 정보가 없습니다.");
+    }
+
+    categoryRepository.deleteAllById(requestedIdList);
   }
 
   @Override

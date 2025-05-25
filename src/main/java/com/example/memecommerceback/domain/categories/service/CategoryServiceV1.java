@@ -12,5 +12,7 @@ public interface CategoryServiceV1 {
   CategoryResponseDto.UpdateOneDto updateOne(
       Long categoryId, String name);
 
+  void delete(CategoryRequestDto.DeleteDto requestDto);
+
   Category findById(Long categoryId);
 }
