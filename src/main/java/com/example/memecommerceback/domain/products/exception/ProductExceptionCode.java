@@ -35,6 +35,10 @@ public enum ProductExceptionCode {
   UNAUTHORIZED_READ(
       HttpStatus.BAD_REQUEST, "PRODUCT-009",
       "해당 유저는 읽을 권한이 없습니다."),
+  UNAUTHORIZED_DELETE(
+      HttpStatus.BAD_REQUEST, "PRODUCT-010",
+      "해당 유저는 삭제할 권한이 없습니다."
+  ),
   ;
 
   private final HttpStatus httpStatus;

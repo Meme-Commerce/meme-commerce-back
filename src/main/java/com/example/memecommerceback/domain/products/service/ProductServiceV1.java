@@ -33,6 +33,8 @@ public interface ProductServiceV1 {
   Page<ProductResponseDto.ReadOneDto> readPageByAdmin(
       int page, int size, List<String> sortList, List<String> statusList);
 
+  void deleteMany(ProductRequestDto.DeleteDto requestDto, User loginUser);
+
   void updateOnSaleStatus();
 
   void updateHiddenStatus();

@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -45,7 +46,7 @@ public class ProductController {
     return ResponseEntity.status(HttpStatus.OK).body(
         new CommonResponseDto<>(
             responseDto,
-            "성공적으로 상품 등록하였습니다. 검수 후, 다시 안내 드리겠습니다.",
+            "상품 등록하였습니다. 검수 후, 다시 안내 드리겠습니다.",
             HttpStatus.OK.value()));
   }
 
@@ -62,7 +63,7 @@ public class ProductController {
     return ResponseEntity.status(HttpStatus.OK).body(
         new CommonResponseDto<>(
             responseDto,
-            "성공적으로 관리자가 상품 상태를 변경하였습니다.",
+            "관리자가 상품 상태를 변경하였습니다.",
             HttpStatus.OK.value()));
   }
 
@@ -80,7 +81,7 @@ public class ProductController {
     return ResponseEntity.status(HttpStatus.OK).body(
         new CommonResponseDto<>(
             responseDto,
-            "성공적으로 판매자가 상품 정보를 수정하였습니다.",
+            "판매자가 상품 정보를 수정하였습니다.",
             HttpStatus.OK.value()));
   }
 
@@ -92,7 +93,7 @@ public class ProductController {
     return ResponseEntity.status(HttpStatus.OK).body(
         new CommonResponseDto<>(
             responseDto,
-            "성공적으로 상품 정보를 조회하였습니다.",
+            "상품 정보를 조회하였습니다.",
             HttpStatus.OK.value()));
   }
 
@@ -107,7 +108,7 @@ public class ProductController {
         = productService.readPageByAll(page, size, sortList, statusList);
     return ResponseEntity.status(HttpStatus.OK).body(
         new CommonResponseDto<>(
-            responseDtoPage, "성공적으로 모든 회원이 상품 페이지를 조회하였습니다.",
+            responseDtoPage, "모든 회원이 상품 페이지를 조회하였습니다.",
             HttpStatus.OK.value()));
   }
 
@@ -125,7 +126,7 @@ public class ProductController {
             page, size, sortList, statusList, userDetails.getUser());
     return ResponseEntity.status(HttpStatus.OK).body(
         new CommonResponseDto<>(
-            responseDtoPage, "성공적으로 판매자가 자신의 상품 페이지를 조회하였습니다.",
+            responseDtoPage, "판매자가 자신의 상품 페이지를 조회하였습니다.",
             HttpStatus.OK.value()));
   }
 
@@ -142,13 +143,19 @@ public class ProductController {
             page, size, sortList, statusList);
     return ResponseEntity.status(HttpStatus.OK).body(
         new CommonResponseDto<>(
-            responseDtoPage, "성공적으로 관리자가 자신의 상품 페이지를 조회하였습니다.",
+            responseDtoPage, "관리자가 자신의 상품 페이지를 조회하였습니다.",
             HttpStatus.OK.value()));
   }
 
-  @PreAuthorize("hasAnyAuthority('ROLE_ADMIN' || 'ROLE_SELLER')")
-  @DeleteMapping("/products")
-  public ResponseEntity<CommonResponseDto<Void>> deleteMany(){
-    return null;
+  @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_SELLER')")
+  @PostMapping("/products/delete")
+  public ResponseEntity<CommonResponseDto<Void>> deleteMany(
+      @RequestBody @Valid ProductRequestDto.DeleteDto requestDto,
+      @AuthenticationPrincipal UserDetailsImpl userDetails){
+    productService.deleteMany(requestDto, userDetails.getUser());
+    return ResponseEntity.status(HttpStatus.OK).body(
+        new CommonResponseDto<>(
+            null, "상품 삭제 성공하였습니다.",
+            HttpStatus.OK.value()));
   }
 }

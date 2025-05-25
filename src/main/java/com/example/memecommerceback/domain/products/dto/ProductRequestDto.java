@@ -6,6 +6,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -59,5 +61,14 @@ public class ProductRequestDto {
     // null 가능 -> 상품 상태 RESALE_ON, ON_SALE에 따라 적어야함.
     private LocalDateTime sellStartDate;
     private LocalDateTime sellEndDate;
+  }
+
+  @Getter
+  @Builder
+  @AllArgsConstructor
+  @NoArgsConstructor
+  public static class DeleteDto {
+    @NotNull(message = "삭제하려는 아이디 리스트는 필수 입력란입니다.")
+    private List<UUID> productIdList;
   }
 }

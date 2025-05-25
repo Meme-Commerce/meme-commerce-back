@@ -7,4 +7,8 @@ public class ProductCustomException extends CustomException {
   public ProductCustomException(ProductExceptionCode e) {
     super(e.getHttpStatus(), e.getErrorCode(), e.getMessage());
   }
+
+  public ProductCustomException(ProductExceptionCode e, String message) {
+    super(e.getHttpStatus(), e.getErrorCode(), message);
+  }
 }

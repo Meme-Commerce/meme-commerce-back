@@ -13,14 +13,18 @@ import com.example.memecommerceback.domain.products.exception.ProductCustomExcep
 import com.example.memecommerceback.domain.products.exception.ProductExceptionCode;
 import com.example.memecommerceback.domain.products.repository.ProductRepository;
 import com.example.memecommerceback.domain.users.entity.User;
+import com.example.memecommerceback.domain.users.entity.UserRole;
 import com.example.memecommerceback.global.awsS3.dto.S3ResponseDto;
 import com.example.memecommerceback.global.service.ProfanityFilterService;
 import com.example.memecommerceback.global.utils.DateUtils;
 import com.example.memecommerceback.global.utils.PageUtils;
 import com.example.memecommerceback.global.utils.RabinKarpUtils;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -250,6 +254,43 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
             pageable, sortList, productStatusList);
     return ProductConverter.toReadPageDto(productPage);
   }
+
+  @Override
+  @Transactional
+  public void deleteMany(ProductRequestDto.DeleteDto requestDto, User loginUser){
+    List<UUID> requestedIdList = requestDto.getProductIdList();
+    List<Product> productList = productRepository.findAllById(requestedIdList);
+
+    if (!loginUser.getRole().equals(UserRole.ADMIN)) {
+      boolean allOwnedBySeller = productList.stream()
+          .allMatch(product -> product.getOwner().getId().equals(loginUser.getId()));
+
+      if (!(loginUser.getRole().equals(UserRole.SELLER) && allOwnedBySeller)) {
+        throw new ProductCustomException(ProductExceptionCode.UNAUTHORIZED_DELETE);
+      }
+    }
+
+    // DB에 존재하는 Product의 ID Set
+    Set<UUID> foundIds = productList.stream()
+        .map(Product::getId)
+        .collect(Collectors.toSet());
+
+    // 요청한 ID 중 DB에 없는 ID만 추출
+    Set<UUID> notFoundIds = requestedIdList.stream()
+        .filter(id -> !foundIds.contains(id))
+        .collect(Collectors.toSet());
+
+    if (!notFoundIds.isEmpty()) {
+      throw new ProductCustomException(ProductExceptionCode.NOT_FOUND,
+          "요청하신 아이디 [ " + notFoundIds + " ]에 대한 상품 정보가 없습니다.");
+    }
+    for(Product product : productList){
+      imageService.deleteProductImageList(product.getId(), loginUser.getId());
+    }
+    // 이후 삭제 처리 등 원하는 비즈니스 로직
+    productRepository.deleteAll(productList);
+  }
+
 
   // TODO : ProductStatus는 Indexing 고려
   @Override
