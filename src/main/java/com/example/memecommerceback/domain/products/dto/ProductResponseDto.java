@@ -60,4 +60,29 @@ public class ProductResponseDto {
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
   }
+
+  @Getter
+  @Builder
+  @AllArgsConstructor
+  @NoArgsConstructor
+  public static class ReadOneDto {
+    private UUID productId;
+    private String name;
+    private String description;
+    private Long price;
+    private String ownerName;
+    private List<ImageResponseDto> imageResponseDtoList;
+    // private List<CategoryResponseDto.ReadOneDto> categoryList;
+    // private List<HashtagResponseDto.ReadOneDto> hashtagList;
+    private Long stock;
+    // private String registeredCompanyName;
+    private Integer likeCount;
+    private Integer viewCount;
+    private ProductStatus status;
+    private LocalDateTime createdAt;
+
+    public void registerImageResponseDtoList(List<ImageResponseDto> imageResponseDtoList){
+      this.imageResponseDtoList = imageResponseDtoList;
+    }
+  }
 }

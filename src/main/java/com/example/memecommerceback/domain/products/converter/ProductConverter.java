@@ -62,4 +62,20 @@ public class ProductConverter {
         .status(product.getStatus())
         .build();
   }
+
+  public static ProductResponseDto.ReadOneDto toReadOneDto(
+      Product product){
+    return ProductResponseDto.ReadOneDto.builder()
+        .productId(product.getId())
+        .createdAt(product.getCreatedAt())
+        .name(product.getName())
+        .description(product.getDescription())
+        .stock(product.getStock())
+        .price(product.getPrice())
+        .ownerName(product.getOwner().getName())
+        .imageResponseDtoList(
+            ImageConverter.toResponseDtoList(product.getImageList()))
+        .status(product.getStatus())
+        .build();
+  }
 }

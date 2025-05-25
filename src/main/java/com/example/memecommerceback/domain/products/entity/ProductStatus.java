@@ -2,7 +2,6 @@ package com.example.memecommerceback.domain.products.entity;
 
 import com.example.memecommerceback.domain.products.exception.ProductCustomException;
 import com.example.memecommerceback.domain.products.exception.ProductExceptionCode;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import lombok.Getter;

@@ -20,5 +20,7 @@ public interface ProductServiceV1 {
       UUID productId, ProductRequestDto.UpdateOneDto requestDto,
       List<MultipartFile> multipartFileList, User seller);
 
+  ProductResponseDto.ReadOneDto readOne(UUID productId);
+
   Product findById(UUID productId);
 }

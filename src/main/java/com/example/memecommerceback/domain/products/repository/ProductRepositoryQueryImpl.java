@@ -1,12 +1,12 @@
 package com.example.memecommerceback.domain.products.repository;
 
-import com.example.memecommerceback.domain.products.dto.ProductTitleDescriptionProjection;
+import com.example.memecommerceback.domain.images.entity.QImage;
+import com.example.memecommerceback.domain.images.repository.ImageRepository;
 import com.example.memecommerceback.domain.products.entity.Product;
 import com.example.memecommerceback.domain.products.entity.QProduct;
-import com.example.memecommerceback.domain.users.entity.User;
-import com.querydsl.core.types.Projections;
+import com.example.memecommerceback.domain.users.entity.QUser;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import java.util.List;
+import java.util.UUID;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 import org.springframework.stereotype.Repository;
 
@@ -18,8 +18,22 @@ public class ProductRepositoryQueryImpl
   private final JPAQueryFactory jpaQueryFactory;
   private final QProduct qProduct = QProduct.product;
 
-  public ProductRepositoryQueryImpl(JPAQueryFactory jpaQueryFactory) {
+  public ProductRepositoryQueryImpl(
+      JPAQueryFactory jpaQueryFactory, ImageRepository imageRepository) {
     super(Product.class);
     this.jpaQueryFactory = jpaQueryFactory;
+  }
+
+  @Override
+  public Product findDetailsById(UUID productId) {
+    QUser qUser = QUser.user;
+    QImage qImage = QImage.image;
+
+    return jpaQueryFactory.selectFrom(qProduct)
+        .where(qProduct.id.eq(productId))
+        .leftJoin(qProduct.owner, qUser).fetchJoin()
+        .leftJoin(qProduct.imageList, qImage).fetchJoin()
+        .distinct()
+        .fetchOne();
   }
 }

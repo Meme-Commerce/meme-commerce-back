@@ -173,6 +173,16 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
   }
 
   @Override
+  @Transactional(readOnly = true)
+  public ProductResponseDto.ReadOneDto readOne(UUID productId) {
+    Product product = productRepository.findDetailsById(productId);
+    if(product == null){
+      throw new ProductCustomException(ProductExceptionCode.NOT_FOUND);
+    }
+    return ProductConverter.toReadOneDto(product);
+  }
+
+  @Override
   @Transactional
   public Product findById(UUID productId) {
     return productRepository.findById(productId).orElseThrow(
