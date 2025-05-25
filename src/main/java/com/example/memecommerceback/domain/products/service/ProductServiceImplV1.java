@@ -5,6 +5,7 @@ import com.example.memecommerceback.domain.images.service.ImageServiceV1;
 import com.example.memecommerceback.domain.products.converter.ProductConverter;
 import com.example.memecommerceback.domain.products.dto.ProductRequestDto;
 import com.example.memecommerceback.domain.products.dto.ProductResponseDto;
+import com.example.memecommerceback.domain.products.dto.ProductResponseDto.ReadOneDto;
 import com.example.memecommerceback.domain.products.dto.ProductTitleDescriptionProjection;
 import com.example.memecommerceback.domain.products.entity.Product;
 import com.example.memecommerceback.domain.products.entity.ProductStatus;
@@ -16,10 +17,12 @@ import com.example.memecommerceback.global.awsS3.dto.S3ResponseDto;
 import com.example.memecommerceback.global.service.ProfanityFilterService;
 import com.example.memecommerceback.global.utils.DateUtils;
 import com.example.memecommerceback.global.utils.RabinKarpUtils;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -40,6 +43,8 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
       List<MultipartFile> productImageList, User loginUser) {
 
     // 1. 요청한 판매 시작일/마감일 검증
+    // 해당 판매 시작일/마감일은 특정 시간만 허용한다.
+    // 10:00, 11:00, 12:00, 19:00, 20:00, 21:00
     DateUtils.validateDateTime(requestDto.getSellStartDate(), requestDto.getSellEndDate());
 
     // 2. 제목/설명에 비속어가 들어갔는지?
@@ -180,6 +185,38 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
       throw new ProductCustomException(ProductExceptionCode.NOT_FOUND);
     }
     return ProductConverter.toReadOneDto(product);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public Page<ReadOneDto> readPage(
+      int page, int size, List<String> sortList, List<String> statusList) {
+
+    return null;
+    // return ProductConverter.toReadPageDto();
+  }
+
+  // TODO : ProductStatus는 Indexing 고려
+  @Override
+  @Transactional
+  public void updateOnSaleStatus(){
+    List<Product> updateStatusList
+        = productRepository.findAllBySellStartDateAfter(
+            LocalDateTime.now());
+    for(Product product : updateStatusList) {
+      product.updateStatus(ProductStatus.HIDDEN);
+    }
+  }
+
+  @Override
+  @Transactional
+  public void updateHiddenStatus(){
+    List<Product> updateStatusList
+        = productRepository.findAllBySellEndDateBefore(
+            LocalDateTime.now());
+    for(Product product : updateStatusList) {
+      product.updateStatus(ProductStatus.HIDDEN);
+    }
   }
 
   @Override

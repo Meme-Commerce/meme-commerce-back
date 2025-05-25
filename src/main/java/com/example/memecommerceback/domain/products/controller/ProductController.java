@@ -2,6 +2,7 @@ package com.example.memecommerceback.domain.products.controller;
 
 import com.example.memecommerceback.domain.products.dto.ProductRequestDto;
 import com.example.memecommerceback.domain.products.dto.ProductResponseDto;
+import com.example.memecommerceback.domain.products.dto.ProductResponseDto.ReadOneDto;
 import com.example.memecommerceback.domain.products.service.ProductServiceV1;
 import com.example.memecommerceback.global.exception.dto.CommonResponseDto;
 import com.example.memecommerceback.global.security.UserDetailsImpl;
@@ -9,6 +10,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -91,6 +93,20 @@ public class ProductController {
         new CommonResponseDto<>(
             responseDto,
             "성공적으로 상품 정보를 조회하였습니다.",
+            HttpStatus.OK.value()));
+  }
+
+  @GetMapping("/products")
+  public ResponseEntity<CommonResponseDto<Page<ProductResponseDto.ReadOneDto>>> readPage(
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "20") int size,
+      @RequestParam(defaultValue = "created_at,asc") List<String> sortList,
+      @RequestParam(defaultValue = "ON_SALE") List<String> statusList){
+    Page<ProductResponseDto.ReadOneDto> responseDtoPage
+        = productService.readPage(page, size, sortList, statusList);
+    return ResponseEntity.status(HttpStatus.OK).body(
+        new CommonResponseDto<>(
+            responseDtoPage, "성공적으로 상품 페이지를 조회하였습니다.",
             HttpStatus.OK.value()));
   }
 }
