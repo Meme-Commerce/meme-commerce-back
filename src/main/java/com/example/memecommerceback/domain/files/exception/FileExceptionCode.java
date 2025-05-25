@@ -9,7 +9,7 @@ import org.springframework.http.HttpStatus;
 public enum FileExceptionCode {
 
   NOT_FOUND(
-      HttpStatus.BAD_REQUEST, "FILE-001",
+      HttpStatus.NOT_FOUND, "FILE-001",
       "찾을 수 없는 파일입니다."),
   NOT_SUPPORTED_EXTENSION(
       HttpStatus.BAD_REQUEST, "FILE-002",
@@ -20,6 +20,12 @@ public enum FileExceptionCode {
   FILE_IS_REQUIRED(
       HttpStatus.BAD_REQUEST, "FILE-004",
       "등록을 위해 파일이 필요합니다."),
+  NOT_REGISTER_OVER_MAX_PRODUCT_IMAGES(
+      HttpStatus.BAD_REQUEST, "FILE-005",
+      "상품 파일 등록은 최대 5개까지입니다."),
+  FAILED_DELETE_IMAGE_S3(
+      HttpStatus.BAD_REQUEST, "FILE-006",
+      "S3 버킷에서 이미지 파일을 삭제하는데, 실패하였습니다"),
   ;
 
   private final HttpStatus httpStatus;

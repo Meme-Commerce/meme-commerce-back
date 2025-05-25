@@ -1,6 +1,7 @@
 package com.example.memecommerceback.global.exception;
 
 import com.example.memecommerceback.domain.files.exception.FileCustomException;
+import com.example.memecommerceback.domain.products.exception.ProductCustomException;
 import com.example.memecommerceback.domain.users.exception.UserCustomException;
 import com.example.memecommerceback.global.exception.ProfanityFilterCustomException;
 import com.example.memecommerceback.global.exception.dto.CommonResponseDto;
@@ -149,7 +150,7 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler(
       {UserCustomException.class, FileCustomException.class,
-          ProfanityFilterCustomException.class})
+          ProfanityFilterCustomException.class, ProductCustomException.class})
   public ResponseEntity<CommonResponseDto<ErrorResponseDto>> handleCustomException(
       CustomException ex) {
     String category;
@@ -159,6 +160,8 @@ public class GlobalExceptionHandler {
       category = "파일 오류";
     } else if (ex instanceof ProfanityFilterCustomException) {
       category = "비속어 오류";
+    } else if (ex instanceof  ProductCustomException) {
+      category = "상품 오류";
     } else {
       category = "기타 오류";
     }
