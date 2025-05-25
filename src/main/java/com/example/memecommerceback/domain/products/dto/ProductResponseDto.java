@@ -1,9 +1,8 @@
 package com.example.memecommerceback.domain.products.dto;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-
 import com.example.memecommerceback.domain.images.dto.ImageResponseDto;
 import com.example.memecommerceback.domain.products.entity.ProductStatus;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -17,7 +16,8 @@ public class ProductResponseDto {
   @Builder
   @AllArgsConstructor
   @NoArgsConstructor
-  @Schema(description = "Response payload after registering a single product")
+  @Schema(name = "ProductResponseDto.RegisterOneDto",
+      description = "상품 하나 등록 응답 DTO")
   public static class RegisterOneDto {
     @Schema(description = "Identifier of the created product", example = "d290f1ee-6c54-4b01-90e6-d701748f0851")
     private UUID productId;
@@ -28,7 +28,7 @@ public class ProductResponseDto {
     @Schema(description = "Description of the product", example = "A beautiful antique lamp")
     private String description;
 
-    @Schema(description = "Price in cents", example = "15000")
+    @Schema(description = "Price in Wons", example = "15000")
     private Long price;
 
     @Schema(description = "Name of the product owner", example = "John Doe")
@@ -46,7 +46,7 @@ public class ProductResponseDto {
     @Schema(description = "Registered company name", example = "Acme Corp")
     private String registeredCompanyName;
 
-    @Schema(description = "Current status of the product", example = "AVAILABLE")
+    @Schema(description = "Current status of the product", example = "PENDING")
     private ProductStatus status;
 
     @Schema(description = "Creation timestamp", example = "2025-05-15T10:15:30")
@@ -57,7 +57,8 @@ public class ProductResponseDto {
   @Builder
   @AllArgsConstructor
   @NoArgsConstructor
-  @Schema(description = "Response payload after updating a product")
+  @Schema(name = "ProductResponseDto.UpdateOneDto",
+      description = "상품 하나 수정 응답 DTO")
   public static class UpdateOneDto {
     @Schema(description = "Identifier of the product", example = "d290f1ee-6c54-4b01-90e6-d701748f0851")
     private UUID productId;
@@ -68,7 +69,7 @@ public class ProductResponseDto {
     @Schema(description = "Description of the product", example = "A beautiful antique lamp")
     private String description;
 
-    @Schema(description = "Price in cents", example = "15000")
+    @Schema(description = "Price in Wons", example = "15000")
     private Long price;
 
     @Schema(description = "Name of the product owner", example = "John Doe")
@@ -86,7 +87,7 @@ public class ProductResponseDto {
     @Schema(description = "Registered company name", example = "Acme Corp")
     private String registeredCompanyName;
 
-    @Schema(description = "Current status of the product", example = "AVAILABLE")
+    @Schema(description = "Current status of the product", example = "PENDING")
     private ProductStatus status;
 
     @Schema(description = "Creation timestamp", example = "2025-05-15T10:15:30")
@@ -97,7 +98,8 @@ public class ProductResponseDto {
   @Builder
   @AllArgsConstructor
   @NoArgsConstructor
-  @Schema(description = "Response payload after updating product status")
+  @Schema(name = "ProductResponseDto.UpdateOneStatusDto",
+      description = "상품 하나 상태 수정 응답 DTO")
   public static class UpdateOneStatusDto {
     @Schema(description = "Identifier of the product", example = "d290f1ee-6c54-4b01-90e6-d701748f0851")
     private UUID productId;
@@ -119,7 +121,8 @@ public class ProductResponseDto {
   @Builder
   @AllArgsConstructor
   @NoArgsConstructor
-  @Schema(description = "Response payload for reading a single product")
+  @Schema(name = "ProductResponseDto.ReadOneDto",
+      description = "상품 하나 조회 응답 DTO")
   public static class ReadOneDto {
     @Schema(description = "Identifier of the product", example = "d290f1ee-6c54-4b01-90e6-d701748f0851")
     private UUID productId;
@@ -130,7 +133,7 @@ public class ProductResponseDto {
     @Schema(description = "Description of the product", example = "A beautiful antique lamp")
     private String description;
 
-    @Schema(description = "Price in cents", example = "15000")
+    @Schema(description = "Price in Wons", example = "15000")
     private Long price;
 
     @Schema(description = "Name of the product owner", example = "John Doe")
@@ -151,7 +154,7 @@ public class ProductResponseDto {
     @Schema(description = "Number of views", example = "100")
     private Integer viewCount;
 
-    @Schema(description = "Current status of the product", example = "AVAILABLE")
+    @Schema(description = "Current status of the product", example = "PENDING")
     private ProductStatus status;
 
     @Schema(description = "Creation timestamp", example = "2025-05-15T10:15:30")

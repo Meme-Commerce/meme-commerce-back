@@ -1,6 +1,7 @@
 package com.example.memecommerceback.domain.products.dto;
 
 import com.example.memecommerceback.domain.products.entity.ProductStatus;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -18,6 +19,8 @@ public class ProductRequestDto {
   @Builder
   @AllArgsConstructor
   @NoArgsConstructor
+  @Schema(name = "ProductRequestDto.RegisterOneDto",
+          description = "상품 등록 요청 DTO")
   public static class RegisterOneDto {
     @Size(min = 1, max = 30,
         message = "상품명은 최소 1자부터 30자를 입력하셔야합니다.")
@@ -42,6 +45,8 @@ public class ProductRequestDto {
   @Builder
   @AllArgsConstructor
   @NoArgsConstructor
+  @Schema(name = "ProductRequestDto.UpdateOneDto",
+      description = "상품 수정 요청 DTO")
   public static class UpdateOneDto {
     @Size(min = 1, max = 30,
         message = "상품명은 최소 1자부터 30자를 입력하셔야합니다.")
@@ -67,6 +72,8 @@ public class ProductRequestDto {
   @Builder
   @AllArgsConstructor
   @NoArgsConstructor
+  @Schema(name = "ProductRequestDto.DeleteDto",
+      description = "상품 삭제 요청 DTO")
   public static class DeleteDto {
     @Size(min = 1, message = "삭제할 상품을 최소 1개 이상 선택해주세요.")
     @NotNull(message = "삭제하려는 아이디 리스트는 필수 입력란입니다.")

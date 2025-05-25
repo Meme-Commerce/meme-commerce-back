@@ -1,13 +1,16 @@
 package com.example.memecommerceback.domain.products.service;
 
+import com.example.memecommerceback.domain.files.exception.FileCustomException;
 import com.example.memecommerceback.domain.products.dto.ProductRequestDto;
 import com.example.memecommerceback.domain.products.dto.ProductResponseDto;
 import com.example.memecommerceback.domain.products.entity.Product;
 import com.example.memecommerceback.domain.users.entity.User;
+import com.example.memecommerceback.global.exception.PageCustomException;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
+import com.example.memecommerceback.domain.products.exception.ProductCustomException;
 
 /**
  * 상품 관리를 위한 서비스 인터페이스
@@ -33,9 +36,9 @@ public interface ProductServiceV1 {
    * @param productImageList 상품 이미지 파일들 (최대 5개)
    * @param loginUser 로그인한 사용자 (판매자 권한 필요)
    * @return 등록된 상품 정보를 포함한 응답 DTO
-   * @throws com.example.memecommerceback.domain.products.exception.ProductCustomException
+   * @throws ProductCustomException
    *         상품명/설명 유사성 검사 실패, 욕설 포함, 판매 일정 오류 등의 경우
-   * @throws com.example.memecommerceback.domain.files.exception.FileCustomException
+   * @throws FileCustomException
    *         이미지 파일 업로드 실패 또는 최대 개수 초과 시
    */
   ProductResponseDto.RegisterOneDto registerOne(
@@ -53,7 +56,7 @@ public interface ProductServiceV1 {
    * @param requestedStatus 변경하고자 하는 상품 상태 문자열
    * @param Admin 관리자 사용자 (ROLE_ADMIN 권한 필요)
    * @return 상태 변경된 상품 정보를 포함한 응답 DTO
-   * @throws com.example.memecommerceback.domain.products.exception.ProductCustomException
+   * @throws ProductCustomException
    *         상품을 찾을 수 없거나, 알 수 없는 상태값, 동일한 상태 요청 시
    */
   ProductResponseDto.UpdateOneStatusDto updateOneStatusByAdmin(
@@ -71,7 +74,7 @@ public interface ProductServiceV1 {
    * @param multipartFileList 새로운 상품 이미지 파일들 (기존 이미지는 모두 교체됨)
    * @param seller 판매자 사용자 (상품 소유자여야 함)
    * @return 수정된 상품 정보를 포함한 응답 DTO
-   * @throws com.example.memecommerceback.domain.products.exception.ProductCustomException
+   * @throws ProductCustomException
    *         상품 소유자가 아니거나, 허용되지 않는 상태 전환, 유사성 검사 실패 등의 경우
    */
   ProductResponseDto.UpdateOneDto updateOneBySeller(
@@ -87,7 +90,7 @@ public interface ProductServiceV1 {
    *
    * @param productId 조회할 상품의 고유 식별자
    * @return 상품 상세 정보를 포함한 응답 DTO
-   * @throws com.example.memecommerceback.domain.products.exception.ProductCustomException
+   * @throws ProductCustomException
    *         상품을 찾을 수 없는 경우
    */
   ProductResponseDto.ReadOneDto readOne(UUID productId);
@@ -104,9 +107,9 @@ public interface ProductServiceV1 {
    * @param sortList 정렬 기준 목록 (createdAt, likeCount, viewCount, price 사용 가능)
    * @param statusList 필터링할 상품 상태 목록 (숨김, 대기, 거절 상태는 제외됨)
    * @return 페이지네이션된 상품 목록
-   * @throws com.example.memecommerceback.domain.products.exception.ProductCustomException
+   * @throws ProductCustomException
    *         허용되지 않는 상태로 필터링 시도 시
-   * @throws com.example.memecommerceback.global.exception.PageCustomException
+   * @throws PageCustomException
    *         잘못된 정렬 필드 사용 시
    */
   Page<ProductResponseDto.ReadOneDto> readPageByAll(
@@ -125,7 +128,7 @@ public interface ProductServiceV1 {
    * @param statusList 필터링할 상품 상태 목록
    * @param seller 판매자 사용자
    * @return 페이지네이션된 판매자 상품 목록
-   * @throws com.example.memecommerceback.global.exception.PageCustomException
+   * @throws PageCustomException
    *         잘못된 정렬 필드 사용 시
    */
   Page<ProductResponseDto.ReadOneDto> readPageBySeller(
@@ -144,7 +147,7 @@ public interface ProductServiceV1 {
    * @param sortList 정렬 기준 목록 (createdAt, likeCount, viewCount, price 사용 가능)
    * @param statusList 필터링할 상품 상태 목록
    * @return 페이지네이션된 전체 상품 목록
-   * @throws com.example.memecommerceback.global.exception.PageCustomException
+   * @throws PageCustomException
    *         잘못된 정렬 필드 사용 시
    */
   Page<ProductResponseDto.ReadOneDto> readPageByAdmin(
@@ -159,7 +162,7 @@ public interface ProductServiceV1 {
    *
    * @param requestDto 삭제할 상품 ID 목록을 포함한 요청 DTO
    * @param loginUser 로그인한 사용자 (관리자 또는 상품 소유자)
-   * @throws com.example.memecommerceback.domain.products.exception.ProductCustomException
+   * @throws ProductCustomException
    *         상품을 찾을 수 없거나, 삭제 권한이 없는 경우
    */
   void deleteMany(ProductRequestDto.DeleteDto requestDto, User loginUser);
@@ -192,7 +195,7 @@ public interface ProductServiceV1 {
    *
    * @param productId 조회할 상품의 고유 식별자
    * @return 상품 엔티티 객체
-   * @throws com.example.memecommerceback.domain.products.exception.ProductCustomException
+   * @throws ProductCustomException
    *         상품을 찾을 수 없는 경우
    */
   Product findById(UUID productId);
