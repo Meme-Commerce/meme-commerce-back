@@ -80,9 +80,5 @@ public class ProductResponseDto {
     private Integer viewCount;
     private ProductStatus status;
     private LocalDateTime createdAt;
-
-    public void registerImageResponseDtoList(List<ImageResponseDto> imageResponseDtoList){
-      this.imageResponseDtoList = imageResponseDtoList;
-    }
   }
 }

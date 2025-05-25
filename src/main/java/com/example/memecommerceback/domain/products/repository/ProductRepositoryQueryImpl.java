@@ -18,8 +18,7 @@ public class ProductRepositoryQueryImpl
   private final JPAQueryFactory jpaQueryFactory;
   private final QProduct qProduct = QProduct.product;
 
-  public ProductRepositoryQueryImpl(
-      JPAQueryFactory jpaQueryFactory, ImageRepository imageRepository) {
+  public ProductRepositoryQueryImpl(JPAQueryFactory jpaQueryFactory) {
     super(Product.class);
     this.jpaQueryFactory = jpaQueryFactory;
   }
