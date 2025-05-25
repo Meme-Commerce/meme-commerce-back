@@ -288,7 +288,7 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
       imageService.deleteProductImageList(product.getId(), loginUser.getId());
     }
     // 이후 삭제 처리 등 원하는 비즈니스 로직
-    productRepository.deleteAll(productList);
+    productRepository.deleteAllById(requestedIdList);
   }
 
 
