@@ -51,6 +51,12 @@ public class ProductResponseDto {
 
     @Schema(description = "Creation timestamp", example = "2025-05-15T10:15:30")
     private LocalDateTime createdAt;
+
+    @Schema(description = "Product sell start date", example = "2025-05-20T10:00:00")
+    private LocalDateTime sellStartDate;
+
+    @Schema(description = "Product sell end date", example = "2025-05-30T23:59:59")
+    private LocalDateTime sellEndDate;
   }
 
   @Getter
@@ -92,6 +98,12 @@ public class ProductResponseDto {
 
     @Schema(description = "Creation timestamp", example = "2025-05-15T10:15:30")
     private LocalDateTime createdAt;
+
+    @Schema(description = "Product sell start date", example = "2025-05-20T10:00:00")
+    private LocalDateTime sellStartDate;
+
+    @Schema(description = "Product sell end date", example = "2025-05-30T23:59:59")
+    private LocalDateTime sellEndDate;
   }
 
   @Getter
@@ -115,6 +127,12 @@ public class ProductResponseDto {
 
     @Schema(description = "Last modified timestamp", example = "2025-05-16T11:20:45")
     private LocalDateTime modifiedAt;
+
+    @Schema(description = "Product sell start date", example = "2025-05-20T10:00:00")
+    private LocalDateTime sellStartDate;
+
+    @Schema(description = "Product sell end date", example = "2025-05-30T23:59:59")
+    private LocalDateTime sellEndDate;
   }
 
   @Getter
@@ -159,5 +177,11 @@ public class ProductResponseDto {
 
     @Schema(description = "Creation timestamp", example = "2025-05-15T10:15:30")
     private LocalDateTime createdAt;
+
+    @Schema(description = "Product sell start date", example = "2025-05-20T10:00:00")
+    private LocalDateTime sellStartDate;
+
+    @Schema(description = "Product sell end date", example = "2025-05-30T23:59:59")
+    private LocalDateTime sellEndDate;
   }
 }
