@@ -97,16 +97,52 @@ public class ProductController {
   }
 
   @GetMapping("/products")
-  public ResponseEntity<CommonResponseDto<Page<ProductResponseDto.ReadOneDto>>> readPage(
+  public ResponseEntity<CommonResponseDto<Page<ProductResponseDto.ReadOneDto>>> readPageByAll(
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "20") int size,
-      @RequestParam(defaultValue = "created_at,asc") List<String> sortList,
+      // 예: sortList=createdAt,asc&sortList=price,desc
+      @RequestParam(defaultValue = "createdAt,desc") List<String> sortList,
       @RequestParam(defaultValue = "ON_SALE") List<String> statusList){
     Page<ProductResponseDto.ReadOneDto> responseDtoPage
-        = productService.readPage(page, size, sortList, statusList);
+        = productService.readPageByAll(page, size, sortList, statusList);
     return ResponseEntity.status(HttpStatus.OK).body(
         new CommonResponseDto<>(
-            responseDtoPage, "성공적으로 상품 페이지를 조회하였습니다.",
+            responseDtoPage, "성공적으로 모든 회원이 상품 페이지를 조회하였습니다.",
+            HttpStatus.OK.value()));
+  }
+
+  @PreAuthorize("hasAuthority('ROLE_SELLER')")
+  @GetMapping("/seller/products")
+  public ResponseEntity<CommonResponseDto<Page<ProductResponseDto.ReadOneDto>>> readPageBySeller(
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "20") int size,
+      // 예: sortList=createdAt,asc&sortList=price,desc
+      @RequestParam(defaultValue = "createdAt,desc") List<String> sortList,
+      @RequestParam(defaultValue = "ON_SALE") List<String> statusList,
+      @AuthenticationPrincipal UserDetailsImpl userDetails){
+    Page<ProductResponseDto.ReadOneDto> responseDtoPage
+        = productService.readPageBySeller(
+            page, size, sortList, statusList, userDetails.getUser());
+    return ResponseEntity.status(HttpStatus.OK).body(
+        new CommonResponseDto<>(
+            responseDtoPage, "성공적으로 판매자가 자신의 상품 페이지를 조회하였습니다.",
+            HttpStatus.OK.value()));
+  }
+
+  @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+  @GetMapping("/admin/products")
+  public ResponseEntity<CommonResponseDto<Page<ProductResponseDto.ReadOneDto>>> readPageByAdmin(
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "20") int size,
+      // 예: sortList=createdAt,asc&sortList=price,desc
+      @RequestParam(defaultValue = "createdAt,desc") List<String> sortList,
+      @RequestParam(defaultValue = "ON_SALE") List<String> statusList){
+    Page<ProductResponseDto.ReadOneDto> responseDtoPage
+        = productService.readPageByAdmin(
+            page, size, sortList, statusList);
+    return ResponseEntity.status(HttpStatus.OK).body(
+        new CommonResponseDto<>(
+            responseDtoPage, "성공적으로 판매자가 자신의 상품 페이지를 조회하였습니다.",
             HttpStatus.OK.value()));
   }
 }

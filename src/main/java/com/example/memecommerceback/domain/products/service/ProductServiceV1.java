@@ -24,7 +24,14 @@ public interface ProductServiceV1 {
 
   ProductResponseDto.ReadOneDto readOne(UUID productId);
 
-  Page<ReadOneDto> readPage(
+  Page<ProductResponseDto.ReadOneDto> readPageByAll(
+      int page, int size, List<String> sortList, List<String> statusList);
+
+  Page<ProductResponseDto.ReadOneDto> readPageBySeller(
+      int page, int size, List<String> sortList,
+      List<String> statusList, User seller);
+
+  Page<ProductResponseDto.ReadOneDto> readPageByAdmin(
       int page, int size, List<String> sortList, List<String> statusList);
 
   void updateOnSaleStatus();

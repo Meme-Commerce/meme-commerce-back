@@ -92,6 +92,11 @@ public enum GlobalExceptionCode {
   DATE_TOO_FAR(
       HttpStatus.BAD_REQUEST, "DATE-TIME-004",
       "핫링크 요청은 현 시간으로부터 3달까지만 허용됩니다."),
+
+  // PAGE-ERROR
+  INVALID_SORT_FIELDS(
+      HttpStatus.BAD_REQUEST, "PAGE-001",
+      "는 정렬할 수 없는 필드입니다."),
   ;
 
   private final HttpStatus httpStatus;

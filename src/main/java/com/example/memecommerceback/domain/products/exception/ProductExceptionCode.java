@@ -32,6 +32,9 @@ public enum ProductExceptionCode {
   NEED_TO_SELL_DATE(
       HttpStatus.BAD_REQUEST, "PRODUCT-008",
       "상품을 판매 또는 재판매 할 경우, 다시 판매 시작일, 마감일을 적으셔야합니다."),
+  UNAUTHORIZED_READ(
+      HttpStatus.BAD_REQUEST, "PRODUCT-009",
+      "해당 유저는 읽을 권한이 없습니다."),
   ;
 
   private final HttpStatus httpStatus;

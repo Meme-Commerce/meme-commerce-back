@@ -7,6 +7,7 @@ import com.example.memecommerceback.domain.products.dto.ProductResponseDto;
 import com.example.memecommerceback.domain.products.entity.Product;
 import com.example.memecommerceback.domain.users.entity.User;
 import java.util.List;
+import org.springframework.data.domain.Page;
 
 public class ProductConverter {
   public static Product toEntity(
@@ -76,6 +77,13 @@ public class ProductConverter {
         .imageResponseDtoList(
             ImageConverter.toResponseDtoList(product.getImageList()))
         .status(product.getStatus())
+        .likeCount(product.getLikeCount())
+        .viewCount(product.getViewCount())
         .build();
+  }
+
+  public static Page<ProductResponseDto.ReadOneDto> toReadPageDto(
+      Page<Product> productPage){
+    return productPage.map(ProductConverter::toReadOneDto);
   }
 }

@@ -2,9 +2,12 @@ package com.example.memecommerceback.domain.products.entity;
 
 import com.example.memecommerceback.domain.products.exception.ProductCustomException;
 import com.example.memecommerceback.domain.products.exception.ProductExceptionCode;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import lombok.Getter;
+import org.springframework.security.core.parameters.P;
 
 @Getter
 public enum ProductStatus {
@@ -61,6 +64,23 @@ public enum ProductStatus {
   public boolean canSellerChangeTo(ProductStatus to) {
     return SELLER_ALLOWED_TRANSITIONS
         .getOrDefault(this, Set.of()).contains(to);
+  }
+
+  public static List<ProductStatus> fromStatusList(List<String> statusList){
+    return statusList.stream().map(ProductStatus::fromStatus).toList();
+  }
+
+  public static List<ProductStatus> getAndValidateStatusListByUser(
+      List<String> statusList){
+    List<ProductStatus> productStatusList
+        = statusList.stream().map(ProductStatus::fromStatus).toList();
+    for (ProductStatus productStatus : productStatusList) {
+      if(productStatus.equals(ProductStatus.HIDDEN)
+          || productStatus.equals(ProductStatus.PENDING) || productStatus.equals(ProductStatus.REJECTED)){
+        throw new ProductCustomException(ProductExceptionCode.UNAUTHORIZED_READ);
+      }
+    }
+    return productStatusList;
   }
 }
 

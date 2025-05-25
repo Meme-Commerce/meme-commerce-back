@@ -16,6 +16,7 @@ import com.example.memecommerceback.domain.users.entity.User;
 import com.example.memecommerceback.global.awsS3.dto.S3ResponseDto;
 import com.example.memecommerceback.global.service.ProfanityFilterService;
 import com.example.memecommerceback.global.utils.DateUtils;
+import com.example.memecommerceback.global.utils.PageUtils;
 import com.example.memecommerceback.global.utils.RabinKarpUtils;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,6 +24,10 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Order;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -184,16 +189,61 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
     if(product == null){
       throw new ProductCustomException(ProductExceptionCode.NOT_FOUND);
     }
+    // TODO : viewCount 로직 Redis로 할 지?, 엔티티에 increaseViewCount()로 구현할지?
     return ProductConverter.toReadOneDto(product);
+  }
+
+  // TODO : readPageBy.. 메서드 모두
+  //  클라이언트의 요청에 따라 ReadOneDto가 아닌 ReadSummaryOneDto를 넣어서
+  //  응답 형태를 더 가볍게 할 예정 (productImageList 또한 마찬가지)
+  //  All, Seller, Admin으로 분기
+  //  확장성 : 추가 정책이 필요할지도?
+  @Override
+  @Transactional(readOnly = true)
+  public Page<ReadOneDto> readPageByAll(
+      int page, int size, List<String> sortList, List<String> statusList) {
+    // 1. 정렬 가능한 필드를 요청했는지?
+    Pageable pageable = validateSortFieldsAndGetPageable(sortList, page, size);
+
+    // 2. 비로그인/유저 권한으로 특정 상태의 상품 페이지를 못 보도록 막음.
+    // 검수 중, 거절된 상품, 숨김 상품을 못 보도록 함.
+    List<ProductStatus> readOnlyStatusList
+        = ProductStatus.getAndValidateStatusListByUser(statusList);
+
+    // 3. 유효한 정렬 리스트를 통해 페이지로 변환
+    Page<Product> productPage
+        = productRepository.readPageByAll(pageable, sortList, readOnlyStatusList);
+    return ProductConverter.toReadPageDto(productPage);
   }
 
   @Override
   @Transactional(readOnly = true)
-  public Page<ReadOneDto> readPage(
-      int page, int size, List<String> sortList, List<String> statusList) {
+  public Page<ProductResponseDto.ReadOneDto> readPageBySeller(
+      int page, int size, List<String> sortList,
+      List<String> statusList, User seller) {
+    // 1. 정렬 가능한 필드를 요청했는지?
+    Pageable pageable = validateSortFieldsAndGetPageable(sortList, page, size);
 
-    return null;
-    // return ProductConverter.toReadPageDto();
+    List<ProductStatus> productStatusList
+        = ProductStatus.fromStatusList(statusList);
+    Page<Product> productPage
+        = productRepository.readPageBySeller(pageable, sortList, productStatusList, seller.getId());
+    return ProductConverter.toReadPageDto(productPage);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public Page<ProductResponseDto.ReadOneDto> readPageByAdmin(
+      int page, int size, List<String> sortList, List<String> statusList) {
+    // 1. 정렬 가능한 필드를 요청했는지?
+    Pageable pageable = validateSortFieldsAndGetPageable(sortList, page, size);
+
+    List<ProductStatus> productStatusList
+        = ProductStatus.fromStatusList(statusList);
+    Page<Product> productPage
+        = productRepository.readPageByAll(
+            pageable, sortList, productStatusList);
+    return ProductConverter.toReadPageDto(productPage);
   }
 
   // TODO : ProductStatus는 Indexing 고려
@@ -244,5 +294,11 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
         throw new ProductCustomException(ProductExceptionCode.SIMILAR_PRODUCT_DESCRIPTION_EXISTS);
       }
     }
+  }
+
+  private Pageable validateSortFieldsAndGetPageable(
+      List<String> sortList, int page, int size){
+    PageUtils.validateProductSortFields(sortList);
+    return PageRequest.of(page, size);
   }
 }
