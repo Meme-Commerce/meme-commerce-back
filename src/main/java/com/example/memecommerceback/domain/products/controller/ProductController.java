@@ -35,9 +35,9 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @RestController
-@Tag(name = "Product", description = "Operations related to Products")
 @RequiredArgsConstructor
 @RequestMapping("/api/v1")
+@Tag(name = "Product API", description = "상품 관리 API")
 public class ProductController {
 
   private final ProductServiceV1 productService;
