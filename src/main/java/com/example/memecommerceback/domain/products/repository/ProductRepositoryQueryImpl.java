@@ -49,7 +49,7 @@ public class ProductRepositoryQueryImpl
   }
 
   @Override
-  public Page<Product> readPageByAllOrAdmin(
+  public Page<Product> readPageByAll(
       Pageable pageable, List<String> sortList, List<ProductStatus> statusList) {
 
     QUser qUser = QUser.user;
