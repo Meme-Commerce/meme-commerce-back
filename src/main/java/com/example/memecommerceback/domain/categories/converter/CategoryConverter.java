@@ -42,4 +42,12 @@ public class CategoryConverter {
         .name(category.getName())
         .build();
   }
+
+  public static CategoryResponseDto.UpdateOneDto toUpdateOneDto(Category category){
+    return CategoryResponseDto.UpdateOneDto.builder()
+        .categoryId(category.getId())
+        .name(category.getName())
+        .modifiedAt(category.getModifiedAt())
+        .build();
+  }
 }

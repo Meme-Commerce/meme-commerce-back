@@ -26,4 +26,14 @@ public class CategoryResponseDto {
     private Long categoryId;
     private String name;
   }
+
+  @Getter
+  @Builder
+  @AllArgsConstructor
+  @NoArgsConstructor
+  public static class UpdateOneDto {
+    private Long categoryId;
+    private String name;
+    private LocalDateTime modifiedAt;
+  }
 }

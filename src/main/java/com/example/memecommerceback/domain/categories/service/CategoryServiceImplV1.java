@@ -4,6 +4,8 @@ import com.example.memecommerceback.domain.categories.converter.CategoryConverte
 import com.example.memecommerceback.domain.categories.dto.CategoryRequestDto;
 import com.example.memecommerceback.domain.categories.dto.CategoryResponseDto;
 import com.example.memecommerceback.domain.categories.entity.Category;
+import com.example.memecommerceback.domain.categories.exception.CategoryCustomException;
+import com.example.memecommerceback.domain.categories.exception.CategoryExceptionCode;
 import com.example.memecommerceback.domain.categories.repository.CategoryRepository;
 import com.example.memecommerceback.global.service.ProfanityFilterService;
 import java.util.List;
@@ -28,5 +30,22 @@ public class CategoryServiceImplV1 implements CategoryServiceV1{
         = CategoryConverter.toEntityList(requestDto);
     categoryRepository.saveAll(categoryList);
     return CategoryConverter.toCreateDto(categoryList);
+  }
+
+  @Override
+  @Transactional
+  public CategoryResponseDto.UpdateOneDto updateOne(
+      Long categoryId, String name) {
+    Category category = findById(categoryId);
+    profanityFilterService.validateNoProfanity(name);
+    category.update(name);
+    return CategoryConverter.toUpdateOneDto(category);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public Category findById(Long categoryId){
+    return categoryRepository.findById(categoryId).orElseThrow(
+        ()-> new CategoryCustomException(CategoryExceptionCode.NOT_FOUND));
   }
 }
