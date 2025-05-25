@@ -118,9 +118,11 @@ public class ProductRepositoryQueryImpl
 
     long total = jpaQueryFactory
         .selectFrom(qProduct)
-        .where(qProduct.status.in(productStatusList))
+        .where(qProduct.status.in(productStatusList),
+            qProduct.owner.id.eq(sellerId))
         .fetchCount();
 
     return new PageImpl<>(content, pageable, total);
   }
+
 }

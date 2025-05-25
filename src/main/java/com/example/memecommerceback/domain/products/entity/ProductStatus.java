@@ -40,6 +40,9 @@ public enum ProductStatus {
     public static final String REJECTED = "REJECTED";
   }
 
+  private static final Set<ProductStatus> USER_RESTRICTED_STATUSES
+      = Set.of(HIDDEN, PENDING, REJECTED);
+
   public static ProductStatus fromStatus(String status) {
     for (ProductStatus ps : ProductStatus.values()) {
       if (ps.getStatus().equals(status)) {
@@ -75,8 +78,7 @@ public enum ProductStatus {
     List<ProductStatus> productStatusList
         = statusList.stream().map(ProductStatus::fromStatus).toList();
     for (ProductStatus productStatus : productStatusList) {
-      if(productStatus.equals(ProductStatus.HIDDEN)
-          || productStatus.equals(ProductStatus.PENDING) || productStatus.equals(ProductStatus.REJECTED)){
+      if(USER_RESTRICTED_STATUSES.contains(productStatus)){
         throw new ProductCustomException(ProductExceptionCode.UNAUTHORIZED_READ);
       }
     }

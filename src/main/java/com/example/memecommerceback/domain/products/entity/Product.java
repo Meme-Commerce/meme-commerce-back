@@ -89,8 +89,20 @@ public class Product extends CommonEntity {
     this.status = status;
   }
 
+  public void update(
+      ProductStatus status, LocalDateTime sellStartDate, LocalDateTime sellEndDate,
+      String name, String description, Long price, Long stock){
+    this.status = status;
+    this.sellStartDate = sellStartDate;
+    this.sellEndDate = sellEndDate;
+    this.name = name;
+    this.description = description;
+    this.price = price;
+    this.stock = stock;
+  }
+
   public void updateStatusAndDate(
-      ProductStatus status, LocalDateTime sellStartDate, LocalDateTime sellEndDate){
+      ProductStatus status, LocalDateTime sellStartDate, LocalDateTime sellEndDate) {
     this.status = status;
     this.sellStartDate = sellStartDate;
     this.sellEndDate = sellEndDate;

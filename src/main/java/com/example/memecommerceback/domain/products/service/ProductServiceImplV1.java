@@ -114,14 +114,21 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
 
     validateProfanityText(requestDto.getName(), requestDto.getDescription(), seller);
 
+    // TODO : stock 변경 시, 재고락 서비스에서 해당 재고 업데이트 로직 필요
     if (afterStatus == ProductStatus.RESALE_SOON || afterStatus == ProductStatus.ON_SALE) {
       if (requestDto.getSellStartDate() == null || requestDto.getSellEndDate() == null) {
         throw new ProductCustomException(ProductExceptionCode.NEED_TO_SELL_DATE);
       }
       DateUtils.validateDateTime(requestDto.getSellStartDate(), requestDto.getSellEndDate());
-      product.updateStatusAndDate(afterStatus, requestDto.getSellStartDate(), requestDto.getSellEndDate());
+      product.update(
+          afterStatus, requestDto.getSellStartDate(), requestDto.getSellEndDate(),
+          requestDto.getName(), requestDto.getDescription(),
+          requestDto.getPrice(), requestDto.getStock());
     } else if (afterStatus == ProductStatus.HIDDEN) {
-      product.updateStatusAndDate(afterStatus, null, null);
+      product.update(
+          afterStatus, null, null,
+          requestDto.getName(), requestDto.getDescription(),
+          requestDto.getPrice(), requestDto.getStock());
     }
 
     List<S3ResponseDto> uploadedImages = null;
@@ -154,7 +161,8 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
       throw e;
     }
 
-    return ProductConverter.toUpdateOneDto(product, seller.getName(), newImageList);
+    return ProductConverter.toUpdateOneDto(
+        product, seller.getName(), newImageList);
   }
 
   @Override
