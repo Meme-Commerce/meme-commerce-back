@@ -45,7 +45,7 @@ public class HashtagServiceImplV1 implements HashtagServiceV1 {
   public HashtagResponseDto.UpdateOneDto updateOne(
       Long hashtagId, String name) {
     Hashtag hashtag = findById(hashtagId);
-    if (hashtagRepository.existsByName(name)) {
+    if(hashtagRepository.existsByNameAndIdNot(name, hashtagId)){
       throw new HashtagCustomException(HashtagExceptionCode.ALREADY_EXIST_NAME);
     }
     profanityFilterService.validateNoProfanity(name);
@@ -69,7 +69,7 @@ public class HashtagServiceImplV1 implements HashtagServiceV1 {
 
     if (!notFoundIdList.isEmpty()) {
       throw new HashtagCustomException(HashtagExceptionCode.NOT_FOUND,
-          "요청하신 해시태그 아이디 [ " + notFoundIdList + " ]에 대한 해시태그 정보가 없습니다.");
+          "요청하신 해시태그 아이디 " + notFoundIdList + "에 대한 해시태그 정보가 없습니다.");
     }
 
     hashtagRepository.deleteAllById(requestedIdList);

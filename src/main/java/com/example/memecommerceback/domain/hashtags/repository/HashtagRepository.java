@@ -8,5 +8,5 @@ public interface HashtagRepository extends JpaRepository<Hashtag, Long> {
 
   boolean existsByNameIn(List<String> nameList);
 
-  boolean existsByName(String name);
+  boolean existsByNameAndIdNot(String name, Long id);
 }

@@ -15,6 +15,8 @@ public class CategoryRequestDto {
   @Builder
   @AllArgsConstructor
   @NoArgsConstructor
+  @Schema(name = "CategoryRequestDto.CreateDto",
+          description = "카테고리 생성 요청 DTO")
   public static class CreateDto {
     @NotNull(message = "이름 리스트는 필수 입력 값입니다.")
     @Size(min = 1, message = "최소 1개의 카테고리명을 입력해야 합니다.")
@@ -29,6 +31,8 @@ public class CategoryRequestDto {
   @Builder
   @AllArgsConstructor
   @NoArgsConstructor
+  @Schema(name = "CategoryRequestDto.DeleteDto",
+      description = "카테고리 삭제 요청 DTO")
   public static class DeleteDto {
     @NotNull(message = "삭제할 카테고리 아이디 리스트는 필수 입력 값입니다.")
     @Size(min = 1, message = "최소 1개의 카테고리 아이디를 입력해야 합니다.")

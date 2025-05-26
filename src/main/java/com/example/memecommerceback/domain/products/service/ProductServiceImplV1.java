@@ -281,7 +281,7 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
 
     if (!notFoundIds.isEmpty()) {
       throw new ProductCustomException(ProductExceptionCode.NOT_FOUND,
-          "요청하신 아이디 [ " + notFoundIds + " ]에 대한 상품 정보가 없습니다.");
+          "요청하신 아이디 " + notFoundIds + "에 대한 상품 정보가 없습니다.");
     }
     for(Product product : productList){
       imageService.deleteProductImageList(product.getId(), loginUser.getId());
