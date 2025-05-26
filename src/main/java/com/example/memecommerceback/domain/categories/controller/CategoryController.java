@@ -22,6 +22,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -47,7 +48,10 @@ public class CategoryController {
               schema = @Schema(implementation = ErrorResponseDto.class))),
       @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자",
           content = @Content(mediaType = "application/json",
-              schema = @Schema(implementation = ErrorResponseDto.class)))})
+              schema = @Schema(implementation = ErrorResponseDto.class))),
+      @ApiResponse(responseCode = "403", description = "권한 없음",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = ErrorResponseDto.class))),})
   @PreAuthorize("hasAuthority('ROLE_ADMIN')")
   @PostMapping("/categories")
   public ResponseEntity<CommonResponseDto<CategoryResponseDto.CreateDto>> create(
@@ -72,7 +76,7 @@ public class CategoryController {
           content = @Content(mediaType = "application/json",
               schema = @Schema(implementation = ErrorResponseDto.class)))})
   @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-  @PostMapping("/categories/{categoryId}")
+  @PatchMapping("/categories/{categoryId}")
   public ResponseEntity<CommonResponseDto<CategoryResponseDto.UpdateOneDto>> updateOne(
       @PathVariable Long categoryId,
       @RequestParam @NotNull(message = "카테고리 이름은 필수 입력 값입니다.")
@@ -119,7 +123,7 @@ public class CategoryController {
           content = @Content(mediaType = "application/json",
               schema = @Schema(implementation = ErrorResponseDto.class)))})
   @GetMapping("/categories")
-  public ResponseEntity<CommonResponseDto<Page<ReadOneDto>>> readPage(
+  public ResponseEntity<CommonResponseDto<Page<CategoryResponseDto.ReadOneDto>>> readPage(
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "20") int size) {
     Page<CategoryResponseDto.ReadOneDto> responseDto

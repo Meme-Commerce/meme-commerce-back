@@ -10,7 +10,7 @@ public enum HashtagExceptionCode {
 
   NOT_FOUND(
       HttpStatus.NOT_FOUND, "HASHTAG-001",
-      "찾을 수 없는 파일입니다."),
+      "찾을 수 없는 해시태그입니다."),
   ;
 
   private final HttpStatus httpStatus;
