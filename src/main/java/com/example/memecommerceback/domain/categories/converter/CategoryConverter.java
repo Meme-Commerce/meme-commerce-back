@@ -3,7 +3,6 @@ package com.example.memecommerceback.domain.categories.converter;
 import com.example.memecommerceback.domain.categories.dto.CategoryRequestDto;
 import com.example.memecommerceback.domain.categories.dto.CategoryResponseDto;
 import com.example.memecommerceback.domain.categories.dto.CategoryResponseDto.CreateDto;
-import com.example.memecommerceback.domain.categories.dto.CategoryResponseDto.ReadOneDto;
 import com.example.memecommerceback.domain.categories.entity.Category;
 import java.time.LocalDateTime;
 import java.util.List;

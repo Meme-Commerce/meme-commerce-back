@@ -11,11 +11,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 public class HashtagRequestDto {
+
   @Getter
   @Builder
   @AllArgsConstructor
   @NoArgsConstructor
   public static class CreateDto {
+
     @NotNull(message = "이름 리스트는 필수 입력 값입니다.")
     @Size(min = 1, message = "최소 1개의 해시태그명을 입력해야 합니다.")
     @Schema(description = "생성할 해시태그명 리스트", example = "[\"밈\", \"유머\", \"트렌드\"]")
@@ -30,6 +32,7 @@ public class HashtagRequestDto {
   @AllArgsConstructor
   @NoArgsConstructor
   public static class DeleteDto {
+
     @NotNull(message = "삭제할 해시태그 아이디 리스트는 필수 입력 값입니다.")
     @Size(min = 1, message = "최소 1개의 해시태그 아이디를 입력해야 합니다.")
     @Schema(description = "삭제할 해시태그 ID 리스트", example = "[1,2,3]")

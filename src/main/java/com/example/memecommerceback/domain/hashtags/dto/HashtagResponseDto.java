@@ -17,6 +17,7 @@ public class HashtagResponseDto {
   @Schema(name = "HashtagResponseDto.CreateDto",
       description = "해시태그 여러 개 생성 응답 DTO")
   public static class CreateDto {
+
     @Schema(description = "생성된 해시태그 정보 리스트")
     private List<CreateOneDto> createOneDtoList;
 
@@ -31,6 +32,7 @@ public class HashtagResponseDto {
   @Schema(name = "HashtagResponseDto.CreateOneDto",
       description = "해시태그 하나 생성 정보 DTO")
   public static class CreateOneDto {
+
     @Schema(description = "해시태그 아이디", example = "1")
     private Long hashtagId;
 
@@ -45,6 +47,7 @@ public class HashtagResponseDto {
   @Schema(name = "HashtagResponseDto.UpdateOneDto",
       description = "해시태그 하나 수정 응답 DTO")
   public static class UpdateOneDto {
+
     @Schema(description = "해시태그 아이디", example = "1")
     private Long hashtagId;
 
@@ -53,5 +56,18 @@ public class HashtagResponseDto {
 
     @Schema(description = "해시태그 수정 시각", example = "2025-05-29T09:10:00")
     private LocalDateTime modifiedAt;
+  }
+
+  @Getter
+  @Builder
+  @AllArgsConstructor
+  @NoArgsConstructor
+  public static class ReadOneDto {
+
+    @Schema(description = "해시태그 아이디", example = "1")
+    private Long hashtagId;
+
+    @Schema(description = "조회된 해시태그 명", example = "밈")
+    private String name;
   }
 }

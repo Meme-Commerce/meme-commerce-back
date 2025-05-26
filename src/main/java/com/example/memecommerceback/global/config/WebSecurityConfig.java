@@ -11,8 +11,10 @@ import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -25,6 +27,7 @@ import org.springframework.web.cors.CorsConfiguration;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class WebSecurityConfig {
 
@@ -76,6 +79,9 @@ public class WebSecurityConfig {
         .authorizeHttpRequests((requests) -> requests
             .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
             .requestMatchers("/api/v1/public/**").permitAll()
+            .requestMatchers(HttpMethod.GET, "/api/v1/products/**").permitAll()
+            .requestMatchers(HttpMethod.GET, "/api/v1/categories").permitAll()
+            .requestMatchers(HttpMethod.GET, "/api/v1/hashtags").permitAll()
             .anyRequest().authenticated()
         )
         .sessionManagement((session) ->

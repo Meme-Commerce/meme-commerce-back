@@ -15,9 +15,12 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -43,6 +46,9 @@ public class HashtagController {
       @ApiResponse(responseCode = "400", description = "잘못된 요청 값",
           content = @Content(mediaType = "application/json",
               schema = @Schema(implementation = ErrorResponseDto.class))),
+      @ApiResponse(responseCode = "403", description = "권한 없음",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = ErrorResponseDto.class))),
       @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자",
           content = @Content(mediaType = "application/json",
               schema = @Schema(implementation = ErrorResponseDto.class)))})
@@ -54,7 +60,7 @@ public class HashtagController {
   }
 
   @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-  @PostMapping("/hashtags/{hashtagId}")
+  @PatchMapping("/hashtags/{hashtagId}")
   @Operation(summary = "해시태그 단일 수정", description = "관리자가 해시태그의 이름을 수정합니다.")
   @ApiResponses({
       @ApiResponse(responseCode = "200", description = "해시태그 수정 성공",
@@ -64,6 +70,9 @@ public class HashtagController {
           content = @Content(mediaType = "application/json",
               schema = @Schema(implementation = ErrorResponseDto.class))),
       @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = ErrorResponseDto.class))),
+      @ApiResponse(responseCode = "403", description = "권한 없음",
           content = @Content(mediaType = "application/json",
               schema = @Schema(implementation = ErrorResponseDto.class))),
       @ApiResponse(responseCode = "404", description = "존재하지 않는 해시태그",
@@ -93,6 +102,9 @@ public class HashtagController {
       @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자",
           content = @Content(mediaType = "application/json",
               schema = @Schema(implementation = ErrorResponseDto.class))),
+      @ApiResponse(responseCode = "403", description = "권한 없음",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = ErrorResponseDto.class))),
       @ApiResponse(responseCode = "404", description = "존재하지 않는 해시태그",
           content = @Content(mediaType = "application/json",
               schema = @Schema(implementation = ErrorResponseDto.class)))})
@@ -101,6 +113,33 @@ public class HashtagController {
     hashtagService.delete(requestDto);
     return ResponseEntity.status(HttpStatus.OK).body(
         new CommonResponseDto<>(null, "해시태그 리스트를 삭제하였습니다.", HttpStatus.OK.value()));
+  }
+
+  @Operation(summary = "해신태그 페이지 조회",
+      description = "모든 사용자는 해시태그 페이지를 조회할 수 있습니다.")
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "해시태그 페이지 조회 성공",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = HashtagResponseDto.ReadOneDto.class))),
+      @ApiResponse(responseCode = "400", description = "잘못된 요청 값",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = ErrorResponseDto.class))),
+      @ApiResponse(responseCode = "403", description = "권한 없음",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = ErrorResponseDto.class))),
+      @ApiResponse(responseCode = "404", description = "존재하지 않는 카테고리",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = ErrorResponseDto.class)))})
+  @GetMapping("/hashtags")
+  public ResponseEntity<
+      CommonResponseDto<Page<HashtagResponseDto.ReadOneDto>>> readPage(
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "20") int size) {
+    Page<HashtagResponseDto.ReadOneDto> responseDto
+        = hashtagService.readPage(page, size);
+    return ResponseEntity.status(HttpStatus.OK).body(
+        new CommonResponseDto<>(
+            responseDto, "해시태그 페이지를 조회 하였습니다.", HttpStatus.OK.value()));
   }
 }
 

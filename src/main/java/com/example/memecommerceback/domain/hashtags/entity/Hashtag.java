@@ -33,7 +33,7 @@ public class Hashtag extends CommonEntity {
   @Column(nullable = false, length = 20)
   private String name;
 
-  public void update(String name){
+  public void update(String name) {
     this.name = name;
   }
 }

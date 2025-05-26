@@ -12,6 +12,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +29,9 @@ public class HashtagServiceImplV1 implements HashtagServiceV1 {
   @Transactional
   public HashtagResponseDto.CreateDto create(
       HashtagRequestDto.CreateDto requestDto) {
+    if (hashtagRepository.existsByNameIn(requestDto.getNameList())) {
+      throw new HashtagCustomException(HashtagExceptionCode.ALREADY_EXIST_NAME);
+    }
     profanityFilterService.validateListNoProfanity(requestDto.getNameList());
 
     List<Hashtag> hashtagList = HashtagConverter.toEntityList(requestDto);
@@ -39,6 +45,9 @@ public class HashtagServiceImplV1 implements HashtagServiceV1 {
   public HashtagResponseDto.UpdateOneDto updateOne(
       Long hashtagId, String name) {
     Hashtag hashtag = findById(hashtagId);
+    if (hashtagRepository.existsByName(name)) {
+      throw new HashtagCustomException(HashtagExceptionCode.ALREADY_EXIST_NAME);
+    }
     profanityFilterService.validateNoProfanity(name);
     hashtag.update(name);
     return HashtagConverter.toUpdateOneDto(hashtag);
@@ -64,6 +73,14 @@ public class HashtagServiceImplV1 implements HashtagServiceV1 {
     }
 
     hashtagRepository.deleteAllById(requestedIdList);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public Page<HashtagResponseDto.ReadOneDto> readPage(int page, int size) {
+    Pageable pageable = PageRequest.of(page, size);
+    Page<Hashtag> hashtagPage = hashtagRepository.findAll(pageable);
+    return HashtagConverter.toReadPageDto(hashtagPage);
   }
 
   @Override
