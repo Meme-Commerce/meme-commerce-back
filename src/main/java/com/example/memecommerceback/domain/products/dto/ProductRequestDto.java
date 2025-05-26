@@ -49,6 +49,9 @@ public class ProductRequestDto {
         description = "상품 판매 종료일 (ISO 8601 형식의 날짜/시간)",
         example = "2025-05-30T23:59:59")
     private LocalDateTime sellEndDate;
+
+    private List<Long> categoryIdList;
+    private List<Long> hashtagIdList;
   }
 
   @Getter
@@ -86,6 +89,9 @@ public class ProductRequestDto {
         description = "상품 판매 종료일 (ISO 8601 형식의 날짜/시간)",
         example = "2025-05-30T23:59:59")
     private LocalDateTime sellEndDate;
+
+    private List<Long> categoryIdList;
+    private List<Long> hashtagIdList;
   }
 
   @Getter

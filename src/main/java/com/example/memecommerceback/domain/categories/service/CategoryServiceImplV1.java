@@ -92,4 +92,10 @@ public class CategoryServiceImplV1 implements CategoryServiceV1{
     return categoryRepository.findById(categoryId).orElseThrow(
         ()-> new CategoryCustomException(CategoryExceptionCode.NOT_FOUND));
   }
+
+  @Override
+  @Transactional(readOnly = true)
+  public List<Category> findAllById(List<Long> cateogryIdList){
+    return categoryRepository.findAllById(cateogryIdList);
+  }
 }

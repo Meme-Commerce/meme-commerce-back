@@ -3,6 +3,7 @@ package com.example.memecommerceback.domain.categories.service;
 import com.example.memecommerceback.domain.categories.dto.CategoryRequestDto;
 import com.example.memecommerceback.domain.categories.dto.CategoryResponseDto;
 import com.example.memecommerceback.domain.categories.entity.Category;
+import java.util.List;
 import org.springframework.data.domain.Page;
 
 /**
@@ -78,4 +79,6 @@ public interface CategoryServiceV1 {
    * @return 카테고리 목록 페이지(Page) 객체 (각 항목은 ReadOneDto로 반환)
    */
   Page<CategoryResponseDto.ReadOneDto> readPage(int page, int size);
+
+  List<Category> findAllById(List<Long> cateogryIdList);
 }

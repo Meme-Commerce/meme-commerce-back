@@ -1,6 +1,7 @@
 package com.example.memecommerceback.domain.products.entity;
 
 import com.example.memecommerceback.domain.images.entity.Image;
+import com.example.memecommerceback.domain.productCategory.entity.ProductCategory;
 import com.example.memecommerceback.domain.users.entity.User;
 import com.example.memecommerceback.global.common.CommonEntity;
 import jakarta.persistence.CascadeType;
@@ -72,6 +73,10 @@ public class Product extends CommonEntity {
   @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Image> imageList = new ArrayList<>();
 
+  @Builder.Default
+  @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<ProductCategory> productCategoryList = new ArrayList<>();
+
   @JoinColumn(name = "user_id")
   @ManyToOne(fetch = FetchType.LAZY)
   private User owner;
@@ -106,5 +111,10 @@ public class Product extends CommonEntity {
     this.status = status;
     this.sellStartDate = sellStartDate;
     this.sellEndDate = sellEndDate;
+  }
+
+  public void addCategoryList(List<ProductCategory> productCategoryList){
+    this.productCategoryList.clear();
+    this.productCategoryList.addAll(productCategoryList);
   }
 }
