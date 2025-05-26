@@ -2,7 +2,6 @@ package com.example.memecommerceback.domain.categories.controller;
 
 import com.example.memecommerceback.domain.categories.dto.CategoryRequestDto;
 import com.example.memecommerceback.domain.categories.dto.CategoryResponseDto;
-import com.example.memecommerceback.domain.categories.dto.CategoryResponseDto.ReadOneDto;
 import com.example.memecommerceback.domain.categories.service.CategoryServiceV1;
 import com.example.memecommerceback.global.exception.dto.CommonResponseDto;
 import com.example.memecommerceback.global.exception.dto.ErrorResponseDto;
@@ -16,7 +15,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -60,7 +60,9 @@ public class CategoryResponseDto {
   @AllArgsConstructor
   @NoArgsConstructor
   public static class ReadOneDto {
+    @Schema(description = "카테고리 아이디", example = "1")
     private Long categoryId;
+    @Schema(description = "조회된 카테고리 명", example = "의류")
     private String name;
   }
 }
