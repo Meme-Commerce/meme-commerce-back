@@ -54,4 +54,15 @@ public class CategoryResponseDto {
     @Schema(description = "카테고리 수정 시각", example = "2025-05-29T09:10:00")
     private LocalDateTime modifiedAt;
   }
+
+  @Getter
+  @Builder
+  @AllArgsConstructor
+  @NoArgsConstructor
+  public static class ReadOneDto {
+    @Schema(description = "카테고리 아이디", example = "1")
+    private Long categoryId;
+    @Schema(description = "조회된 카테고리 명", example = "의류")
+    private String name;
+  }
 }

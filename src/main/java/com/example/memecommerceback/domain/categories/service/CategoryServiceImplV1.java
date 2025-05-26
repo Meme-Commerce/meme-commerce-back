@@ -7,11 +7,16 @@ import com.example.memecommerceback.domain.categories.entity.Category;
 import com.example.memecommerceback.domain.categories.exception.CategoryCustomException;
 import com.example.memecommerceback.domain.categories.exception.CategoryExceptionCode;
 import com.example.memecommerceback.domain.categories.repository.CategoryRepository;
+import com.example.memecommerceback.domain.hashtags.exception.HashtagCustomException;
+import com.example.memecommerceback.domain.hashtags.exception.HashtagExceptionCode;
 import com.example.memecommerceback.global.service.ProfanityFilterService;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +31,9 @@ public class CategoryServiceImplV1 implements CategoryServiceV1{
   @Transactional
   public CategoryResponseDto.CreateDto create(
       CategoryRequestDto.CreateDto requestDto) {
+    if(categoryRepository.existsByNameIn(requestDto.getNameList())){
+      throw new CategoryCustomException(CategoryExceptionCode.ALREADY_EXIST_NAME);
+    }
     // 1. 공란인지?, 욕설이 들어갔는지?
     profanityFilterService.validateListNoProfanity(requestDto.getNameList());
     List<Category> categoryList
@@ -39,6 +47,9 @@ public class CategoryServiceImplV1 implements CategoryServiceV1{
   public CategoryResponseDto.UpdateOneDto updateOne(
       Long categoryId, String name) {
     Category category = findById(categoryId);
+    if(categoryRepository.existsByNameAndIdNot(name, categoryId)){
+      throw new HashtagCustomException(HashtagExceptionCode.ALREADY_EXIST_NAME);
+    }
     profanityFilterService.validateNoProfanity(name);
     category.update(name);
     return CategoryConverter.toUpdateOneDto(category);
@@ -61,10 +72,18 @@ public class CategoryServiceImplV1 implements CategoryServiceV1{
 
     if (!notFoundIdList.isEmpty()) {
       throw new CategoryCustomException(CategoryExceptionCode.NOT_FOUND,
-          "요청하신 카테고리 아이디 [ " + notFoundIdList + " ]에 대한 카테고리 정보가 없습니다.");
+          "요청하신 카테고리 아이디 " + notFoundIdList + "에 대한 카테고리 정보가 없습니다.");
     }
 
     categoryRepository.deleteAllById(requestedIdList);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public Page<CategoryResponseDto.ReadOneDto> readPage(int page, int size) {
+    Pageable pageable = PageRequest.of(page, size);
+    Page<Category> categoryPage = categoryRepository.findAll(pageable);
+    return CategoryConverter.toReadPageDto(categoryPage);
   }
 
   @Override

@@ -3,6 +3,7 @@ package com.example.memecommerceback.domain.categories.service;
 import com.example.memecommerceback.domain.categories.dto.CategoryRequestDto;
 import com.example.memecommerceback.domain.categories.dto.CategoryResponseDto;
 import com.example.memecommerceback.domain.categories.entity.Category;
+import org.springframework.data.domain.Page;
 
 /**
  * 카테고리 관리를 위한 서비스 인터페이스
@@ -64,4 +65,17 @@ public interface CategoryServiceV1 {
    * @return 카테고리 엔티티 객체
    */
   Category findById(Long categoryId);
+
+  /**
+   * 카테고리 페이지(목록) 정보를 조회합니다.
+   * <p>
+   * 지정한 페이지 번호와 크기에 따라 카테고리 목록을 페이징하여 반환합니다.
+   * 일반적으로 관리자/사용자 모두의 목록, 검색, 자동완성 등 다양한 용도로 활용될 수 있습니다.
+   * </p>
+   *
+   * @param page 조회할 페이지 번호 (0부터 시작)
+   * @param size 한 페이지에 포함할 카테고리 개수
+   * @return 카테고리 목록 페이지(Page) 객체 (각 항목은 ReadOneDto로 반환)
+   */
+  Page<CategoryResponseDto.ReadOneDto> readPage(int page, int size);
 }

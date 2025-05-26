@@ -91,7 +91,7 @@ public class JwtUtils {
     Date now = new Date();
     String accessToken = Jwts.builder()
         .setSubject(email)
-        .claim(JwtConstants.AUTHORIZATION_KEY, role)
+        .claim(JwtConstants.AUTHORIZATION_KEY, role.getAuthority())
         .setIssuedAt(now)
         .setExpiration(new Date(now.getTime() + getAccessTokenExpiration(role)))
         .signWith(key, signatureAlgorithm)
@@ -99,7 +99,7 @@ public class JwtUtils {
 
     String refreshToken = Jwts.builder()
         .setSubject(email)
-        .claim(JwtConstants.AUTHORIZATION_KEY, role)
+        .claim(JwtConstants.AUTHORIZATION_KEY, role.getAuthority())
         .setIssuedAt(now)
         .setExpiration(new Date(now.getTime() + getRefreshTokenExpiration(role)))
         .signWith(key, signatureAlgorithm)
