@@ -3,6 +3,7 @@ package com.example.memecommerceback.domain.categories.service;
 import com.example.memecommerceback.domain.categories.converter.CategoryConverter;
 import com.example.memecommerceback.domain.categories.dto.CategoryRequestDto;
 import com.example.memecommerceback.domain.categories.dto.CategoryResponseDto;
+import com.example.memecommerceback.domain.categories.dto.CategoryResponseDto.ReadOneDto;
 import com.example.memecommerceback.domain.categories.entity.Category;
 import com.example.memecommerceback.domain.categories.exception.CategoryCustomException;
 import com.example.memecommerceback.domain.categories.exception.CategoryExceptionCode;
@@ -12,6 +13,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -65,6 +69,14 @@ public class CategoryServiceImplV1 implements CategoryServiceV1{
     }
 
     categoryRepository.deleteAllById(requestedIdList);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public Page<CategoryResponseDto.ReadOneDto> readPage(int page, int size) {
+    Pageable pageable = PageRequest.of(page, size);
+    Page<Category> categoryPage = categoryRepository.findAll(pageable);
+    return CategoryConverter.toReadPageDto(categoryPage);
   }
 
   @Override

@@ -2,7 +2,9 @@ package com.example.memecommerceback.domain.categories.service;
 
 import com.example.memecommerceback.domain.categories.dto.CategoryRequestDto;
 import com.example.memecommerceback.domain.categories.dto.CategoryResponseDto;
+import com.example.memecommerceback.domain.categories.dto.CategoryResponseDto.ReadOneDto;
 import com.example.memecommerceback.domain.categories.entity.Category;
+import org.springframework.data.domain.Page;
 
 /**
  * 카테고리 관리를 위한 서비스 인터페이스
@@ -64,4 +66,6 @@ public interface CategoryServiceV1 {
    * @return 카테고리 엔티티 객체
    */
   Category findById(Long categoryId);
+
+  Page<CategoryResponseDto.ReadOneDto> readPage(int page, int size);
 }

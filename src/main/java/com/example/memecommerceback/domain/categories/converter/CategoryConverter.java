@@ -3,9 +3,11 @@ package com.example.memecommerceback.domain.categories.converter;
 import com.example.memecommerceback.domain.categories.dto.CategoryRequestDto;
 import com.example.memecommerceback.domain.categories.dto.CategoryResponseDto;
 import com.example.memecommerceback.domain.categories.dto.CategoryResponseDto.CreateDto;
+import com.example.memecommerceback.domain.categories.dto.CategoryResponseDto.ReadOneDto;
 import com.example.memecommerceback.domain.categories.entity.Category;
 import java.time.LocalDateTime;
 import java.util.List;
+import org.springframework.data.domain.Page;
 
 public class CategoryConverter {
 
@@ -48,6 +50,18 @@ public class CategoryConverter {
         .categoryId(category.getId())
         .name(category.getName())
         .modifiedAt(category.getModifiedAt())
+        .build();
+  }
+
+  public static Page<CategoryResponseDto.ReadOneDto> toReadPageDto(
+      Page<Category> categoryPage){
+    return categoryPage.map(CategoryConverter::toReadOneDto);
+  }
+
+  public static CategoryResponseDto.ReadOneDto toReadOneDto(Category category){
+    return CategoryResponseDto.ReadOneDto.builder()
+        .categoryId(category.getId())
+        .name(category.getName())
         .build();
   }
 }

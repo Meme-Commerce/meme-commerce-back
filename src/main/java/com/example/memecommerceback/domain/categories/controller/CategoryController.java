@@ -2,23 +2,32 @@ package com.example.memecommerceback.domain.categories.controller;
 
 import com.example.memecommerceback.domain.categories.dto.CategoryRequestDto;
 import com.example.memecommerceback.domain.categories.dto.CategoryResponseDto;
+import com.example.memecommerceback.domain.categories.dto.CategoryResponseDto.ReadOneDto;
 import com.example.memecommerceback.domain.categories.service.CategoryServiceV1;
 import com.example.memecommerceback.global.exception.dto.CommonResponseDto;
 import com.example.memecommerceback.global.exception.dto.ErrorResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
@@ -95,5 +104,28 @@ public class CategoryController {
     categoryService.delete(requestDto);
     return ResponseEntity.status(HttpStatus.OK).body(
         new CommonResponseDto<>(null, "카테고리 리스트를 삭제 하였습니다.", HttpStatus.OK.value()));
+  }
+
+  @Operation(summary = "카테고리 페이지 조회",
+      description = "모든 사용자는 카테고리 페이지를 조회할 수 있습니다.")
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "카테고리 페이지 조회 성공",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = CategoryResponseDto.ReadOneDto.class))),
+      @ApiResponse(responseCode = "400", description = "잘못된 요청 값",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = ErrorResponseDto.class))),
+      @ApiResponse(responseCode = "404", description = "존재하지 않는 카테고리",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = ErrorResponseDto.class)))})
+  @GetMapping("/categories")
+  public ResponseEntity<CommonResponseDto<Page<ReadOneDto>>> readPage(
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "20") int size) {
+    Page<CategoryResponseDto.ReadOneDto> responseDto
+        = categoryService.readPage(page, size);
+    return ResponseEntity.status(HttpStatus.OK).body(
+        new CommonResponseDto<>(
+            responseDto, "카테고리 페이지를 조회 하였습니다.", HttpStatus.OK.value()));
   }
 }
