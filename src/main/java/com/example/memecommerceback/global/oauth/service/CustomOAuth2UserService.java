@@ -12,7 +12,6 @@ import com.example.memecommerceback.global.oauth.entity.CustomOAuth2User;
 import com.example.memecommerceback.global.utils.ContactUtils;
 import com.example.memecommerceback.global.utils.DateUtils;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;

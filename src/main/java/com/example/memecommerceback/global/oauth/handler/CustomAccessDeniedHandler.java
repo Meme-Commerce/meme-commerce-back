@@ -6,12 +6,12 @@ import com.example.memecommerceback.global.exception.dto.ErrorResponseDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
+import java.io.IOException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.access.AccessDeniedHandler;
-import java.io.IOException;
 
 public class CustomAccessDeniedHandler implements AccessDeniedHandler {
+
   private final ObjectMapper objectMapper;
 
   public CustomAccessDeniedHandler(ObjectMapper objectMapper) {
@@ -23,7 +23,7 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
       AccessDeniedException accessDeniedException) throws IOException {
     String uri = request.getRequestURI();
 
-    if(uri.startsWith("/api")){
+    if (uri != null && uri.startsWith("/api")) {
       ErrorResponseDto error = ErrorResponseDto.of(
           Error.AUTH_DENIED_ERROR.getCode(),
           Error.AUTH_DENIED_ERROR.getMessage()
@@ -35,7 +35,7 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
       response.setStatus(HttpServletResponse.SC_FORBIDDEN);
       response.setContentType("application/json;charset=UTF-8");
       response.getWriter().write(objectMapper.writeValueAsString(body));
-    }else{
+    } else {
       response.sendRedirect("/login");
     }
   }

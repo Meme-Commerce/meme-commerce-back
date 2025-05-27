@@ -30,7 +30,6 @@ import java.util.Base64;
 import java.util.Collection;
 import java.util.Date;
 import java.util.stream.Collectors;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -47,6 +46,7 @@ import org.springframework.stereotype.Component;
 @Slf4j(topic = "JWT Utils")
 @RequiredArgsConstructor
 public class JwtUtils {
+
   private Key key;
 
   private final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
@@ -74,12 +74,16 @@ public class JwtUtils {
 
   // 개발 환경에서 어드민 관리자일 때, 토큰 만료 시간 변경
   public long getAccessTokenExpiration(UserRole role) {
-    if (isLocal() && UserRole.ADMIN.equals(role)) return ADMIN_LOCAL_ACCESS_EXP;
+    if (isLocal() && UserRole.ADMIN.equals(role)) {
+      return ADMIN_LOCAL_ACCESS_EXP;
+    }
     return JwtConstants.ACCESS_TOKEN_EXPIRATION;
   }
 
   public long getRefreshTokenExpiration(UserRole role) {
-    if (isLocal() && UserRole.ADMIN.equals(role)) return ADMIN_LOCAL_REFRESH_EXP;
+    if (isLocal() && UserRole.ADMIN.equals(role)) {
+      return ADMIN_LOCAL_REFRESH_EXP;
+    }
     return JwtConstants.REFRESH_TOKEN_EXPIRATION;
   }
 
@@ -87,7 +91,7 @@ public class JwtUtils {
     return "local".equalsIgnoreCase(activeProfile);
   }
 
-  public JwtTokenDto generateToken(String email, UserRole role){
+  public JwtTokenDto generateToken(String email, UserRole role) {
     Date now = new Date();
     String accessToken = Jwts.builder()
         .setSubject(email)
@@ -107,7 +111,7 @@ public class JwtUtils {
     return JwtTokenDto.of(accessToken, refreshToken);
   }
 
-  public JwtStatus validateToken(String tokenValue){
+  public JwtStatus validateToken(String tokenValue) {
     try {
       Jwts.parserBuilder()
           .setSigningKey(key).build().parseClaimsJws(tokenValue);
@@ -130,7 +134,7 @@ public class JwtUtils {
     }
   }
 
-  public Claims getClaims(String tokenValue){
+  public Claims getClaims(String tokenValue) {
     return Jwts.parserBuilder()
         .setSigningKey(key)
         .build()
@@ -138,7 +142,7 @@ public class JwtUtils {
         .getBody();
   }
 
-  public Authentication getAuthentication(String tokenValue){
+  public Authentication getAuthentication(String tokenValue) {
     Claims claims;
     try {
       claims = getClaims(tokenValue);
@@ -157,7 +161,7 @@ public class JwtUtils {
     return new UsernamePasswordAuthenticationToken(user, null, authorities);
   }
 
-  public void setAuthentication(Authentication authentication){
+  public void setAuthentication(Authentication authentication) {
     SecurityContextHolder.getContext().setAuthentication(authentication);
   }
 
@@ -175,7 +179,7 @@ public class JwtUtils {
         .orElseThrow(() -> new JwtCustomException(GlobalExceptionCode.MISSING_TOKEN));
 
     String storedRefreshToken = refreshTokenRepository.getByKey(
-        JwtConstants.REFRESH_TOKEN_HEADER+":"+email);
+        JwtConstants.REFRESH_TOKEN_HEADER + ":" + email);
 
     // 클라이언트 토큰과 저장된 토큰 비교
     if (!storedRefreshToken.equals(clientRefreshTokenValue)) {
@@ -183,7 +187,7 @@ public class JwtUtils {
     }
 
     JwtStatus jwtStatus = validateToken(storedRefreshToken);
-    switch (jwtStatus){
+    switch (jwtStatus) {
       case ACCESS -> {
         setResponseCookie(email, role, response);
       }
@@ -198,7 +202,7 @@ public class JwtUtils {
 
     ResponseCookie newAccessTokenCookie
         = cookieUtils.createCookie(
-            JwtConstants.ACCESS_TOKEN_HEADER, newAccessToken,
+        JwtConstants.ACCESS_TOKEN_HEADER, newAccessToken,
         getAccessTokenExpiration(UserRole.fromAuthority(role)) / 1000);
 
     response.addHeader(

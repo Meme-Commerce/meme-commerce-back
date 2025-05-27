@@ -14,7 +14,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
 
   private final ObjectMapper objectMapper;
 
-  public CustomAuthenticationEntryPoint(ObjectMapper objectMapper){
+  public CustomAuthenticationEntryPoint(ObjectMapper objectMapper) {
     this.objectMapper = objectMapper;
   }
 
@@ -23,7 +23,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
       AuthenticationException authException) throws IOException {
     String uri = request.getRequestURI();
 
-    if (uri.startsWith("/api")) {
+    if (uri != null && uri.startsWith("/api/")) {
       ErrorResponseDto error = ErrorResponseDto.of(
           Error.JWT_AUTHENTICATION_ERROR.getCode(),
           Error.JWT_AUTHENTICATION_ERROR.getMessage()
@@ -34,7 +34,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
       response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
       response.setContentType("application/json;charset=UTF-8");
       response.getWriter().write(objectMapper.writeValueAsString(body));
-    }else{
+    } else {
       response.sendRedirect("/login");
     }
   }

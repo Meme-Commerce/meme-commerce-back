@@ -151,7 +151,7 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(
       {UserCustomException.class, FileCustomException.class,
           ProfanityFilterCustomException.class, ProductCustomException.class,
-      CategoryCustomException.class, HashtagCustomException.class})
+          CategoryCustomException.class, HashtagCustomException.class})
   public ResponseEntity<CommonResponseDto<ErrorResponseDto>> handleCustomException(
       CustomException ex) {
     String category;
@@ -175,5 +175,5 @@ public class GlobalExceptionHandler {
             ErrorResponseDto.of(
                 ex.getErrorCode(), ex.getMessage()),
             category, HttpStatus.BAD_REQUEST.value()));
-     }
+  }
 }

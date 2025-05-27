@@ -1,7 +1,7 @@
 package com.example.memecommerceback.global.oauth.handler;
 
-import com.example.memecommerceback.domain.users.entity.UserRole;
 import com.example.memecommerceback.domain.users.entity.User;
+import com.example.memecommerceback.domain.users.entity.UserRole;
 import com.example.memecommerceback.global.jwt.JwtConstants;
 import com.example.memecommerceback.global.jwt.JwtUtils;
 import com.example.memecommerceback.global.jwt.cookie.CookieConstants;
@@ -74,7 +74,6 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         CookieConstants.SET_COOKIE, accessTokenCookie.toString());
     response.addHeader(
         CookieConstants.SET_COOKIE, refreshTokenCookie.toString());
-
 
     response.sendRedirect(redirectUri);
 

@@ -6,6 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Getter
 @ConfigurationProperties(prefix = "cookie")
 public class CookieProperties {
+
   private final String domain;
   private final String sameSite;
   private final boolean httpOnly;

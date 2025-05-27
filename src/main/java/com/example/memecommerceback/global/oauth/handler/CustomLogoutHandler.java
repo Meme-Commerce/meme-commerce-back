@@ -64,10 +64,10 @@ public class CustomLogoutHandler implements LogoutHandler {
           || refreshStatus == JwtStatus.EXPIRED) {
         String email = jwtUtils.getEmailFromToken(refreshToken);
         String redisKey = JwtConstants.REFRESH_TOKEN_HEADER + ":" + email;
-            if (refreshTokenRepository.getByKey(redisKey) != null) {
-              refreshTokenRepository.deleteToken(redisKey);
-              log.info("delete refresh token by refresh token success!");
-            }
+        if (refreshTokenRepository.getByKey(redisKey) != null) {
+          refreshTokenRepository.deleteToken(redisKey);
+          log.info("delete refresh token by refresh token success!");
+        }
       }
     } catch (Exception e) {
       log.warn("logout 중 예외 발생: {}", e.getMessage());
@@ -82,12 +82,12 @@ public class CustomLogoutHandler implements LogoutHandler {
       response.setStatus(status);
       response.setContentType("application/json;charset=UTF-8");
 
-      if(e instanceof JwtCustomException jwtEx){
+      if (e instanceof JwtCustomException jwtEx) {
         message = Error.JWT_AUTHENTICATION_ERROR.getMessage();
         errorCode = Error.JWT_AUTHENTICATION_ERROR.getCode();
         errorResponse = ErrorResponseDto.of(errorCode, jwtEx.getMessage());
         commonResponseDto = new CommonResponseDto<>(errorResponse, message, status);
-      }else{
+      } else {
         errorResponse = ErrorResponseDto.of(errorCode, e.getMessage());
         commonResponseDto = new CommonResponseDto<>(errorResponse, message, status);
       }
