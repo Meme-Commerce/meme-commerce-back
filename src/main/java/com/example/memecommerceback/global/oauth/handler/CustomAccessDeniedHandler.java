@@ -23,7 +23,7 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
       AccessDeniedException accessDeniedException) throws IOException {
     String uri = request.getRequestURI();
 
-    if(uri.startsWith("/api/v1")){
+    if(uri.startsWith("/api")){
       ErrorResponseDto error = ErrorResponseDto.of(
           Error.AUTH_DENIED_ERROR.getCode(),
           Error.AUTH_DENIED_ERROR.getMessage()
