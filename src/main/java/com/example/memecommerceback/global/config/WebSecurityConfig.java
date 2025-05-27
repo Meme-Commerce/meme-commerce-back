@@ -3,10 +3,13 @@ package com.example.memecommerceback.global.config;
 import com.example.memecommerceback.global.jwt.JwtAuthorizationFilter;
 import com.example.memecommerceback.global.jwt.JwtUtils;
 import com.example.memecommerceback.global.jwt.cookie.CookieUtils;
+import com.example.memecommerceback.global.oauth.handler.CustomAccessDeniedHandler;
+import com.example.memecommerceback.global.oauth.handler.CustomAuthenticationEntryPoint;
 import com.example.memecommerceback.global.oauth.handler.CustomLogoutHandler;
 import com.example.memecommerceback.global.oauth.handler.CustomLogoutSuccessHandler;
 import com.example.memecommerceback.global.oauth.handler.OAuth2SuccessHandler;
 import com.example.memecommerceback.global.oauth.service.CustomOAuth2UserService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -33,6 +36,7 @@ public class WebSecurityConfig {
 
   private final JwtUtils jwtUtils;
   private final CookieUtils cookieUtils;
+  private final ObjectMapper objectMapper;
 
   private final CustomLogoutHandler customLogoutHandler;
   private final OAuth2SuccessHandler oAuth2SuccessHandler;
@@ -98,6 +102,9 @@ public class WebSecurityConfig {
             .deleteCookies("remember-me")
             .logoutSuccessHandler(customLogoutSuccessHandler)
         )
+        .exceptionHandling(e -> e
+            .authenticationEntryPoint(new CustomAuthenticationEntryPoint(objectMapper))
+            .accessDeniedHandler(new CustomAccessDeniedHandler(objectMapper)))
         .addFilterBefore(jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
     return http.build();
   }

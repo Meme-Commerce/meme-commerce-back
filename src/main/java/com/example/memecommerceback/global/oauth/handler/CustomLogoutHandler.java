@@ -2,13 +2,18 @@ package com.example.memecommerceback.global.oauth.handler;
 
 import com.example.memecommerceback.global.exception.GlobalExceptionCode;
 import com.example.memecommerceback.global.exception.JwtCustomException;
+import com.example.memecommerceback.global.exception.dto.CommonResponseDto;
+import com.example.memecommerceback.global.exception.dto.Error;
+import com.example.memecommerceback.global.exception.dto.ErrorResponseDto;
 import com.example.memecommerceback.global.jwt.JwtConstants;
 import com.example.memecommerceback.global.jwt.JwtStatus;
 import com.example.memecommerceback.global.jwt.JwtUtils;
 import com.example.memecommerceback.global.jwt.cookie.CookieUtils;
 import com.example.memecommerceback.global.redis.repository.RefreshTokenRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -66,6 +71,36 @@ public class CustomLogoutHandler implements LogoutHandler {
       }
     } catch (Exception e) {
       log.warn("logout 중 예외 발생: {}", e.getMessage());
+
+      int status = HttpServletResponse.SC_UNAUTHORIZED;
+      String message = Error.LOGOUT_ERROR.getMessage();
+      String errorCode = Error.LOGOUT_ERROR.getCode();
+
+      ErrorResponseDto errorResponse = null;
+      CommonResponseDto<ErrorResponseDto> commonResponseDto = null;
+
+      response.setStatus(status);
+      response.setContentType("application/json;charset=UTF-8");
+
+      if(e instanceof JwtCustomException jwtEx){
+        message = Error.JWT_AUTHENTICATION_ERROR.getMessage();
+        errorCode = Error.JWT_AUTHENTICATION_ERROR.getCode();
+        errorResponse = ErrorResponseDto.of(errorCode, jwtEx.getMessage());
+        commonResponseDto = new CommonResponseDto<>(errorResponse, message, status);
+      }else{
+        errorResponse = ErrorResponseDto.of(errorCode, e.getMessage());
+        commonResponseDto = new CommonResponseDto<>(errorResponse, message, status);
+      }
+
+      try {
+        response.getWriter().write(
+            new ObjectMapper().writeValueAsString(commonResponseDto)
+        );
+        response.getWriter().flush();
+      } catch (IOException ioException) {
+        log.error("로그아웃 에러 응답 전송 중 오류: {}", ioException.getMessage());
+      }
+      return;
     } finally {
       cookieUtils.deleteCookie(response, JwtConstants.ACCESS_TOKEN_HEADER);
       cookieUtils.deleteCookie(response, JwtConstants.REFRESH_TOKEN_HEADER);

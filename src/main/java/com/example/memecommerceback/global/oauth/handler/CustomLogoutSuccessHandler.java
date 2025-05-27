@@ -1,5 +1,7 @@
 package com.example.memecommerceback.global.oauth.handler;
 
+import com.example.memecommerceback.global.exception.dto.CommonResponseDto;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -19,6 +21,12 @@ public class CustomLogoutSuccessHandler implements LogoutSuccessHandler {
     log.info("로그아웃 성공!");
     response.setStatus(HttpServletResponse.SC_OK);
     response.setContentType("application/json;charset=UTF-8");
-    response.getWriter().write("{\"message\": \"로그아웃 성공\"}");
+
+    CommonResponseDto<Void> successResponse = new CommonResponseDto<>(
+        null, "로그아웃 성공", HttpServletResponse.SC_OK);
+    response.getWriter().write(
+        new ObjectMapper().writeValueAsString(successResponse));
+
+    response.getWriter().flush();
   }
 }
