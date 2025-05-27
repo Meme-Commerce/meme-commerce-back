@@ -116,8 +116,4 @@ public class Product extends CommonEntity {
     this.sellEndDate = sellEndDate;
   }
 
-  public void addCategoryList(List<ProductCategory> productCategoryList){
-    this.productCategoryList.clear();
-    this.productCategoryList.addAll(productCategoryList);
-  }
 }
