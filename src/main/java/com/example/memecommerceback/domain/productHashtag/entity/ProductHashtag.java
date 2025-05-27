@@ -1,6 +1,6 @@
-package com.example.memecommerceback.domain.productCategory.entity;
+package com.example.memecommerceback.domain.productHashtag.entity;
 
-import com.example.memecommerceback.domain.categories.entity.Category;
+import com.example.memecommerceback.domain.hashtags.entity.Hashtag;
 import com.example.memecommerceback.domain.products.entity.Product;
 import com.example.memecommerceback.global.common.CommonEntity;
 import jakarta.persistence.Column;
@@ -23,27 +23,27 @@ import lombok.NoArgsConstructor;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "product_category")
-public class ProductCategory extends CommonEntity {
+@Table(name = "product_hashtag")
+public class ProductHashtag extends CommonEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.SEQUENCE,
-      generator = "product_category_seq_generator")
+      generator = "product_hashtag_seq_generator")
   @SequenceGenerator(
-      name = "product_category_seq_generator",
-      sequenceName = "product_category_seq",
+      name = "product_hashtag_seq_generator",
+      sequenceName = "product_hashtag_seq",
       allocationSize = 1
   )
   private Long id;
 
   @Column(nullable = false)
-  private String categoryName;
+  private String hashtagName;
 
   @JoinColumn(name = "product_id")
   @ManyToOne(fetch = FetchType.LAZY)
   private Product product;
 
-  @JoinColumn(name = "category_id")
+  @JoinColumn(name = "hashtag_id")
   @ManyToOne(fetch = FetchType.LAZY)
-  private Category category;
+  private Hashtag hashtag;
 }

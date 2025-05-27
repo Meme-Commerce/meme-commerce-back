@@ -55,6 +55,7 @@ public enum ProductStatus {
       // ON_SALE은 해당 시간에 ON_SALE로 자동으로 변경되도록 함.
       // TEMP_OUT_OF_STOCK은 재고가 0이 되면 자동으로 변경되도록 함.
       SELLER_ALLOWED_TRANSITIONS = Map.of(
+          PENDING, Set.of(PENDING),
           HIDDEN, Set.of(RESALE_SOON),
           ON_SALE, Set.of(HIDDEN, RESALE_SOON),
           RESALE_SOON, Set.of(HIDDEN),

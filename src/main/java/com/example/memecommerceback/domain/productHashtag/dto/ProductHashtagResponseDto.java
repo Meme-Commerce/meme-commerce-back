@@ -1,4 +1,4 @@
-package com.example.memecommerceback.domain.productCategory.dto;
+package com.example.memecommerceback.domain.productHashtag.dto;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -11,10 +11,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProductCategoryResponseDto {
+public class ProductHashtagResponseDto {
 
   private UUID productId;
-  private Long categoryId;
-  private String categoryName;
+  private Long hashtagId;
+  private String hashtagName;
   private LocalDateTime createdAt;
 }

@@ -4,6 +4,7 @@ import com.example.memecommerceback.domain.hashtags.dto.HashtagRequestDto;
 import com.example.memecommerceback.domain.hashtags.dto.HashtagResponseDto;
 import com.example.memecommerceback.domain.hashtags.dto.HashtagResponseDto.ReadOneDto;
 import com.example.memecommerceback.domain.hashtags.entity.Hashtag;
+import java.util.List;
 import org.springframework.data.domain.Page;
 
 /**
@@ -63,4 +64,6 @@ public interface HashtagServiceV1 {
   Hashtag findById(Long hashtagId);
 
   Page<ReadOneDto> readPage(int page, int size);
+
+  List<Hashtag> findAllById(List<Long> hashtagIdList);
 }

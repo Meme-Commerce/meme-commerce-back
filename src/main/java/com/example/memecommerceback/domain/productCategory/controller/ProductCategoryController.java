@@ -1,7 +1,6 @@
 package com.example.memecommerceback.domain.productCategory.controller;
 
 import com.example.memecommerceback.domain.productCategory.service.ProductCategoryServiceV1;
-import com.example.memecommerceback.global.exception.dto.CommonResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;

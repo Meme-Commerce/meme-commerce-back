@@ -18,9 +18,6 @@ public class PageUtils {
   public static final String PRODUCT = "Product";
 
   public static void validateProductSortFields(List<String> sortList) {
-    sortList.forEach(sort -> {
-      System.out.println("requested Sort : "+sort);
-    });
     if (sortList == null || sortList.isEmpty()) return;
 
     Set<String> allowedFields = Set.of(

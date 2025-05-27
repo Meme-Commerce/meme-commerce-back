@@ -2,6 +2,7 @@ package com.example.memecommerceback.domain.products.entity;
 
 import com.example.memecommerceback.domain.images.entity.Image;
 import com.example.memecommerceback.domain.productCategory.entity.ProductCategory;
+import com.example.memecommerceback.domain.productHashtag.entity.ProductHashtag;
 import com.example.memecommerceback.domain.users.entity.User;
 import com.example.memecommerceback.global.common.CommonEntity;
 import jakarta.persistence.CascadeType;
@@ -62,10 +63,8 @@ public class Product extends CommonEntity {
   @Builder.Default
   private Integer likeCount = 0;
 
-  @Column(nullable = false)
   private LocalDateTime sellStartDate;
 
-  @Column(nullable = false)
   private LocalDateTime sellEndDate;
 
   // relations
@@ -76,6 +75,10 @@ public class Product extends CommonEntity {
   @Builder.Default
   @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<ProductCategory> productCategoryList = new ArrayList<>();
+
+  @Builder.Default
+  @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<ProductHashtag> productHashtagList = new ArrayList<>();
 
   @JoinColumn(name = "user_id")
   @ManyToOne(fetch = FetchType.LAZY)

@@ -7,15 +7,16 @@ import com.example.memecommerceback.domain.products.entity.Product;
 import java.util.List;
 
 public class ProductCategoryConverter {
+
   public static List<ProductCategory> toEntityList(
-      Product product, List<Category> categoryList){
+      Product product, List<Category> categoryList) {
     return categoryList.stream().map(category -> {
       return toEntity(product, category);
     }).toList();
   }
 
   public static ProductCategory toEntity(
-      Product product, Category category){
+      Product product, Category category) {
     return ProductCategory.builder()
         .product(product)
         .category(category)
@@ -24,13 +25,13 @@ public class ProductCategoryConverter {
   }
 
   public static List<ProductCategoryResponseDto> toResponseDtoList(
-      List<ProductCategory> productCategoryList){
+      List<ProductCategory> productCategoryList) {
     return productCategoryList.stream().map(
         ProductCategoryConverter::toResponseDto).toList();
   }
 
   public static ProductCategoryResponseDto toResponseDto(
-      ProductCategory productCategory){
+      ProductCategory productCategory) {
     return ProductCategoryResponseDto.builder()
         .categoryId(productCategory.getCategory().getId())
         .productId(productCategory.getProduct().getId())

@@ -25,6 +25,7 @@ public class ProductCategoryServiceImplV1 implements ProductCategoryServiceV1 {
 
     // 2. 새로운 연결 추가
     List<Category> categories = categoryService.findAllById(categoryIdList);
+
     List<ProductCategory> newProductCategories = categories.stream()
         .map(category -> ProductCategory.builder()
             .product(product)
