@@ -49,6 +49,14 @@ public class ProductRequestDto {
         description = "상품 판매 종료일 (ISO 8601 형식의 날짜/시간)",
         example = "2025-05-30T23:59:59")
     private LocalDateTime sellEndDate;
+    @Schema(
+        description = "연결할 카테고리 아이디 리스트", example = "[1,2,3]")
+    @Size(max = 10, message = "카테고리는 최대 10개까지 연결 가능합니다.")
+    private List<Long> categoryIdList;
+    @Schema(
+        description = "연결할 해시태그 아이디 리스트", example = "[1,2,3]")
+    @Size(max = 10, message = "해시태그는 최대 10개까지 연결 가능합니다.")
+    private List<Long> hashtagIdList;
   }
 
   @Getter
@@ -76,7 +84,9 @@ public class ProductRequestDto {
     @Schema(description = "상품 설명", example = "아름다운 앤티크 램프")
     private String description;
     @NotNull(message = "상품 상태는 필수 입력란입니다.")
-    @Schema(description = "상품 상태", example = "PENDING")
+    @Schema(description = "상품 상태",
+        example = "[PENDING, TEMP_OUT_OF_STOCK, HIDDEN, "
+            + "ON_SALE, RESALE_SOON, REJECTED] 중 선택")
     private ProductStatus status;
     @Schema(
         description = "상품 판매 시작일 (ISO 8601 형식의 날짜/시간)",
@@ -86,6 +96,12 @@ public class ProductRequestDto {
         description = "상품 판매 종료일 (ISO 8601 형식의 날짜/시간)",
         example = "2025-05-30T23:59:59")
     private LocalDateTime sellEndDate;
+    @Schema(
+        description = "변경할 카테고리 아이디 리스트", example = "[1,2,3]")
+    private List<Long> categoryIdList;
+    @Schema(
+        description = "변경할 해시태그 아이디 리스트", example = "[1,2,3]")
+    private List<Long> hashtagIdList;
   }
 
   @Getter

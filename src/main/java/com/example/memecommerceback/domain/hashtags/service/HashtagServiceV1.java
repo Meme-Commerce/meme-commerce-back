@@ -4,6 +4,7 @@ import com.example.memecommerceback.domain.hashtags.dto.HashtagRequestDto;
 import com.example.memecommerceback.domain.hashtags.dto.HashtagResponseDto;
 import com.example.memecommerceback.domain.hashtags.dto.HashtagResponseDto.ReadOneDto;
 import com.example.memecommerceback.domain.hashtags.entity.Hashtag;
+import java.util.List;
 import org.springframework.data.domain.Page;
 
 /**
@@ -63,4 +64,16 @@ public interface HashtagServiceV1 {
   Hashtag findById(Long hashtagId);
 
   Page<ReadOneDto> readPage(int page, int size);
+
+  /**
+   * 해시테그 ID 리스트로 여러 해시테그 엔티티를 조회합니다.
+   * <p>
+   * 내부적으로 사용되는 메소드로, 여러 해시테그 엔티티 객체를 한 번에 조회합니다.
+   * 상품-해시테그 연관관계 관리 등에서 활용됩니다.
+   * </p>
+   *
+   * @param hashtagIdList 조회할 해시테그 ID 리스트
+   * @return 해시테그 엔티티 리스트
+   */
+  List<Hashtag> findAllById(List<Long> hashtagIdList);
 }

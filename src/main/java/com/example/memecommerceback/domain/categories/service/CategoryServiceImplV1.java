@@ -9,9 +9,13 @@ import com.example.memecommerceback.domain.categories.exception.CategoryExceptio
 import com.example.memecommerceback.domain.categories.repository.CategoryRepository;
 import com.example.memecommerceback.domain.hashtags.exception.HashtagCustomException;
 import com.example.memecommerceback.domain.hashtags.exception.HashtagExceptionCode;
+import com.example.memecommerceback.domain.products.entity.Product;
+import com.example.memecommerceback.domain.products.exception.ProductCustomException;
+import com.example.memecommerceback.domain.products.exception.ProductExceptionCode;
 import com.example.memecommerceback.global.service.ProfanityFilterService;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -91,5 +95,20 @@ public class CategoryServiceImplV1 implements CategoryServiceV1{
   public Category findById(Long categoryId){
     return categoryRepository.findById(categoryId).orElseThrow(
         ()-> new CategoryCustomException(CategoryExceptionCode.NOT_FOUND));
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public List<Category> findAllById(List<Long> categoryIdList){
+    if(categoryIdList.isEmpty()){
+      return List.of();
+    }
+    List<Category> categoryList
+        = categoryRepository.findAllById(categoryIdList);
+
+    if(categoryList.size() != categoryIdList.size()){
+      throw new CategoryCustomException(CategoryExceptionCode.NOT_FOUND);
+    }
+    return categoryList;
   }
 }

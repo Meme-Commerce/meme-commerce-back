@@ -2,6 +2,8 @@ package com.example.memecommerceback.domain.products.service;
 
 import com.example.memecommerceback.domain.images.entity.Image;
 import com.example.memecommerceback.domain.images.service.ImageServiceV1;
+import com.example.memecommerceback.domain.productCategory.service.ProductCategoryServiceV1;
+import com.example.memecommerceback.domain.productHashtag.service.ProductHashtagServiceV1;
 import com.example.memecommerceback.domain.products.converter.ProductConverter;
 import com.example.memecommerceback.domain.products.dto.ProductRequestDto;
 import com.example.memecommerceback.domain.products.dto.ProductResponseDto;
@@ -40,6 +42,9 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
 
   private final ImageServiceV1 imageService;
   private final ProfanityFilterService profanityFilterService;
+  private final ProductHashtagServiceV1 productHashtagService;
+  private final ProductCategoryServiceV1 productCategoryService;
+
   private final ProductRepository productRepository;
 
   @Override
@@ -58,6 +63,19 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
 
     // 3. 상품을 만듦.
     Product product = ProductConverter.toEntity(requestDto, loginUser);
+
+    // 4. 상품에 카테고리, 해시태그 연결
+    if (requestDto.getCategoryIdList() != null
+        && !requestDto.getCategoryIdList().isEmpty()) {
+      productCategoryService.resetCategories(
+          product, requestDto.getCategoryIdList());
+    }
+
+    if (requestDto.getHashtagIdList() != null
+        && !requestDto.getHashtagIdList().isEmpty()) {
+      productHashtagService.resetHashtags(
+          product, requestDto.getHashtagIdList());
+    }
 
     List<S3ResponseDto> uploadedImages = null;
     List<Image> imageList = null;
@@ -130,6 +148,16 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
           afterStatus, null, null,
           requestDto.getName(), requestDto.getDescription(),
           requestDto.getPrice(), requestDto.getStock());
+    }
+
+    if (requestDto.getCategoryIdList() != null) {
+      productCategoryService.resetCategories(
+          product, requestDto.getCategoryIdList());
+    }
+
+    if (requestDto.getHashtagIdList() != null) {
+      productHashtagService.resetHashtags(
+          product, requestDto.getHashtagIdList());
     }
 
     List<S3ResponseDto> uploadedImages = null;

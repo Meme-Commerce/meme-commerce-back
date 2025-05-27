@@ -1,5 +1,7 @@
 package com.example.memecommerceback.domain.hashtags.service;
 
+import com.example.memecommerceback.domain.categories.exception.CategoryCustomException;
+import com.example.memecommerceback.domain.categories.exception.CategoryExceptionCode;
 import com.example.memecommerceback.domain.hashtags.converter.HashtagConverter;
 import com.example.memecommerceback.domain.hashtags.dto.HashtagRequestDto;
 import com.example.memecommerceback.domain.hashtags.dto.HashtagResponseDto;
@@ -88,5 +90,20 @@ public class HashtagServiceImplV1 implements HashtagServiceV1 {
   public Hashtag findById(Long hashtagId) {
     return hashtagRepository.findById(hashtagId).orElseThrow(
         () -> new HashtagCustomException(HashtagExceptionCode.NOT_FOUND));
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public List<Hashtag> findAllById(List<Long> hashtagIdList) {
+    if(hashtagIdList.isEmpty()){
+      return List.of();
+    }
+    List<Hashtag> hashtagList
+        = hashtagRepository.findAllById(hashtagIdList);
+
+    if(hashtagList.size() != hashtagIdList.size()){
+      throw new HashtagCustomException(HashtagExceptionCode.NOT_FOUND);
+    }
+    return hashtagList;
   }
 }

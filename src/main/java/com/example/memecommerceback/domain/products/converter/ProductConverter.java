@@ -2,6 +2,8 @@ package com.example.memecommerceback.domain.products.converter;
 
 import com.example.memecommerceback.domain.images.converter.ImageConverter;
 import com.example.memecommerceback.domain.images.entity.Image;
+import com.example.memecommerceback.domain.productCategory.converter.ProductCategoryConverter;
+import com.example.memecommerceback.domain.productHashtag.converter.ProductHashtagConverter;
 import com.example.memecommerceback.domain.products.dto.ProductRequestDto;
 import com.example.memecommerceback.domain.products.dto.ProductResponseDto;
 import com.example.memecommerceback.domain.products.entity.Product;
@@ -34,7 +36,13 @@ public class ProductConverter {
         .price(product.getPrice())
         .ownerName(ownerName)
         .imageResponseDtoList(ImageConverter.toResponseDtoList(productImageList))
+        .productCategoryResponseDtoList(
+            ProductCategoryConverter.toResponseDtoList(product.getProductCategoryList()))
+        .productHashtagResponseDtoList(
+            ProductHashtagConverter.toResponseDtoList(product.getProductHashtagList()))
         .status(product.getStatus())
+        .sellStartDate(product.getSellStartDate())
+        .sellEndDate(product.getSellEndDate())
         .build();
   }
 

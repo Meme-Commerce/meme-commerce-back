@@ -1,6 +1,9 @@
 package com.example.memecommerceback.domain.products.dto;
 
 import com.example.memecommerceback.domain.images.dto.ImageResponseDto;
+import com.example.memecommerceback.domain.productCategory.dto.ProductCategoryResponseDto;
+import com.example.memecommerceback.domain.productCategory.entity.ProductCategory;
+import com.example.memecommerceback.domain.productHashtag.dto.ProductHashtagResponseDto;
 import com.example.memecommerceback.domain.products.entity.ProductStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
@@ -36,6 +39,12 @@ public class ProductResponseDto {
 
     @Schema(description = "상품 이미지 리스트", example = "[]")
     private List<ImageResponseDto> imageResponseDtoList;
+
+    @Schema(description = "상품 카테고리 리스트", example = "[전자기기, 생활용품]")
+    private List<ProductCategoryResponseDto> productCategoryResponseDtoList;
+
+    @Schema(description = "상품 해시태그 리스트", example = "[편안함, 엔티크]")
+    private List<ProductHashtagResponseDto> productHashtagResponseDtoList;
 
     @Schema(description = "상품 재고 수량", example = "100")
     private Long stock;
@@ -98,6 +107,13 @@ public class ProductResponseDto {
 
     @Schema(description = "상품 판매 종료일 (ISO 8601 형식의 날짜/시간)", example = "2025-05-30T23:59:59")
     private LocalDateTime sellEndDate;
+
+    @Schema(
+        description = "연결된 카테고리 아이디 리스트", example = "[1,2,3]")
+    private List<Long> categoryIdList;
+    @Schema(
+        description = "연결된 해시태그 아이디 리스트", example = "[1,2,3]")
+    private List<Long> hashtagIdList;
   }
 
   @Getter
@@ -127,6 +143,13 @@ public class ProductResponseDto {
 
     @Schema(description = "상품 판매 종료일 (ISO 8601 형식의 날짜/시간)", example = "2025-05-30T23:59:59")
     private LocalDateTime sellEndDate;
+
+    @Schema(
+        description = "수정된 카테고리 아이디 리스트", example = "[1,2,3]")
+    private List<Long> categoryIdList;
+    @Schema(
+        description = "수정된 해시태그 아이디 리스트", example = "[1,2,3]")
+    private List<Long> hashtagIdList;
   }
 
   @Getter
@@ -174,5 +197,12 @@ public class ProductResponseDto {
 
     @Schema(description = "상품 판매 종료일 (ISO 8601 형식의 날짜/시간)", example = "2025-05-30T23:59:59")
     private LocalDateTime sellEndDate;
+
+    @Schema(
+        description = "연결된 카테고리 아이디 리스트", example = "[1,2,3]")
+    private List<Long> categoryIdList;
+    @Schema(
+        description = "연결된 해시태그 아이디 리스트", example = "[1,2,3]")
+    private List<Long> hashtagIdList;
   }
 }
