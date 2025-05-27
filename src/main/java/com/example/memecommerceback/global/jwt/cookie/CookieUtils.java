@@ -17,7 +17,7 @@ public class CookieUtils {
   private final CookieProperties cookieProperties;
 
   public ResponseCookie createCookie(
-      String name, String value, long maxAgeSeconds){
+      String name, String value, long maxAgeSeconds) {
     return ResponseCookie.from(name, value)
         .domain(cookieProperties.getDomain())
         .sameSite(cookieProperties.getSameSite())
@@ -60,9 +60,13 @@ public class CookieUtils {
 
   private Cookie getCookieByName(HttpServletRequest request, String name) {
     Cookie[] cookies = request.getCookies();
-    if (cookies == null) return null;
+    if (cookies == null) {
+      return null;
+    }
     for (Cookie cookie : cookies) {
-      if (name.equals(cookie.getName())) return cookie;
+      if (name.equals(cookie.getName())) {
+        return cookie;
+      }
     }
     return null;
   }

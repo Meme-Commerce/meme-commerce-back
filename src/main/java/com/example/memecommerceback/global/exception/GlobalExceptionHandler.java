@@ -5,7 +5,6 @@ import com.example.memecommerceback.domain.files.exception.FileCustomException;
 import com.example.memecommerceback.domain.hashtags.exception.HashtagCustomException;
 import com.example.memecommerceback.domain.products.exception.ProductCustomException;
 import com.example.memecommerceback.domain.users.exception.UserCustomException;
-import com.example.memecommerceback.global.exception.ProfanityFilterCustomException;
 import com.example.memecommerceback.global.exception.dto.CommonResponseDto;
 import com.example.memecommerceback.global.exception.dto.Error;
 import com.example.memecommerceback.global.exception.dto.ErrorResponseDto;
@@ -18,7 +17,6 @@ import java.util.Set;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -153,7 +151,7 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(
       {UserCustomException.class, FileCustomException.class,
           ProfanityFilterCustomException.class, ProductCustomException.class,
-      CategoryCustomException.class, HashtagCustomException.class})
+          CategoryCustomException.class, HashtagCustomException.class})
   public ResponseEntity<CommonResponseDto<ErrorResponseDto>> handleCustomException(
       CustomException ex) {
     String category;
@@ -177,5 +175,5 @@ public class GlobalExceptionHandler {
             ErrorResponseDto.of(
                 ex.getErrorCode(), ex.getMessage()),
             category, HttpStatus.BAD_REQUEST.value()));
-     }
+  }
 }

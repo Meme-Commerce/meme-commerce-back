@@ -29,7 +29,8 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     if (loggedRequests.add(path)) {
       log.info("Filtering path: {}", path);
     }
-    return path.startsWith("/oauth2/") || path.startsWith("/login/oauth2") || path.startsWith("/login");
+    return path.startsWith("/oauth2/") || path.startsWith("/login/oauth2") || path.startsWith(
+        "/login");
   }
 
   @Override
