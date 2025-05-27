@@ -84,7 +84,9 @@ public class ProductRequestDto {
     @Schema(description = "상품 설명", example = "아름다운 앤티크 램프")
     private String description;
     @NotNull(message = "상품 상태는 필수 입력란입니다.")
-    @Schema(description = "상품 상태", example = "PENDING")
+    @Schema(description = "상품 상태",
+        example = "[PENDING, TEMP_OUT_OF_STOCK, HIDDEN, "
+            + "ON_SALE, RESALE_SOON, REJECTED] 중 선택")
     private ProductStatus status;
     @Schema(
         description = "상품 판매 시작일 (ISO 8601 형식의 날짜/시간)",
