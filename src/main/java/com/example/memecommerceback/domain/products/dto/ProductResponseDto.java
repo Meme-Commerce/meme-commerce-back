@@ -40,10 +40,10 @@ public class ProductResponseDto {
     @Schema(description = "상품 이미지 리스트", example = "[]")
     private List<ImageResponseDto> imageResponseDtoList;
 
-    @Schema(description = "상품 이미지 리스트", example = "[]")
+    @Schema(description = "상품 카테고리 리스트", example = "[전자기기, 생활용품]")
     private List<ProductCategoryResponseDto> productCategoryResponseDtoList;
 
-    @Schema(description = "상품 이미지 리스트", example = "[]")
+    @Schema(description = "상품 해시태그 리스트", example = "[편안함, 엔티크]")
     private List<ProductHashtagResponseDto> productHashtagResponseDtoList;
 
     @Schema(description = "상품 재고 수량", example = "100")

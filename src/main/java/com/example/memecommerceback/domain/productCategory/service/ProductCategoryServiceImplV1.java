@@ -35,7 +35,7 @@ public class ProductCategoryServiceImplV1 implements ProductCategoryServiceV1 {
         .toList();
 
     product.getProductCategoryList().addAll(newProductCategories);
-    productCategoryRepository.saveAll(newProductCategories);
+    // productCategoryRepository.saveAll(newProductCategories);
   }
 
 }

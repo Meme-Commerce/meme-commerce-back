@@ -34,6 +34,6 @@ public class ProductHashtagServiceImplV1 implements ProductHashtagServiceV1 {
         .toList();
 
     product.getProductHashtagList().addAll(newProductHashtags);
-    productHashtagRepository.saveAll(newProductHashtags);
+    // productHashtagRepository.saveAll(newProductHashtags);
   }
 }

@@ -51,9 +51,11 @@ public class ProductRequestDto {
     private LocalDateTime sellEndDate;
     @Schema(
         description = "연결할 카테고리 아이디 리스트", example = "[1,2,3]")
+    @Size(max = 10, message = "카테고리는 최대 10개까지 연결 가능합니다.")
     private List<Long> categoryIdList;
     @Schema(
         description = "연결할 해시태그 아이디 리스트", example = "[1,2,3]")
+    @Size(max = 10, message = "해시태그는 최대 10개까지 연결 가능합니다.")
     private List<Long> hashtagIdList;
   }
 

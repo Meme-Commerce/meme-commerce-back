@@ -79,6 +79,15 @@ public interface CategoryServiceV1 {
    * @return 카테고리 목록 페이지(Page) 객체 (각 항목은 ReadOneDto로 반환)
    */
   Page<CategoryResponseDto.ReadOneDto> readPage(int page, int size);
-
-  List<Category> findAllById(List<Long> cateogryIdList);
+  /**
+   * 카테고리 ID 리스트로 여러 카테고리 엔티티를 조회합니다.
+   * <p>
+   * 내부적으로 사용되는 메소드로, 여러 카테고리 엔티티 객체를 한 번에 조회합니다.
+   * 상품-카테고리 연관관계 관리 등에서 활용됩니다.
+   * </p>
+   *
+   * @param categoryIdList 조회할 카테고리 ID 리스트
+   * @return 카테고리 엔티티 리스트
+   */
+  List<Category> findAllById(List<Long> categoryIdList);
 }
