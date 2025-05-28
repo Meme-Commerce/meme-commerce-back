@@ -27,6 +27,12 @@ public enum UserExceptionCode {
   ALREADY_COMPLETED_OR_PENDING_STATUS(
       HttpStatus.BAD_REQUEST, "USER-006",
       "이미 완료된 상태(거절, 판매자 승인)이거나 검수 중인 상태입니다."),
+  ALREADY_COMPLETED_STATUS(
+      HttpStatus.BAD_REQUEST, "USER-007",
+      "이미 검수가 완료된 상태입니다."),
+  CANNOT_CHANGE_ADMIN_ROLE(
+      HttpStatus.BAD_REQUEST, "USER-008",
+      "관리자는 다른 관리자의 권한을 변경할 수 없습니다."),
   ;
 
   private final HttpStatus httpStatus;

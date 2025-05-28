@@ -2,6 +2,7 @@ package com.example.memecommerceback.domain.files.service;
 
 import com.example.memecommerceback.domain.files.converter.FileConverter;
 import com.example.memecommerceback.domain.files.entity.File;
+import com.example.memecommerceback.domain.files.entity.FileType;
 import com.example.memecommerceback.domain.files.exception.FileCustomException;
 import com.example.memecommerceback.domain.files.exception.FileExceptionCode;
 import com.example.memecommerceback.domain.files.repository.FileRepository;
@@ -26,11 +27,11 @@ public class FileServiceImplV1 implements FileServiceV1 {
   @Transactional
   public List<File> uploadUserFileList(
       List<MultipartFile> multipartFileList, User owner) {
-    if(multipartFileList == null){
+    if (multipartFileList == null) {
       throw new FileCustomException(FileExceptionCode.EMPTY_FILE_LIST);
     }
-    for(MultipartFile multipartFile : multipartFileList){
-      if( multipartFile == null || multipartFile.isEmpty()){
+    for (MultipartFile multipartFile : multipartFileList) {
+      if (multipartFile == null || multipartFile.isEmpty()) {
         throw new FileCustomException(FileExceptionCode.EMPTY_FILE);
       }
     }
@@ -40,7 +41,9 @@ public class FileServiceImplV1 implements FileServiceV1 {
     List<S3FileResponseDto> s3ResponseDtoList
         = s3Service.uploadCertificateFileList(
         multipartFileList, owner.getNickname());
-    List<File> fileList = FileConverter.toEntityList(s3ResponseDtoList, owner);
+    List<File> fileList
+        = FileConverter.toEntityList(
+        s3ResponseDtoList, owner, FileType.SELLER_CERTIFICATE);
     fileRepository.saveAll(fileList);
     return fileList;
   }
@@ -48,10 +51,22 @@ public class FileServiceImplV1 implements FileServiceV1 {
   @Override
   @Transactional
   public void deleteUserWithFiles(UUID ownerId) {
-    List<File> fileList = fileRepository.findAllByOwnerId(ownerId);
-    for(File file : fileList){
+    List<File> fileList = findAllByOwnerIdAndFileType(
+        ownerId, FileType.SELLER_CERTIFICATE);
+    for (File file : fileList) {
       s3Service.deleteS3Object(file.getUrl());
     }
     fileRepository.deleteAll(fileList);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public List<File> findAllByOwnerIdAndFileType(UUID ownerId, FileType fileType) {
+    List<File> fileList
+        = fileRepository.findAllByOwnerIdAndFileType(ownerId, fileType);
+    if (fileList == null || fileList.isEmpty()) {
+      throw new FileCustomException(FileExceptionCode.EMPTY_FILE_LIST);
+    }
+    return fileList;
   }
 }

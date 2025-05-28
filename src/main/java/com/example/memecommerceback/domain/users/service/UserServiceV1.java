@@ -3,6 +3,8 @@ package com.example.memecommerceback.domain.users.service;
 import com.example.memecommerceback.domain.users.dto.UserRequestDto;
 import com.example.memecommerceback.domain.users.dto.UserResponseDto;
 import com.example.memecommerceback.domain.users.entity.User;
+import com.example.memecommerceback.domain.users.entity.UserRole;
+import com.example.memecommerceback.domain.users.exception.UserCustomException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -32,7 +34,6 @@ public interface UserServiceV1 {
    * @param profileImage 업로드된 프로필 이미지 (null 가능)
    * @param loginUser    현재 로그인한 사용자
    * @return 업데이트된 사용자 프로필 정보
-   * @throws com.example.memecommerceback.global.exception.CustomException 사용자가 존재하지 않을 경우
    */
   UserResponseDto.UpdateProfileDto updateProfile(
       UserRequestDto.UpdateProfileDto requestDto,
@@ -43,7 +44,6 @@ public interface UserServiceV1 {
    *
    * @param loginUserId 검색할 사용자의 ID
    * @return 검색된 사용자 정보
-   * @throws com.example.memecommerceback.global.exception.CustomException 사용자가 존재하지 않을 경우
    */
   User findById(UUID loginUserId);
 
@@ -62,8 +62,6 @@ public interface UserServiceV1 {
    * @param requestedNickname 새로운 닉네임
    * @param loginUser         현재 로그인한 사용자
    * @return 업데이트된 사용자 프로필 정보
-   * @throws com.example.memecommerceback.global.exception.CustomException 닉네임이 이미 사용 중이거나 사용자가 존재하지
-   *                                                                       않을 경우
    */
   UserResponseDto.UpdateProfileDto updateNickname(
       String requestedNickname, User loginUser);
@@ -73,7 +71,6 @@ public interface UserServiceV1 {
    *
    * @param loginUser 현재 로그인한 사용자
    * @return 사용자 프로필 정보
-   * @throws com.example.memecommerceback.global.exception.CustomException 사용자가 존재하지 않을 경우
    */
   UserResponseDto.ReadProfileDto readProfile(User loginUser);
 
@@ -85,6 +82,24 @@ public interface UserServiceV1 {
    */
   void deleteOne(UUID userId, User loginUser);
 
+  /**
+   * 사용자가 판매자 권한을 요청합니다. 판매자 인증에 필요한 서류를 업로드합니다.
+   *
+   * @param fileList  판매자 인증을 위해 업로드할 파일 목록 (사업자등록증 등)
+   * @param loginUser 현재 로그인한 사용자
+   * @return 업데이트된 사용자 역할 정보
+   */
   UserResponseDto.UpdateRoleDto updateRoleSellerByUser(
       List<MultipartFile> fileList, User loginUser);
+
+  /**
+   * 관리자가 사용자의 역할을 변경합니다.
+   *
+   * @param userId    역할을 변경할 사용자의 ID
+   * @param loginUser 현재 로그인한 관리자 사용자
+   * @param role      변경할 역할 (문자열)
+   * @return 업데이트된 사용자 역할 정보
+   */
+  UserResponseDto.UpdateRoleDto updateRoleByAdmin(
+      UUID userId, User loginUser, String role);
 }

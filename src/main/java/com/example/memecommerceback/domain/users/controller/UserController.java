@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import java.util.List;
 import java.util.UUID;
@@ -174,7 +175,7 @@ public class UserController {
               schema = @Schema(implementation = ErrorResponseDto.class))),})
   public ResponseEntity<
       CommonResponseDto<UserResponseDto.UpdateRoleDto>> updateRoleSellerByUser(
-      @RequestPart(name = "file-list") List<MultipartFile> multipartFileList,
+          @RequestPart(name = "file-list") List<MultipartFile> multipartFileList,
       @AuthenticationPrincipal UserDetailsImpl userDetails) {
     UserResponseDto.UpdateRoleDto responseDto
         = userService.updateRoleSellerByUser(
@@ -182,6 +183,38 @@ public class UserController {
     return ResponseEntity.status(HttpStatus.OK).body(
         new CommonResponseDto<>(
             responseDto, "검수 후, 유저의 권한을 '판매자'로 변경 예정입니다.",
+            HttpStatus.OK.value()));
+  }
+
+  @PatchMapping("admin/users/{userId}")
+  @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+  @Operation(summary = "관리자가 특정 회원의 권한 변경",
+      description = "관리자는 특정 회원의 권한을 변경할 수 있습니다.")
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "권한 변경 성공",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = UserResponseDto.UpdateRoleDto.class))),
+      @ApiResponse(responseCode = "400", description = "유효하지 않은 입력",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = ErrorResponseDto.class))),
+      @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = ErrorResponseDto.class))),
+      @ApiResponse(responseCode = "403", description = "관리자 권한 필요",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = ErrorResponseDto.class)))})
+  public ResponseEntity<
+      CommonResponseDto<UserResponseDto.UpdateRoleDto>> updateRoleByAdmin(
+          @PathVariable UUID userId,
+      @AuthenticationPrincipal UserDetailsImpl userDetails,
+      @RequestParam @NotNull(message = "권한은 필수 입력란입니다.")
+      @Pattern(regexp = "^(USER|SELLER|ADMIN)$",
+          message = "유효하지 않은 권한입니다.") String role){
+    UserResponseDto.UpdateRoleDto responseDto
+        = userService.updateRoleByAdmin(userId, userDetails.getUser(), role);
+    return ResponseEntity.status(HttpStatus.OK).body(
+        new CommonResponseDto<>(
+            responseDto, "관리자가 특정 회원의 권한을 변경하였습니다.",
             HttpStatus.OK.value()));
   }
 }

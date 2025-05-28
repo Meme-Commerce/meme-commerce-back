@@ -1,6 +1,7 @@
 package com.example.memecommerceback.domain.users.service;
 
 import com.example.memecommerceback.domain.files.entity.File;
+import com.example.memecommerceback.domain.files.entity.FileType;
 import com.example.memecommerceback.domain.files.service.FileServiceV1;
 import com.example.memecommerceback.domain.images.service.ImageServiceV1;
 import com.example.memecommerceback.domain.users.converter.UserConverter;
@@ -163,6 +164,33 @@ public class UserServiceImplV1 implements UserServiceV1 {
     user.updateSellerStatus(SellerStatus.PENDING);
 
     return UserConverter.toUpdateRoleDto(user, fileList);
+  }
+
+  @Override
+  @Transactional
+  public UserResponseDto.UpdateRoleDto updateRoleByAdmin(
+      UUID userId, User loginUser, String role) {
+    User user = findById(userId);
+    if(user.getRole().equals(UserRole.ADMIN)){
+      throw new UserCustomException(UserExceptionCode.CANNOT_CHANGE_ADMIN_ROLE);
+    }
+
+    if (SellerStatus.getProcessedSellerStatus()
+        .contains(user.getSellerStatus())) {
+      throw new UserCustomException(
+          UserExceptionCode.ALREADY_COMPLETED_STATUS);
+    }
+
+    UserRole userRole = UserRole.fromAuthority(role);
+    user.updateRole(userRole);
+
+    // 유저에서 '판매자'로 권한이 되기 위한 파일 리스트를 가지고
+    // 있을 필요가 없을 것이라 생각하여 단방향 연관관계로 인한
+    List<File> userFileList
+        = fileService.findAllByOwnerIdAndFileType(
+            user.getId(), FileType.SELLER_CERTIFICATE);
+
+    return UserConverter.toUpdateRoleDto(user, userFileList);
   }
 
   @Override
