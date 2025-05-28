@@ -1,5 +1,6 @@
 package com.example.memecommerceback.domain.users.converter;
 
+import com.example.memecommerceback.domain.files.entity.File;
 import com.example.memecommerceback.domain.users.dto.UserResponseDto;
 import com.example.memecommerceback.domain.users.entity.Gender;
 import com.example.memecommerceback.domain.users.entity.OAuthProvider;
@@ -7,6 +8,7 @@ import com.example.memecommerceback.domain.users.entity.UserRole;
 import com.example.memecommerceback.domain.userOAuthProvider.converter.UserOAuthProviderConverter;
 import com.example.memecommerceback.domain.users.entity.User;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 public class UserConverter {
@@ -70,5 +72,10 @@ public class UserConverter {
         .createdAt(user.getCreatedAt())
         .registeredCompanyName(user.getCompanyName())
         .build();
+  }
+
+  public static UserResponseDto.UpdateRoleDto toUpdateRoleDto(
+      User user, List<File> fileList){
+    return UserResponseDto.UpdateRoleDto.builder().build();
   }
 }

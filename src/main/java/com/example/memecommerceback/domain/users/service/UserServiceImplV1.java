@@ -1,15 +1,19 @@
 package com.example.memecommerceback.domain.users.service;
 
+import com.example.memecommerceback.domain.files.entity.File;
+import com.example.memecommerceback.domain.files.service.FileServiceV1;
 import com.example.memecommerceback.domain.images.service.ImageServiceV1;
 import com.example.memecommerceback.domain.users.converter.UserConverter;
 import com.example.memecommerceback.domain.users.dto.UserRequestDto;
 import com.example.memecommerceback.domain.users.dto.UserResponseDto;
+import com.example.memecommerceback.domain.users.entity.SellerStatus;
 import com.example.memecommerceback.domain.users.entity.User;
 import com.example.memecommerceback.domain.users.entity.UserRole;
 import com.example.memecommerceback.domain.users.exception.UserCustomException;
 import com.example.memecommerceback.domain.users.exception.UserExceptionCode;
 import com.example.memecommerceback.domain.users.repository.UserRepository;
 import com.example.memecommerceback.global.service.ProfanityFilterService;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 public class UserServiceImplV1 implements UserServiceV1 {
 
+  private final FileServiceV1 fileService;
   private final ImageServiceV1 imageService;
   private final ProfanityFilterService profanityFilterService;
 
@@ -74,7 +79,7 @@ public class UserServiceImplV1 implements UserServiceV1 {
         && requestDto.getNickname() != null
         && !requestDto.getNickname().equals(beforeNickname)) {
       newProfileUrl = imageService.changeProfilePath(
-          profileImage, beforeNickname, requestDto.getNickname());
+          null, beforeNickname, requestDto.getNickname());
     }
 
     // 3. 유저 정보 업데이트 (가장 우선: 새 업로드 > 경로 이동 > 기존값)
@@ -136,6 +141,22 @@ public class UserServiceImplV1 implements UserServiceV1 {
     }
 
     userRepository.deleteById(userId);
+  }
+
+  @Override
+  @Transactional
+  public UserResponseDto.UpdateRoleDto updateRoleSellerByUser(
+      List<MultipartFile> multipartFileList, User loginUser) {
+    User user
+        = userRepository.findByIdAndRole(
+            loginUser.getId(), loginUser.getRole()).orElseThrow(
+        ()-> new UserCustomException(UserExceptionCode.NOT_FOUND));
+
+    List<File> fileList
+        = fileService.uploadUserFileList(multipartFileList, user);
+    user.updateSellerStatus(SellerStatus.PENDING);
+
+    return UserConverter.toUpdateRoleDto(user, fileList);
   }
 
   @Override

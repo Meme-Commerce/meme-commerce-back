@@ -1,6 +1,7 @@
 package com.example.memecommerceback.domain.users.repository;
 
 import com.example.memecommerceback.domain.users.entity.User;
+import com.example.memecommerceback.domain.users.entity.UserRole;
 import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
@@ -34,4 +35,6 @@ public interface UserRepository extends JpaRepository<User, UUID> {
    * @return 닉네임이 존재하면 true, 존재하지 않으면 false
    */
   Boolean existsByNickname(String nickname);
+
+  Optional<User> findByIdAndRole(UUID loginUserId, UserRole role);
 }

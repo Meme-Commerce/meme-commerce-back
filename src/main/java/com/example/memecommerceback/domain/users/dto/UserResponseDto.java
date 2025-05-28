@@ -1,9 +1,11 @@
 package com.example.memecommerceback.domain.users.dto;
 
+import com.example.memecommerceback.domain.files.dto.FileResponseDto;
 import com.example.memecommerceback.domain.users.entity.Gender;
 import com.example.memecommerceback.domain.users.entity.UserRole;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -89,5 +91,27 @@ public class UserResponseDto {
     private LocalDateTime createdAt;
     @Schema(description = "등록된 회사 이름(특이사항 : 판매자만 등록 가능)", example = "밈커머스")
     private String registeredCompanyName;
+  }
+
+  @Getter
+  @Builder
+  @AllArgsConstructor
+  @NoArgsConstructor
+  public static class UpdateRoleDto {
+    @Schema(description = "사용자 ID", example = "a1b2c3d4-e5f6-7890-abcd-ef1234567890")
+    private UUID userId;
+    @Schema(description = "이름", example = "홍길동")
+    private String name;
+    @Schema(description = "닉네임", example = "길동이123")
+    private String nickname;
+    @Schema(description = "사용자 역할", example = "USER")
+    private UserRole userRole;
+    @Schema(
+        description = "1. 사업자 등록증, 2. 대표자 신분증, 3. 통장 사본, 4. 법인 등기부 등본",
+        example = "[{\"imageId\":\"8cfdc5a4-18d8-42c4-b40b-4d3f30351c11\","
+            + "\"url\":\"https://meme-commerce-bucket.s3.ap-northeast-2.amazonaws.com/users/dbnickname"
+            + "/files/randomuuid_filename.png\",\"extension\":\"PNG\",\"height\":800,\"width\":600}]"
+    )
+    private List<FileResponseDto> fileResponseDtoList;
   }
 }

@@ -1,5 +1,6 @@
 package com.example.memecommerceback.domain.users.entity;
 
+import com.example.memecommerceback.domain.files.entity.File;
 import com.example.memecommerceback.domain.userOAuthProvider.entity.UserOAuthProvider;
 import com.example.memecommerceback.global.common.CommonEntity;
 import jakarta.persistence.CascadeType;
@@ -70,13 +71,17 @@ public class User extends CommonEntity {
   @Builder.Default
   private String companyName = null;
 
+  @Builder.Default
+  @Column(nullable = false)
+  @Enumerated(EnumType.STRING)
+  private SellerStatus sellerStatus = SellerStatus.NONE;
+
   // relation
   @Builder.Default
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<UserOAuthProvider> oauthProviderList = new ArrayList<>();
 
   // entity method
-
   public void updateProfile(
       String contact, String nickname, String address, String profileImage) {
     if (contact != null && !contact.equals(this.contact)) {
@@ -106,5 +111,9 @@ public class User extends CommonEntity {
   }
   public void updateProfileImage(String profileImage){
     this.profileImage = profileImage;
+  }
+
+  public void updateSellerStatus(SellerStatus sellerStatus){
+    this.sellerStatus = sellerStatus;
   }
 }

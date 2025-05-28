@@ -48,7 +48,7 @@ public class Image extends CommonEntity {
 
   @Column(nullable = false)
   @Enumerated(EnumType.STRING)
-  private Extension extension;
+  private ImageExtension extension;
 
   @Column(nullable = false)
   private Integer width;

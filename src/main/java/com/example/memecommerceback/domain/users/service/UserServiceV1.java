@@ -2,6 +2,7 @@ package com.example.memecommerceback.domain.users.service;
 
 import com.example.memecommerceback.domain.users.dto.UserRequestDto;
 import com.example.memecommerceback.domain.users.dto.UserResponseDto;
+import com.example.memecommerceback.domain.users.dto.UserResponseDto.UpdateRoleDto;
 import com.example.memecommerceback.domain.users.entity.User;
 import java.util.List;
 import java.util.Optional;
@@ -81,7 +82,9 @@ public interface UserServiceV1 {
    *
    * @param userId 삭제할 사용자의 ID
    * @param loginUser 현재 로그인한 사용자
-   * @throws com.example.memecommerceback.domain.users.exception.UserException 삭제 권한이 없거나 사용자가 존재하지 않을 경우
    */
   void deleteOne(UUID userId, User loginUser);
+
+  UserResponseDto.UpdateRoleDto updateRoleSellerByUser(
+    List<MultipartFile> fileList, User loginUser);
 }

@@ -3,14 +3,16 @@ package com.example.memecommerceback.domain.images.entity;
 import com.example.memecommerceback.domain.files.exception.FileCustomException;
 import com.example.memecommerceback.domain.files.exception.FileExceptionCode;
 import java.util.Arrays;
+import lombok.Getter;
 
-public enum Extension {
+@Getter
+public enum ImageExtension {
   PNG(Name.PNG),
   JPG(Name.JPG),
   JPEG(Name.JPEG);
   private final String ext;
 
-  Extension(String ext){
+  ImageExtension(String ext){
     this.ext = ext;
   }
 
@@ -26,18 +28,10 @@ public enum Extension {
         .anyMatch(e -> e.ext.equalsIgnoreCase(ext));
   }
 
-  public static Extension from(String ext) {
+  public static ImageExtension from(String ext) {
     return Arrays.stream(values())
         .filter(e -> e.ext.equalsIgnoreCase(ext))
         .findFirst()
         .orElseThrow(() -> new FileCustomException(FileExceptionCode.NOT_SUPPORTED_EXTENSION));
-  }
-
-  public static Extension extractFromFilename(String fileName) {
-    if (fileName == null || !fileName.contains(".")) {
-      throw new FileCustomException(FileExceptionCode.NOT_SUPPORTED_EXTENSION);
-    }
-    String ext = fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase();
-    return from(ext); // 이미 있는 Enum 변환 및 검증 로직 재사용
   }
 }

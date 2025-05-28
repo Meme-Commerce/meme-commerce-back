@@ -14,11 +14,15 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -112,6 +116,7 @@ public class UserController {
             responseDto, "회원 닉네임 수정 성공", HttpStatus.OK.value()));
   }
 
+  @GetMapping("/users/profile")
   @Operation(summary = "회원 프로필 조회", description = "로그인한 회원의 프로필 정보를 조회합니다.")
   @ApiResponses({
       @ApiResponse(responseCode = "200", description = "프로필 조회 성공",
@@ -123,7 +128,6 @@ public class UserController {
       @ApiResponse(responseCode = "401", description = "로그인하지 않은 사용자",
           content = @Content(mediaType = "application/json",
               schema = @Schema(implementation = ErrorResponseDto.class))),})
-  @GetMapping("/users/profile")
   public ResponseEntity<CommonResponseDto<UserResponseDto.ReadProfileDto>> readProfile(
       @AuthenticationPrincipal UserDetailsImpl userDetails){
     UserResponseDto.ReadProfileDto responseDto
@@ -152,5 +156,20 @@ public class UserController {
     return ResponseEntity.status(HttpStatus.OK).body(
         new CommonResponseDto<>(
             null, "회원 삭제 성공", HttpStatus.OK.value()));
+  }
+
+  @PatchMapping("/users/role")
+  @PreAuthorize("hasAuthority('ROLE_USER')")
+  public ResponseEntity<
+      CommonResponseDto<UserResponseDto.UpdateRoleDto>> updateRoleSellerByUser(
+      @RequestPart(name = "file-list") List<MultipartFile> multipartFileList,
+      @AuthenticationPrincipal UserDetailsImpl userDetails){
+    UserResponseDto.UpdateRoleDto responseDto
+        = userService.updateRoleSellerByUser(
+            multipartFileList, userDetails.getUser());
+    return ResponseEntity.status(HttpStatus.OK).body(
+        new CommonResponseDto<>(
+            responseDto, "검수 후, 유저의 권한을 '판매자'로 변경 예정입니다.",
+            HttpStatus.OK.value()));
   }
 }

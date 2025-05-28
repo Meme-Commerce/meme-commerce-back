@@ -2,7 +2,6 @@ package com.example.memecommerceback.domain.images.converter;
 
 import com.example.memecommerceback.domain.images.dto.ImageResponseDto;
 import com.example.memecommerceback.domain.images.entity.Image;
-import com.example.memecommerceback.domain.products.entity.Product;
 import com.example.memecommerceback.domain.users.entity.User;
 import com.example.memecommerceback.global.awsS3.dto.S3ResponseDto;
 import java.util.List;
