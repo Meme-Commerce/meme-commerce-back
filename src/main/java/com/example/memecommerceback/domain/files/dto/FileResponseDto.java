@@ -1,6 +1,6 @@
 package com.example.memecommerceback.domain.files.dto;
 
-import com.example.memecommerceback.domain.images.entity.Extension;
+import com.example.memecommerceback.domain.files.entity.FileExtension;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -21,6 +21,6 @@ public class FileResponseDto {
   private String url;
 
   @Schema(description = "확장자", example = "PDF")
-  private Extension extension;
+  private FileExtension extension;
 }
 

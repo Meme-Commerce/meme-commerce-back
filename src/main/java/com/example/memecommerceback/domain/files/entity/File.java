@@ -1,6 +1,5 @@
 package com.example.memecommerceback.domain.files.entity;
 
-import com.example.memecommerceback.domain.images.entity.Extension;
 import com.example.memecommerceback.domain.users.entity.User;
 import jakarta.persistence.*;
 import java.util.UUID;
@@ -38,7 +37,7 @@ public class File {
 
   @Column(nullable = false)
   @Enumerated(EnumType.STRING)
-  private Extension extension;
+  private FileExtension extension;
 
   @JoinColumn(name = "user_id")
   @ManyToOne(fetch = FetchType.LAZY)
