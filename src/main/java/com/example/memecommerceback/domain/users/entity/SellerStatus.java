@@ -11,7 +11,7 @@ public enum SellerStatus {
   REJECTED,
   ;      // SELLER 거절됨
 
-  public static Set<SellerStatus> getCompletedSellerStatus(){
+  public static Set<SellerStatus> getProcessedSellerStatus(){
     return Set.of(PENDING, APPROVED, REJECTED);
   }
 }

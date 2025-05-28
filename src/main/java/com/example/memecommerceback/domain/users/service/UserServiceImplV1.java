@@ -1,6 +1,7 @@
 package com.example.memecommerceback.domain.users.service;
 
 import com.example.memecommerceback.domain.files.entity.File;
+import com.example.memecommerceback.domain.files.entity.FileType;
 import com.example.memecommerceback.domain.files.service.FileServiceV1;
 import com.example.memecommerceback.domain.images.service.ImageServiceV1;
 import com.example.memecommerceback.domain.users.converter.UserConverter;
@@ -174,7 +175,7 @@ public class UserServiceImplV1 implements UserServiceV1 {
       throw new UserCustomException(UserExceptionCode.CANNOT_CHANGE_ADMIN_ROLE);
     }
 
-    if (SellerStatus.getCompletedSellerStatus()
+    if (SellerStatus.getProcessedSellerStatus()
         .contains(user.getSellerStatus())) {
       throw new UserCustomException(
           UserExceptionCode.ALREADY_COMPLETED_STATUS);
@@ -186,7 +187,8 @@ public class UserServiceImplV1 implements UserServiceV1 {
     // 유저에서 '판매자'로 권한이 되기 위한 파일 리스트를 가지고
     // 있을 필요가 없을 것이라 생각하여 단방향 연관관계로 인한
     List<File> userFileList
-        = fileService.findAllByOwnerIdAndFileType(user.getId());
+        = fileService.findAllByOwnerIdAndFileType(
+            user.getId(), FileType.SELLER_CERTIFICATE);
 
     return UserConverter.toUpdateRoleDto(user, userFileList);
   }

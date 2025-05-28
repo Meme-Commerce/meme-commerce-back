@@ -187,11 +187,29 @@ public class UserController {
   }
 
   @PatchMapping("admin/users/{userId}")
+  @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+  @Operation(summary = "관리자가 특정 회원의 권한 변경",
+      description = "관리자는 특정 회원의 권한을 변경할 수 있습니다.")
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "권한 변경 성공",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = UserResponseDto.UpdateRoleDto.class))),
+      @ApiResponse(responseCode = "400", description = "유효하지 않은 입력",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = ErrorResponseDto.class))),
+      @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = ErrorResponseDto.class))),
+      @ApiResponse(responseCode = "403", description = "관리자 권한 필요",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = ErrorResponseDto.class)))})
   public ResponseEntity<
       CommonResponseDto<UserResponseDto.UpdateRoleDto>> updateRoleByAdmin(
           @PathVariable UUID userId,
       @AuthenticationPrincipal UserDetailsImpl userDetails,
-      @RequestParam @NotNull(message = "권한은 필수 입력란입니다.") String role){
+      @RequestParam @NotNull(message = "권한은 필수 입력란입니다.")
+      @Pattern(regexp = "^(USER|SELLER|ADMIN)$",
+          message = "유효하지 않은 권한입니다.") String role){
     UserResponseDto.UpdateRoleDto responseDto
         = userService.updateRoleByAdmin(userId, userDetails.getUser(), role);
     return ResponseEntity.status(HttpStatus.OK).body(
