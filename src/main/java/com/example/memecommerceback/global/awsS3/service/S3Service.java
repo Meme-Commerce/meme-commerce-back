@@ -4,9 +4,11 @@ import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.example.memecommerceback.domain.files.entity.FileExtension;
 import com.example.memecommerceback.domain.images.entity.ImageExtension;
 import com.example.memecommerceback.global.awsS3.converter.S3Converter;
-import com.example.memecommerceback.global.awsS3.dto.S3ResponseDto;
+import com.example.memecommerceback.global.awsS3.dto.S3FileResponseDto;
+import com.example.memecommerceback.global.awsS3.dto.S3ImageResponseDto;
 import com.example.memecommerceback.global.awsS3.utils.S3Utils;
 import com.example.memecommerceback.global.exception.AWSCustomException;
 import com.example.memecommerceback.global.exception.GlobalExceptionCode;
@@ -35,7 +37,7 @@ public class S3Service {
   private String bucket;
 
   @Transactional(propagation = Propagation.NOT_SUPPORTED)
-  public S3ResponseDto uploadProfile(
+  public S3ImageResponseDto uploadProfile(
       MultipartFile profileImage, String nickname){
     try {
       String originalName = profileImage.getOriginalFilename();
@@ -55,7 +57,7 @@ public class S3Service {
 
       log.info("s3 서비스에 파일을 등록했습니다. : " +url);
 
-      return S3Converter.toS3ResponseDto(
+      return S3Converter.toS3ImageResponseDto(
           originalName, ext, fileName, url, profileImage.getSize());
 
     } catch (SdkClientException e) {
@@ -125,9 +127,9 @@ public class S3Service {
   }
 
   @Transactional(propagation = Propagation.NOT_SUPPORTED)
-  public List<S3ResponseDto> uploadProductImageList(
+  public List<S3ImageResponseDto> uploadProductImageList(
       List<MultipartFile> productImageList, String nickname){
-    List<S3ResponseDto> s3ResponseDtoList = new ArrayList<>();
+    List<S3ImageResponseDto> s3ResponseDtoList = new ArrayList<>();
     for (MultipartFile productImage : productImageList) {
       try {
         String originalName = productImage.getOriginalFilename();
@@ -140,7 +142,7 @@ public class S3Service {
 
         uploadS3Bucket(filePath, productImage);
 
-        s3ResponseDtoList.add(S3Converter.toS3ResponseDto(
+        s3ResponseDtoList.add(S3Converter.toS3ImageResponseDto(
             originalName, ext, fileName,
             amazonS3Client.getUrl(bucket, filePath).toString(),
             productImage.getSize()));
@@ -157,13 +159,13 @@ public class S3Service {
   }
 
   @Transactional(propagation = Propagation.NOT_SUPPORTED)
-  public List<S3ResponseDto> uploadCertificateFileList(
+  public List<S3FileResponseDto> uploadCertificateFileList(
       List<MultipartFile> multipartFileList, String nickname) {
-    List<S3ResponseDto> s3ResponseDtoList = new ArrayList<>();
+    List<S3FileResponseDto> s3ResponseDtoList = new ArrayList<>();
     for (MultipartFile certificateFile : multipartFileList) {
       try {
         String originalName = certificateFile.getOriginalFilename();
-        ImageExtension ext = FileUtils.extractFromImageName(originalName);
+        FileExtension ext = FileUtils.extractFromFilename(originalName);
 
         String fileName = createUUIDFile(certificateFile);
         String filePath
@@ -172,7 +174,7 @@ public class S3Service {
 
         uploadS3Bucket(filePath, certificateFile);
 
-        s3ResponseDtoList.add(S3Converter.toS3ResponseDto(
+        s3ResponseDtoList.add(S3Converter.toS3FileResponseDto(
             originalName, ext, fileName,
             amazonS3Client.getUrl(bucket, filePath).toString(),
             certificateFile.getSize()));

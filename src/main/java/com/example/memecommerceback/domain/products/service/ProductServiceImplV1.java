@@ -16,7 +16,7 @@ import com.example.memecommerceback.domain.products.exception.ProductExceptionCo
 import com.example.memecommerceback.domain.products.repository.ProductRepository;
 import com.example.memecommerceback.domain.users.entity.User;
 import com.example.memecommerceback.domain.users.entity.UserRole;
-import com.example.memecommerceback.global.awsS3.dto.S3ResponseDto;
+import com.example.memecommerceback.global.awsS3.dto.S3ImageResponseDto;
 import com.example.memecommerceback.global.service.ProfanityFilterService;
 import com.example.memecommerceback.global.utils.DateUtils;
 import com.example.memecommerceback.global.utils.PageUtils;
@@ -77,7 +77,7 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
           product, requestDto.getHashtagIdList());
     }
 
-    List<S3ResponseDto> uploadedImages = null;
+    List<S3ImageResponseDto> uploadedImages = null;
     List<Image> imageList = null;
 
     try {
@@ -94,7 +94,7 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
     } catch (Exception e) {
       // 3. S3 업로드는 성공했지만 DB 작업 실패 시 S3 정리
       if (uploadedImages != null && !uploadedImages.isEmpty()) {
-        for (S3ResponseDto dto : uploadedImages) {
+        for (S3ImageResponseDto dto : uploadedImages) {
           try {
             imageService.deleteS3Object(dto.getUrl());
           } catch (Exception cleanupEx) {
@@ -160,7 +160,7 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
           product, requestDto.getHashtagIdList());
     }
 
-    List<S3ResponseDto> uploadedImages = null;
+    List<S3ImageResponseDto> uploadedImages = null;
     List<Image> newImageList = null;
 
     try {
@@ -178,7 +178,7 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
     } catch (Exception e) {
       // 보상 처리
       if (uploadedImages != null && !uploadedImages.isEmpty()) {
-        for (S3ResponseDto dto : uploadedImages) {
+        for (S3ImageResponseDto dto : uploadedImages) {
           try {
             imageService.deleteS3Object(dto.getUrl());
           } catch (Exception cleanupEx) {

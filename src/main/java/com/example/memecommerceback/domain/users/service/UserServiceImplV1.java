@@ -154,6 +154,7 @@ public class UserServiceImplV1 implements UserServiceV1 {
 
     List<File> fileList
         = fileService.uploadUserFileList(multipartFileList, user);
+
     user.updateSellerStatus(SellerStatus.PENDING);
 
     return UserConverter.toUpdateRoleDto(user, fileList);

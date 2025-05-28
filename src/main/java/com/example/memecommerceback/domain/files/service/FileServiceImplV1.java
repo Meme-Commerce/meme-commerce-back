@@ -1,11 +1,12 @@
 package com.example.memecommerceback.domain.files.service;
 
+import com.example.memecommerceback.domain.files.converter.FileConverter;
 import com.example.memecommerceback.domain.files.entity.File;
 import com.example.memecommerceback.domain.files.exception.FileCustomException;
 import com.example.memecommerceback.domain.files.exception.FileExceptionCode;
 import com.example.memecommerceback.domain.files.repository.FileRepository;
 import com.example.memecommerceback.domain.users.entity.User;
-import com.example.memecommerceback.global.awsS3.dto.S3ResponseDto;
+import com.example.memecommerceback.global.awsS3.dto.S3FileResponseDto;
 import com.example.memecommerceback.global.awsS3.service.S3Service;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -26,9 +27,11 @@ public class FileServiceImplV1 implements FileServiceV1{
     if(multipartFileList.size() < 4 || multipartFileList.size() > 10){
       throw new FileCustomException(FileExceptionCode.COUNT_OUT_OF_RANGE);
     }
-    List<S3ResponseDto> responseDtoList
+    List<S3FileResponseDto> s3ResponseDtoList
         = s3Service.uploadCertificateFileList(
             multipartFileList, owner.getNickname());
-    return null;
+    List<File> fileList = FileConverter.toEntityList(s3ResponseDtoList, owner);
+    fileRepository.saveAll(fileList);
+    return fileList;
   }
 }
