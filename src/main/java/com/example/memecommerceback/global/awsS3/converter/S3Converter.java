@@ -6,6 +6,7 @@ import com.example.memecommerceback.global.awsS3.dto.S3FileResponseDto;
 import com.example.memecommerceback.global.awsS3.dto.S3ImageResponseDto;
 
 public class S3Converter {
+
   public static S3ImageResponseDto toS3ImageResponseDto(
       String originalName, ImageExtension ext,
       String fileName, String url, long size) {

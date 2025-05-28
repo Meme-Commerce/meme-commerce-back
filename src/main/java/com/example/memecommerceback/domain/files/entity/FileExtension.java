@@ -2,7 +2,6 @@ package com.example.memecommerceback.domain.files.entity;
 
 import com.example.memecommerceback.domain.files.exception.FileCustomException;
 import com.example.memecommerceback.domain.files.exception.FileExceptionCode;
-import com.example.memecommerceback.domain.images.entity.ImageExtension;
 import java.util.Arrays;
 import lombok.Getter;
 
@@ -17,11 +16,12 @@ public enum FileExtension {
 
   private final String ext;
 
-  FileExtension(String ext){
+  FileExtension(String ext) {
     this.ext = ext;
   }
 
-  public static class Name{
+  public static class Name {
+
     public static final String PDF = "pdf";
     public static final String HWP = "hwp";
     public static final String DOCX = "docx";
@@ -31,7 +31,9 @@ public enum FileExtension {
   }
 
   public static boolean isSupported(String ext) {
-    if (ext == null) return false;
+    if (ext == null) {
+      return false;
+    }
     return Arrays.stream(values())
         .anyMatch(e -> e.ext.equalsIgnoreCase(ext));
   }

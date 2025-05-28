@@ -8,15 +8,12 @@ import com.example.memecommerceback.global.exception.dto.ErrorResponseDto;
 import com.example.memecommerceback.global.security.UserDetailsImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -81,7 +78,7 @@ public class UserController {
       @RequestParam @Pattern(
           regexp = "^[a-zA-Z0-9가-힣]{2,20}$",
           message = "닉네임은 2~20자, 영문/숫자/한글만 허용됩니다.")
-      String nickname){
+      String nickname) {
     UserResponseDto.IsAvailableNicknameDto responseDto
         = userService.isAvailableNickname(nickname);
     return ResponseEntity.status(HttpStatus.OK).body(
@@ -129,7 +126,7 @@ public class UserController {
           content = @Content(mediaType = "application/json",
               schema = @Schema(implementation = ErrorResponseDto.class))),})
   public ResponseEntity<CommonResponseDto<UserResponseDto.ReadProfileDto>> readProfile(
-      @AuthenticationPrincipal UserDetailsImpl userDetails){
+      @AuthenticationPrincipal UserDetailsImpl userDetails) {
     UserResponseDto.ReadProfileDto responseDto
         = userService.readProfile(userDetails.getUser());
     return ResponseEntity.status(HttpStatus.OK).body(
@@ -137,6 +134,7 @@ public class UserController {
             responseDto, "프로필 조회 성공", HttpStatus.OK.value()));
   }
 
+  @DeleteMapping("/users/{userId}")
   @Operation(summary = "회원 탈퇴", description = "회원을 삭제합니다. 본인 또는 관리자만 삭제할 수 있습니다.")
   @ApiResponses({
       @ApiResponse(responseCode = "200", description = "회원 삭제 성공",
@@ -148,25 +146,39 @@ public class UserController {
       @ApiResponse(responseCode = "401", description = "로그인하지 않은 사용자",
           content = @Content(mediaType = "application/json",
               schema = @Schema(implementation = ErrorResponseDto.class))),})
-  @DeleteMapping("/users/{userId}")
   public ResponseEntity<CommonResponseDto<Void>> deleteOne(
       @PathVariable UUID userId,
-      @AuthenticationPrincipal UserDetailsImpl userDetails){
+      @AuthenticationPrincipal UserDetailsImpl userDetails) {
     userService.deleteOne(userId, userDetails.getUser());
     return ResponseEntity.status(HttpStatus.OK).body(
         new CommonResponseDto<>(
             null, "회원 삭제 성공", HttpStatus.OK.value()));
   }
 
-  @PatchMapping("/users/role")
+  @PatchMapping(value = "/users/role", consumes = "multipart/form-data")
   @PreAuthorize("hasAuthority('ROLE_USER')")
+  @Operation(summary = "회원의 역할을 '판매자'로 요청",
+      description = "로그인한 회원은 관련 서류를 관리자에게 제출하면, 판매자의 권한을 요청할 수 있다..")
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "회원의 역할 '판매자'로 요청 성공",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = UserResponseDto.UpdateRoleDto.class))),
+      @ApiResponse(responseCode = "400", description = "유효하지 않은 입력 또는 유저 없음",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = ErrorResponseDto.class))),
+      @ApiResponse(responseCode = "401", description = "로그인하지 않은 사용자",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = ErrorResponseDto.class))),
+      @ApiResponse(responseCode = "403", description = "권한 없음",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = ErrorResponseDto.class))),})
   public ResponseEntity<
       CommonResponseDto<UserResponseDto.UpdateRoleDto>> updateRoleSellerByUser(
       @RequestPart(name = "file-list") List<MultipartFile> multipartFileList,
-      @AuthenticationPrincipal UserDetailsImpl userDetails){
+      @AuthenticationPrincipal UserDetailsImpl userDetails) {
     UserResponseDto.UpdateRoleDto responseDto
         = userService.updateRoleSellerByUser(
-            multipartFileList, userDetails.getUser());
+        multipartFileList, userDetails.getUser());
     return ResponseEntity.status(HttpStatus.OK).body(
         new CommonResponseDto<>(
             responseDto, "검수 후, 유저의 권한을 '판매자'로 변경 예정입니다.",

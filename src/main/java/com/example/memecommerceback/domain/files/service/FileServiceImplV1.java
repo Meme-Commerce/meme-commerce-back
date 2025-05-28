@@ -9,6 +9,7 @@ import com.example.memecommerceback.domain.users.entity.User;
 import com.example.memecommerceback.global.awsS3.dto.S3FileResponseDto;
 import com.example.memecommerceback.global.awsS3.service.S3Service;
 import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,7 +17,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
-public class FileServiceImplV1 implements FileServiceV1{
+public class FileServiceImplV1 implements FileServiceV1 {
+
   private final S3Service s3Service;
   private final FileRepository fileRepository;
 
@@ -24,14 +26,31 @@ public class FileServiceImplV1 implements FileServiceV1{
   @Transactional
   public List<File> uploadUserFileList(
       List<MultipartFile> multipartFileList, User owner) {
-    if(multipartFileList.size() < 4 || multipartFileList.size() > 10){
+    if(multipartFileList == null){
+      throw new FileCustomException(FileExceptionCode.EMPTY_FILE_LIST);
+    }
+    for(MultipartFile multipartFile : multipartFileList){
+      if(multipartFile.isEmpty() || multipartFile == null){
+        throw new FileCustomException(FileExceptionCode.EMPTY_FILE);
+      }
+    }
+    if (multipartFileList.size() < 4 || multipartFileList.size() > 10) {
       throw new FileCustomException(FileExceptionCode.COUNT_OUT_OF_RANGE);
     }
     List<S3FileResponseDto> s3ResponseDtoList
         = s3Service.uploadCertificateFileList(
-            multipartFileList, owner.getNickname());
+        multipartFileList, owner.getNickname());
     List<File> fileList = FileConverter.toEntityList(s3ResponseDtoList, owner);
     fileRepository.saveAll(fileList);
     return fileList;
+  }
+
+  @Override
+  @Transactional
+  public void deleteUserWithFiles(UUID ownerId) {
+    File file = fileRepository.findByOwnerId(ownerId).orElseThrow(
+        () -> new FileCustomException(FileExceptionCode.NOT_FOUND));
+    s3Service.deleteS3Object(file.getUrl());
+    fileRepository.deleteById(file.getId());
   }
 }

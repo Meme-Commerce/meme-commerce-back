@@ -1,15 +1,15 @@
 package com.example.memecommerceback.domain.users.converter;
 
+import com.example.memecommerceback.domain.files.converter.FileConverter;
 import com.example.memecommerceback.domain.files.entity.File;
+import com.example.memecommerceback.domain.userOAuthProvider.converter.UserOAuthProviderConverter;
 import com.example.memecommerceback.domain.users.dto.UserResponseDto;
 import com.example.memecommerceback.domain.users.entity.Gender;
 import com.example.memecommerceback.domain.users.entity.OAuthProvider;
-import com.example.memecommerceback.domain.users.entity.UserRole;
-import com.example.memecommerceback.domain.userOAuthProvider.converter.UserOAuthProviderConverter;
 import com.example.memecommerceback.domain.users.entity.User;
+import com.example.memecommerceback.domain.users.entity.UserRole;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.UUID;
 
 public class UserConverter {
 
@@ -31,7 +31,7 @@ public class UserConverter {
     return user;
   }
 
-  public static UserResponseDto.UpdateProfileDto toUpdateProfileDto(User user){
+  public static UserResponseDto.UpdateProfileDto toUpdateProfileDto(User user) {
     return UserResponseDto.UpdateProfileDto.builder()
         .userId(user.getId())
         .address(user.getAddress())
@@ -48,7 +48,7 @@ public class UserConverter {
   }
 
   public static UserResponseDto.IsAvailableNicknameDto toIsAvailableNicknameDto(
-      String requestNickname, boolean isAvailable){
+      String requestNickname, boolean isAvailable) {
     return UserResponseDto.IsAvailableNicknameDto.builder()
         .requestNickname(requestNickname)
         .isAvailable(isAvailable)
@@ -56,7 +56,7 @@ public class UserConverter {
   }
 
   public static UserResponseDto.ReadProfileDto toReadProfileDto(
-      User user){
+      User user) {
     return UserResponseDto.ReadProfileDto.builder()
         .userId(user.getId())
         .address(user.getAddress())
@@ -75,7 +75,13 @@ public class UserConverter {
   }
 
   public static UserResponseDto.UpdateRoleDto toUpdateRoleDto(
-      User user, List<File> fileList){
-    return UserResponseDto.UpdateRoleDto.builder().build();
+      User user, List<File> fileList) {
+    return UserResponseDto.UpdateRoleDto.builder()
+        .userId(user.getId())
+        .userRole(user.getRole())
+        .name(user.getName())
+        .nickname(user.getNickname())
+        .fileResponseDtoList(FileConverter.toResponseDtoList(fileList))
+        .build();
   }
 }

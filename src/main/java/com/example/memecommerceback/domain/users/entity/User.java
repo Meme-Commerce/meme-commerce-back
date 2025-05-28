@@ -1,6 +1,5 @@
 package com.example.memecommerceback.domain.users.entity;
 
-import com.example.memecommerceback.domain.files.entity.File;
 import com.example.memecommerceback.domain.userOAuthProvider.entity.UserOAuthProvider;
 import com.example.memecommerceback.global.common.CommonEntity;
 import jakarta.persistence.CascadeType;
@@ -11,7 +10,6 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -106,14 +104,15 @@ public class User extends CommonEntity {
     this.oauthProviderList.add(oAuthProvider);
   }
 
-  public void updateNickname(String nickname){
+  public void updateNickname(String nickname) {
     this.nickname = nickname;
   }
-  public void updateProfileImage(String profileImage){
+
+  public void updateProfileImage(String profileImage) {
     this.profileImage = profileImage;
   }
 
-  public void updateSellerStatus(SellerStatus sellerStatus){
+  public void updateSellerStatus(SellerStatus sellerStatus) {
     this.sellerStatus = sellerStatus;
   }
 }

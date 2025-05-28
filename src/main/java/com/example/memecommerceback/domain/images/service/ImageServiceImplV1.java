@@ -78,7 +78,8 @@ public class ImageServiceImplV1 implements ImageServiceV1 {
       FileUtils.extractFromImageName(originalFilename);
     }
 
-    List<S3ImageResponseDto> uploadedImages = s3Service.uploadProductImageList(productImageList, user.getNickname());
+    List<S3ImageResponseDto> uploadedImages = s3Service.uploadProductImageList(productImageList,
+        user.getNickname());
     List<Image> imageList = ImageConverter.toEntityList(uploadedImages, user);
     return imageRepository.saveAll(imageList);
   }
@@ -100,15 +101,18 @@ public class ImageServiceImplV1 implements ImageServiceV1 {
 
   @Override
   @Transactional
-  public String changeProfilePath(MultipartFile profileImage, String beforeNickname, String afterNickname) {
+  public String changeProfilePath(MultipartFile profileImage, String beforeNickname,
+      String afterNickname) {
     Image image = imageRepository.findByOwnerNickname(beforeNickname).orElse(null);
-    if(image == null && profileImage != null && !profileImage.isEmpty()){
+    if (image == null && profileImage != null && !profileImage.isEmpty()) {
       String originalFilename = profileImage.getOriginalFilename();
       FileUtils.extractFromImageName(originalFilename);
       return s3Service.uploadProfile(profileImage, afterNickname).getUrl();
     }
     String newUrl = s3Service.changePath(beforeNickname, afterNickname);
-    if(image != null) image.updateProfile(afterNickname, newUrl);
+    if (image != null) {
+      image.updateProfile(afterNickname, newUrl);
+    }
     return newUrl;
   }
 
@@ -126,7 +130,7 @@ public class ImageServiceImplV1 implements ImageServiceV1 {
   @Override
   @Transactional
   public List<S3ImageResponseDto> uploadProductImageList(
-      List<MultipartFile> productImageList, String nickname){
+      List<MultipartFile> productImageList, String nickname) {
     return s3Service.uploadProductImageList(productImageList, nickname);
   }
 
@@ -141,7 +145,7 @@ public class ImageServiceImplV1 implements ImageServiceV1 {
 
   @Override
   @Transactional
-  public void deleteS3Object(String url){
+  public void deleteS3Object(String url) {
     s3Service.deleteS3Object(url);
   }
 }

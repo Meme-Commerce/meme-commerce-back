@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ImageResponseDto {
+
   private UUID imageId;
   private String url;
   private ImageExtension extension;

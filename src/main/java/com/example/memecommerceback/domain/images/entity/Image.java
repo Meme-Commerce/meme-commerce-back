@@ -65,17 +65,17 @@ public class Image extends CommonEntity {
   @ManyToOne(fetch = FetchType.LAZY)
   private Product product;
 
-  public void updateProfile(String ownerNickname, String url){
+  public void updateProfile(String ownerNickname, String url) {
     this.ownerNickname = ownerNickname;
     this.url = url;
   }
 
-  public void updateImage(String url, String fileName){
-      this.url = url;
-      this.fileName = fileName;
+  public void updateImage(String url, String fileName) {
+    this.url = url;
+    this.fileName = fileName;
   }
 
-  public void registerProduct(Product product){
+  public void registerProduct(Product product) {
     this.product = product;
   }
 }

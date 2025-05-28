@@ -2,7 +2,6 @@ package com.example.memecommerceback.domain.users.service;
 
 import com.example.memecommerceback.domain.users.dto.UserRequestDto;
 import com.example.memecommerceback.domain.users.dto.UserResponseDto;
-import com.example.memecommerceback.domain.users.dto.UserResponseDto.UpdateRoleDto;
 import com.example.memecommerceback.domain.users.entity.User;
 import java.util.List;
 import java.util.Optional;
@@ -29,9 +28,9 @@ public interface UserServiceV1 {
   /**
    * 사용자 프로필 정보를 업데이트합니다.
    *
-   * @param requestDto 업데이트할 프로필 정보
+   * @param requestDto   업데이트할 프로필 정보
    * @param profileImage 업로드된 프로필 이미지 (null 가능)
-   * @param loginUser 현재 로그인한 사용자
+   * @param loginUser    현재 로그인한 사용자
    * @return 업데이트된 사용자 프로필 정보
    * @throws com.example.memecommerceback.global.exception.CustomException 사용자가 존재하지 않을 경우
    */
@@ -61,9 +60,10 @@ public interface UserServiceV1 {
    * 사용자의 닉네임을 업데이트합니다.
    *
    * @param requestedNickname 새로운 닉네임
-   * @param loginUser 현재 로그인한 사용자
+   * @param loginUser         현재 로그인한 사용자
    * @return 업데이트된 사용자 프로필 정보
-   * @throws com.example.memecommerceback.global.exception.CustomException 닉네임이 이미 사용 중이거나 사용자가 존재하지 않을 경우
+   * @throws com.example.memecommerceback.global.exception.CustomException 닉네임이 이미 사용 중이거나 사용자가 존재하지
+   *                                                                       않을 경우
    */
   UserResponseDto.UpdateProfileDto updateNickname(
       String requestedNickname, User loginUser);
@@ -80,11 +80,11 @@ public interface UserServiceV1 {
   /**
    * 사용자를 삭제합니다. 본인 또는 관리자만 삭제할 수 있습니다.
    *
-   * @param userId 삭제할 사용자의 ID
+   * @param userId    삭제할 사용자의 ID
    * @param loginUser 현재 로그인한 사용자
    */
   void deleteOne(UUID userId, User loginUser);
 
   UserResponseDto.UpdateRoleDto updateRoleSellerByUser(
-    List<MultipartFile> fileList, User loginUser);
+      List<MultipartFile> fileList, User loginUser);
 }

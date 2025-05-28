@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class FileResponseDto {
+
   @Schema(description = "파일 ID", example = "8cfdc5a4-18d8-42c4-b40b-4d3f30351c11")
   private UUID fileId;
 

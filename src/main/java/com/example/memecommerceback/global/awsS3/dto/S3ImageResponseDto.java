@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class S3ImageResponseDto {
+
   private String fileName;
   private String originalName;
   private String url;

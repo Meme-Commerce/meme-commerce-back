@@ -31,6 +31,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Component
 @RequiredArgsConstructor
 public class S3Service {
+
   private final AmazonS3 amazonS3Client;
 
   @Value("${cloud.aws.s3.bucket}")
@@ -38,7 +39,7 @@ public class S3Service {
 
   @Transactional(propagation = Propagation.NOT_SUPPORTED)
   public S3ImageResponseDto uploadProfile(
-      MultipartFile profileImage, String nickname){
+      MultipartFile profileImage, String nickname) {
     try {
       String originalName = profileImage.getOriginalFilename();
       ImageExtension ext = FileUtils.extractFromImageName(originalName);
@@ -46,8 +47,8 @@ public class S3Service {
       ObjectMetadata metadata = setObjectMetadata(profileImage);
 
       String fileName = createUUIDFile(profileImage);
-      String filePath 
-          = S3Utils.USER_PREFIX + nickname 
+      String filePath
+          = S3Utils.USER_PREFIX + nickname
           + S3Utils.PROFILE_PREFIX + fileName;
 
       amazonS3Client.putObject(
@@ -55,7 +56,7 @@ public class S3Service {
 
       String url = amazonS3Client.getUrl(bucket, filePath).toString();
 
-      log.info("s3 서비스에 파일을 등록했습니다. : " +url);
+      log.info("s3 서비스에 파일을 등록했습니다. : " + url);
 
       return S3Converter.toS3ImageResponseDto(
           originalName, ext, fileName, url, profileImage.getSize());
@@ -128,7 +129,7 @@ public class S3Service {
 
   @Transactional(propagation = Propagation.NOT_SUPPORTED)
   public List<S3ImageResponseDto> uploadProductImageList(
-      List<MultipartFile> productImageList, String nickname){
+      List<MultipartFile> productImageList, String nickname) {
     List<S3ImageResponseDto> s3ResponseDtoList = new ArrayList<>();
     for (MultipartFile productImage : productImageList) {
       try {
@@ -190,7 +191,7 @@ public class S3Service {
     return s3ResponseDtoList;
   }
 
-  private String createUUIDFile(MultipartFile file){
+  private String createUUIDFile(MultipartFile file) {
     String originalFilename = file.getOriginalFilename();
     if (originalFilename == null || originalFilename.isBlank()) {
       throw new AWSCustomException(GlobalExceptionCode.BLANK_FILE);
@@ -200,7 +201,7 @@ public class S3Service {
     return uuid + "_" + file.getOriginalFilename();
   }
 
-  private ObjectMetadata setObjectMetadata(MultipartFile multipartFile){
+  private ObjectMetadata setObjectMetadata(MultipartFile multipartFile) {
     ObjectMetadata metadata = new ObjectMetadata();
     metadata.setContentType(multipartFile.getContentType());
     metadata.setContentLength(multipartFile.getSize());
@@ -216,6 +217,6 @@ public class S3Service {
 
     String url = amazonS3Client.getUrl(bucket, filePath).toString();
 
-    log.info("s3 서비스에 파일을 등록했습니다. : " +url);
+    log.info("s3 서비스에 파일을 등록했습니다. : " + url);
   }
 }

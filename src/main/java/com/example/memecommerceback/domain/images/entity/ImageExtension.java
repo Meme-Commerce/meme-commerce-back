@@ -12,18 +12,21 @@ public enum ImageExtension {
   JPEG(Name.JPEG);
   private final String ext;
 
-  ImageExtension(String ext){
+  ImageExtension(String ext) {
     this.ext = ext;
   }
 
-  public static class Name{
+  public static class Name {
+
     public static final String PNG = "png";
     public static final String JPG = "jpg";
     public static final String JPEG = "jpeg";
   }
 
   public static boolean isSupported(String ext) {
-    if (ext == null) return false;
+    if (ext == null) {
+      return false;
+    }
     return Arrays.stream(values())
         .anyMatch(e -> e.ext.equalsIgnoreCase(ext));
   }

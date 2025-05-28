@@ -21,6 +21,7 @@ public class UserResponseDto {
   @Schema(name = "UserResponseDto.UpdateProfileDto",
       description = "회원 개인 정보 수정 응답 DTO")
   public static class UpdateProfileDto {
+
     @Schema(description = "사용자 ID", example = "a1b2c3d4-e5f6-7890-abcd-ef1234567890")
     private UUID userId;
     @Schema(description = "이름", example = "홍길동")
@@ -53,6 +54,7 @@ public class UserResponseDto {
   @Schema(name = "UserResponseDto.IsAvailableNicknameDto",
       description = "닉네임 사용 가능 여부 응답 DTO")
   public static class IsAvailableNicknameDto {
+
     @Schema(description = "요청한 닉네임", example = "길동이")
     private String requestNickname;
     @Schema(description = "닉네임 사용 가능 여부", example = "true")
@@ -64,6 +66,7 @@ public class UserResponseDto {
   @AllArgsConstructor
   @NoArgsConstructor
   public static class ReadProfileDto {
+
     @Schema(description = "사용자 ID", example = "a1b2c3d4-e5f6-7890-abcd-ef1234567890")
     private UUID userId;
     @Schema(description = "이름", example = "홍길동")
@@ -98,6 +101,7 @@ public class UserResponseDto {
   @AllArgsConstructor
   @NoArgsConstructor
   public static class UpdateRoleDto {
+
     @Schema(description = "사용자 ID", example = "a1b2c3d4-e5f6-7890-abcd-ef1234567890")
     private UUID userId;
     @Schema(description = "이름", example = "홍길동")

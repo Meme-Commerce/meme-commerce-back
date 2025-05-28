@@ -8,6 +8,7 @@ import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ImageRepository extends JpaRepository<Image, UUID> {
+
   Optional<Image> findByUserId(UUID userId);
 
   Optional<Image> findByOwnerNickname(String ownerNickname);
