@@ -1,5 +1,6 @@
 package com.example.memecommerceback.domain.users.entity;
 
+import java.util.Set;
 import lombok.Getter;
 
 @Getter
@@ -10,4 +11,7 @@ public enum SellerStatus {
   REJECTED,
   ;      // SELLER 거절됨
 
+  public static Set<SellerStatus> getCompletedSellerStatus(){
+    return Set.of(PENDING, APPROVED, REJECTED);
+  }
 }

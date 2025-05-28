@@ -3,6 +3,7 @@ package com.example.memecommerceback.domain.users.service;
 import com.example.memecommerceback.domain.users.dto.UserRequestDto;
 import com.example.memecommerceback.domain.users.dto.UserResponseDto;
 import com.example.memecommerceback.domain.users.entity.User;
+import com.example.memecommerceback.domain.users.entity.UserRole;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -87,4 +88,7 @@ public interface UserServiceV1 {
 
   UserResponseDto.UpdateRoleDto updateRoleSellerByUser(
       List<MultipartFile> fileList, User loginUser);
+
+  UserResponseDto.UpdateRoleDto updateRoleByAdmin(
+      UUID userId, User loginUser, String role);
 }

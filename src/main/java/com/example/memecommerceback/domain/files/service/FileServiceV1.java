@@ -12,4 +12,6 @@ public interface FileServiceV1 {
       List<MultipartFile> multipartFileList, User owner);
 
   void deleteUserWithFiles(UUID ownerId);
+
+  List<File> findAllByOwnerIdAndFileType(UUID ownerId);
 }

@@ -2,6 +2,7 @@ package com.example.memecommerceback.domain.files.converter;
 
 import com.example.memecommerceback.domain.files.dto.FileResponseDto;
 import com.example.memecommerceback.domain.files.entity.File;
+import com.example.memecommerceback.domain.files.entity.FileType;
 import com.example.memecommerceback.domain.users.entity.User;
 import com.example.memecommerceback.global.awsS3.dto.S3FileResponseDto;
 import java.util.List;
@@ -16,6 +17,7 @@ public class FileConverter {
         .fileName(s3ResponseDto.getFileName())
         .originalName(s3ResponseDto.getOriginalName())
         .owner(owner)
+        .fileType(FileType.SELLER_CERTIFICATE)
         .build();
   }
 

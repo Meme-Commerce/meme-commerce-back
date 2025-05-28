@@ -166,6 +166,32 @@ public class UserServiceImplV1 implements UserServiceV1 {
   }
 
   @Override
+  @Transactional
+  public UserResponseDto.UpdateRoleDto updateRoleByAdmin(
+      UUID userId, User loginUser, String role) {
+    User user = findById(userId);
+    if(user.getRole().equals(UserRole.ADMIN)){
+      throw new UserCustomException(UserExceptionCode.CANNOT_CHANGE_ADMIN_ROLE);
+    }
+
+    if (SellerStatus.getCompletedSellerStatus()
+        .contains(user.getSellerStatus())) {
+      throw new UserCustomException(
+          UserExceptionCode.ALREADY_COMPLETED_STATUS);
+    }
+
+    UserRole userRole = UserRole.fromAuthority(role);
+    user.updateRole(userRole);
+
+    // 유저에서 '판매자'로 권한이 되기 위한 파일 리스트를 가지고
+    // 있을 필요가 없을 것이라 생각하여 단방향 연관관계로 인한
+    List<File> userFileList
+        = fileService.findAllByOwnerIdAndFileType(user.getId());
+
+    return UserConverter.toUpdateRoleDto(user, userFileList);
+  }
+
+  @Override
   @Transactional(readOnly = true)
   public User findById(UUID loginUserId) {
     return userRepository.findById(loginUserId).orElseThrow(

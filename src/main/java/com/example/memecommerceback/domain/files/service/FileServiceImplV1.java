@@ -2,6 +2,7 @@ package com.example.memecommerceback.domain.files.service;
 
 import com.example.memecommerceback.domain.files.converter.FileConverter;
 import com.example.memecommerceback.domain.files.entity.File;
+import com.example.memecommerceback.domain.files.entity.FileType;
 import com.example.memecommerceback.domain.files.exception.FileCustomException;
 import com.example.memecommerceback.domain.files.exception.FileExceptionCode;
 import com.example.memecommerceback.domain.files.repository.FileRepository;
@@ -48,10 +49,22 @@ public class FileServiceImplV1 implements FileServiceV1 {
   @Override
   @Transactional
   public void deleteUserWithFiles(UUID ownerId) {
-    List<File> fileList = fileRepository.findAllByOwnerId(ownerId);
+    List<File> fileList = findAllByOwnerIdAndFileType(ownerId);
     for(File file : fileList){
       s3Service.deleteS3Object(file.getUrl());
     }
     fileRepository.deleteAll(fileList);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public List<File> findAllByOwnerIdAndFileType(UUID ownerId) {
+    List<File> fileList
+        = fileRepository.findAllByOwnerIdAndFileType(
+            ownerId, FileType.SELLER_CERTIFICATE);
+    if(fileList == null || fileList.isEmpty()){
+      throw new FileCustomException(FileExceptionCode.EMPTY_FILE_LIST);
+    }
+    return fileList;
   }
 }
