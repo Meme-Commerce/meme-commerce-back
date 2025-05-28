@@ -30,7 +30,7 @@ public class FileServiceImplV1 implements FileServiceV1 {
       throw new FileCustomException(FileExceptionCode.EMPTY_FILE_LIST);
     }
     for(MultipartFile multipartFile : multipartFileList){
-      if(multipartFile.isEmpty() || multipartFile == null){
+      if( multipartFile == null || multipartFile.isEmpty()){
         throw new FileCustomException(FileExceptionCode.EMPTY_FILE);
       }
     }
@@ -48,9 +48,10 @@ public class FileServiceImplV1 implements FileServiceV1 {
   @Override
   @Transactional
   public void deleteUserWithFiles(UUID ownerId) {
-    File file = fileRepository.findByOwnerId(ownerId).orElseThrow(
-        () -> new FileCustomException(FileExceptionCode.NOT_FOUND));
-    s3Service.deleteS3Object(file.getUrl());
-    fileRepository.deleteById(file.getId());
+    List<File> fileList = fileRepository.findAllByOwnerId(ownerId);
+    for(File file : fileList){
+      s3Service.deleteS3Object(file.getUrl());
+    }
+    fileRepository.deleteAll(fileList);
   }
 }
