@@ -1,7 +1,6 @@
-package com.example.memecommerceback.domain.images.entity;
+package com.example.memecommerceback.domain.files.entity;
 
-import com.example.memecommerceback.domain.products.entity.Product;
-import com.example.memecommerceback.global.common.CommonEntity;
+import com.example.memecommerceback.domain.users.entity.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -13,7 +12,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.util.UUID;
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -22,10 +20,10 @@ import lombok.NoArgsConstructor;
 @Getter
 @Builder
 @Entity
+@NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "image")
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Image extends CommonEntity {
+@Table(name = "files")
+public class File {
 
   @Id
   @GeneratedValue
@@ -48,35 +46,13 @@ public class Image extends CommonEntity {
 
   @Column(nullable = false)
   @Enumerated(EnumType.STRING)
-  private ImageExtension extension;
+  private FileExtension extension;
 
-  @Column(nullable = false)
-  private Integer width;
-
-  @Column(nullable = false)
-  private Integer height;
-
-  @Column(nullable = false)
-  private UUID userId;
-
-  private String ownerNickname;
-
-  @JoinColumn(name = "product_id")
+  @JoinColumn(name = "user_id")
   @ManyToOne(fetch = FetchType.LAZY)
-  private Product product;
+  private User owner;
 
-  public void updateProfile(String ownerNickname, String url) {
-    this.ownerNickname = ownerNickname;
-    this.url = url;
-  }
-
-  public void updateImage(String url, String fileName) {
-    this.url = url;
-    this.fileName = fileName;
-  }
-
-  public void registerProduct(Product product) {
-    this.product = product;
-  }
+  @Column(nullable = false)
+  @Enumerated(EnumType.STRING)
+  private FileType fileType;
 }
-

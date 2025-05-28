@@ -1,15 +1,19 @@
 package com.example.memecommerceback.domain.users.service;
 
+import com.example.memecommerceback.domain.files.entity.File;
+import com.example.memecommerceback.domain.files.service.FileServiceV1;
 import com.example.memecommerceback.domain.images.service.ImageServiceV1;
 import com.example.memecommerceback.domain.users.converter.UserConverter;
 import com.example.memecommerceback.domain.users.dto.UserRequestDto;
 import com.example.memecommerceback.domain.users.dto.UserResponseDto;
+import com.example.memecommerceback.domain.users.entity.SellerStatus;
 import com.example.memecommerceback.domain.users.entity.User;
 import com.example.memecommerceback.domain.users.entity.UserRole;
 import com.example.memecommerceback.domain.users.exception.UserCustomException;
 import com.example.memecommerceback.domain.users.exception.UserExceptionCode;
 import com.example.memecommerceback.domain.users.repository.UserRepository;
 import com.example.memecommerceback.global.service.ProfanityFilterService;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 public class UserServiceImplV1 implements UserServiceV1 {
 
+  private final FileServiceV1 fileService;
   private final ImageServiceV1 imageService;
   private final ProfanityFilterService profanityFilterService;
 
@@ -74,7 +79,7 @@ public class UserServiceImplV1 implements UserServiceV1 {
         && requestDto.getNickname() != null
         && !requestDto.getNickname().equals(beforeNickname)) {
       newProfileUrl = imageService.changeProfilePath(
-          profileImage, beforeNickname, requestDto.getNickname());
+          null, beforeNickname, requestDto.getNickname());
     }
 
     // 3. 유저 정보 업데이트 (가장 우선: 새 업로드 > 경로 이동 > 기존값)
@@ -92,7 +97,7 @@ public class UserServiceImplV1 implements UserServiceV1 {
   @Override
   @Transactional
   public UserResponseDto.IsAvailableNicknameDto isAvailableNickname(
-      String requestedNickname){
+      String requestedNickname) {
     boolean isAvailable
         = !userRepository.existsByNickname(requestedNickname);
     profanityFilterService.validateNoProfanity(requestedNickname);
@@ -103,11 +108,11 @@ public class UserServiceImplV1 implements UserServiceV1 {
   @Override
   @Transactional
   public UserResponseDto.UpdateProfileDto updateNickname(
-      String requestedNickname, User loginUser){
+      String requestedNickname, User loginUser) {
     User user = findById(loginUser.getId());
     boolean isAvailable
         = !userRepository.existsByNickname(requestedNickname);
-    if(!isAvailable){
+    if (!isAvailable) {
       throw new UserCustomException(UserExceptionCode.REQUEST_DUPLICATE_NICKNAME);
     }
     profanityFilterService.validateNoProfanity(requestedNickname);
@@ -126,23 +131,45 @@ public class UserServiceImplV1 implements UserServiceV1 {
   @Transactional
   public void deleteOne(UUID userId, User loginUser) {
     User user = findById(userId);
-    if(!loginUser.getRole().equals(UserRole.ADMIN)
-        && !loginUser.getId().equals(userId)){
+    if (!loginUser.getRole().equals(UserRole.ADMIN)
+        && !loginUser.getId().equals(userId)) {
       throw new UserCustomException(UserExceptionCode.ONLY_SELF_OR_ADMIN_CAN_DELETE);
     }
 
     if (user.getProfileImage() != null) {
       imageService.deleteS3Object(user.getProfileImage());
     }
-
+    fileService.deleteUserWithFiles(userId);
     userRepository.deleteById(userId);
   }
 
   @Override
+  @Transactional
+  public UserResponseDto.UpdateRoleDto updateRoleSellerByUser(
+      List<MultipartFile> multipartFileList, User loginUser) {
+    User user
+        = userRepository.findByIdAndRole(
+        loginUser.getId(), loginUser.getRole()).orElseThrow(
+        () -> new UserCustomException(UserExceptionCode.NOT_FOUND));
+
+    if (!user.getSellerStatus().equals(SellerStatus.NONE)) {
+      throw new UserCustomException(
+          UserExceptionCode.ALREADY_COMPLETED_OR_PENDING_STATUS);
+    }
+
+    List<File> fileList
+        = fileService.uploadUserFileList(multipartFileList, user);
+
+    user.updateSellerStatus(SellerStatus.PENDING);
+
+    return UserConverter.toUpdateRoleDto(user, fileList);
+  }
+
+  @Override
   @Transactional(readOnly = true)
-  public User findById(UUID loginUserId){
+  public User findById(UUID loginUserId) {
     return userRepository.findById(loginUserId).orElseThrow(
-        ()-> new UserCustomException(UserExceptionCode.NOT_FOUND));
+        () -> new UserCustomException(UserExceptionCode.NOT_FOUND));
   }
 
   private String getProfileImageUrl(MultipartFile profileImage, User user) {

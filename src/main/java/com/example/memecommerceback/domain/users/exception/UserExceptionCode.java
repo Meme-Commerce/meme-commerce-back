@@ -17,13 +17,16 @@ public enum UserExceptionCode {
   NEED_TO_REGISTER_NICKNAME(
       HttpStatus.BAD_REQUEST, "USER-003",
       "먼저 닉네임을 설정하셔야 이용할 수 있습니다."
-      + "닉네임만 먼저 설정해주세요"),
+          + "닉네임만 먼저 설정해주세요"),
   REQUEST_DUPLICATE_NICKNAME(
       HttpStatus.BAD_REQUEST, "USER-004",
       "요청하신 닉네임은 중복 닉네임입니다. "),
   ONLY_SELF_OR_ADMIN_CAN_DELETE(
       HttpStatus.BAD_REQUEST, "USER-005",
       "오직 자신 또는 관리자만 회원을 탈퇴할 권한이 있습니다."),
+  ALREADY_COMPLETED_OR_PENDING_STATUS(
+      HttpStatus.BAD_REQUEST, "USER-006",
+      "이미 완료된 상태(거절, 판매자 승인)이거나 검수 중인 상태입니다."),
   ;
 
   private final HttpStatus httpStatus;

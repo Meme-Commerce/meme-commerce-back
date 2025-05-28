@@ -3,13 +3,12 @@ package com.example.memecommerceback.domain.images.service;
 import com.example.memecommerceback.domain.files.exception.FileCustomException;
 import com.example.memecommerceback.domain.files.exception.FileExceptionCode;
 import com.example.memecommerceback.domain.images.converter.ImageConverter;
-import com.example.memecommerceback.domain.images.entity.Extension;
 import com.example.memecommerceback.domain.images.entity.Image;
 import com.example.memecommerceback.domain.images.repository.ImageRepository;
-import com.example.memecommerceback.domain.products.entity.Product;
 import com.example.memecommerceback.domain.users.entity.User;
-import com.example.memecommerceback.global.awsS3.dto.S3ResponseDto;
+import com.example.memecommerceback.global.awsS3.dto.S3ImageResponseDto;
 import com.example.memecommerceback.global.awsS3.service.S3Service;
+import com.example.memecommerceback.global.utils.FileUtils;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -37,18 +36,20 @@ public class ImageServiceImplV1 implements ImageServiceV1 {
     }
 
     String originalFilename = profileImage.getOriginalFilename();
-    Extension.extractFromFilename(originalFilename);
+    FileUtils.extractFromImageName(originalFilename);
 
-    S3ResponseDto s3ResponseDto = s3Service.uploadProfile(profileImage, user.getNickname());
+    S3ImageResponseDto s3ImageResponseDto
+        = s3Service.uploadProfile(profileImage, user.getNickname());
 
     Image originalImage = findByUserIdGet(user.getId());
     if (originalImage != null) {
       s3Service.deleteS3Object(originalImage.getUrl());
-      originalImage.updateImage(s3ResponseDto.getUrl(), s3ResponseDto.getFileName());
+      originalImage.updateImage(
+          s3ImageResponseDto.getUrl(), s3ImageResponseDto.getFileName());
       return originalImage.getUrl();
     }
 
-    Image image = createAndSaveImage(s3ResponseDto, user);
+    Image image = createAndSaveImage(s3ImageResponseDto, user);
     return image.getUrl();
   }
 
@@ -74,10 +75,11 @@ public class ImageServiceImplV1 implements ImageServiceV1 {
         throw new FileCustomException(FileExceptionCode.FILE_IS_REQUIRED);
       }
       String originalFilename = productImage.getOriginalFilename();
-      Extension.extractFromFilename(originalFilename);
+      FileUtils.extractFromImageName(originalFilename);
     }
 
-    List<S3ResponseDto> uploadedImages = s3Service.uploadProductImageList(productImageList, user.getNickname());
+    List<S3ImageResponseDto> uploadedImages = s3Service.uploadProductImageList(productImageList,
+        user.getNickname());
     List<Image> imageList = ImageConverter.toEntityList(uploadedImages, user);
     return imageRepository.saveAll(imageList);
   }
@@ -99,20 +101,23 @@ public class ImageServiceImplV1 implements ImageServiceV1 {
 
   @Override
   @Transactional
-  public String changeProfilePath(MultipartFile profileImage, String beforeNickname, String afterNickname) {
+  public String changeProfilePath(MultipartFile profileImage, String beforeNickname,
+      String afterNickname) {
     Image image = imageRepository.findByOwnerNickname(beforeNickname).orElse(null);
-    if(image == null && profileImage != null && !profileImage.isEmpty()){
+    if (image == null && profileImage != null && !profileImage.isEmpty()) {
       String originalFilename = profileImage.getOriginalFilename();
-      Extension.extractFromFilename(originalFilename);
+      FileUtils.extractFromImageName(originalFilename);
       return s3Service.uploadProfile(profileImage, afterNickname).getUrl();
     }
     String newUrl = s3Service.changePath(beforeNickname, afterNickname);
-    if(image != null) image.updateProfile(afterNickname, newUrl);
+    if (image != null) {
+      image.updateProfile(afterNickname, newUrl);
+    }
     return newUrl;
   }
 
   @Transactional
-  public Image createAndSaveImage(S3ResponseDto s3ResponseDto, User user) {
+  public Image createAndSaveImage(S3ImageResponseDto s3ResponseDto, User user) {
     Image image = ImageConverter.toEntity(s3ResponseDto, user);
     imageRepository.save(image);
     return image;
@@ -124,15 +129,15 @@ public class ImageServiceImplV1 implements ImageServiceV1 {
 
   @Override
   @Transactional
-  public List<S3ResponseDto> uploadProductImageList(
-      List<MultipartFile> productImageList, String nickname){
+  public List<S3ImageResponseDto> uploadProductImageList(
+      List<MultipartFile> productImageList, String nickname) {
     return s3Service.uploadProductImageList(productImageList, nickname);
   }
 
   @Override
   @Transactional
   public List<Image> toEntityListAndSaveAll(
-      List<S3ResponseDto> uploadedImageList, User loginUser) {
+      List<S3ImageResponseDto> uploadedImageList, User loginUser) {
     List<Image> imageList
         = ImageConverter.toEntityList(uploadedImageList, loginUser);
     return imageRepository.saveAll(imageList);
@@ -140,7 +145,7 @@ public class ImageServiceImplV1 implements ImageServiceV1 {
 
   @Override
   @Transactional
-  public void deleteS3Object(String url){
+  public void deleteS3Object(String url) {
     s3Service.deleteS3Object(url);
   }
 }

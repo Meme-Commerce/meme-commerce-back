@@ -4,12 +4,15 @@ import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.example.memecommerceback.domain.images.entity.Extension;
+import com.example.memecommerceback.domain.files.entity.FileExtension;
+import com.example.memecommerceback.domain.images.entity.ImageExtension;
 import com.example.memecommerceback.global.awsS3.converter.S3Converter;
-import com.example.memecommerceback.global.awsS3.dto.S3ResponseDto;
+import com.example.memecommerceback.global.awsS3.dto.S3FileResponseDto;
+import com.example.memecommerceback.global.awsS3.dto.S3ImageResponseDto;
 import com.example.memecommerceback.global.awsS3.utils.S3Utils;
 import com.example.memecommerceback.global.exception.AWSCustomException;
 import com.example.memecommerceback.global.exception.GlobalExceptionCode;
+import com.example.memecommerceback.global.utils.FileUtils;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -28,23 +31,24 @@ import org.springframework.web.multipart.MultipartFile;
 @Component
 @RequiredArgsConstructor
 public class S3Service {
+
   private final AmazonS3 amazonS3Client;
 
   @Value("${cloud.aws.s3.bucket}")
   private String bucket;
 
   @Transactional(propagation = Propagation.NOT_SUPPORTED)
-  public S3ResponseDto uploadProfile(
-      MultipartFile profileImage, String nickname){
+  public S3ImageResponseDto uploadProfile(
+      MultipartFile profileImage, String nickname) {
     try {
       String originalName = profileImage.getOriginalFilename();
-      Extension ext = Extension.extractFromFilename(originalName);
+      ImageExtension ext = FileUtils.extractFromImageName(originalName);
 
       ObjectMetadata metadata = setObjectMetadata(profileImage);
 
       String fileName = createUUIDFile(profileImage);
-      String filePath 
-          = S3Utils.USER_PREFIX + nickname 
+      String filePath
+          = S3Utils.USER_PREFIX + nickname
           + S3Utils.PROFILE_PREFIX + fileName;
 
       amazonS3Client.putObject(
@@ -52,9 +56,9 @@ public class S3Service {
 
       String url = amazonS3Client.getUrl(bucket, filePath).toString();
 
-      log.info("s3 서비스에 파일을 등록했습니다. : " +url);
+      log.info("s3 서비스에 파일을 등록했습니다. : " + url);
 
-      return S3Converter.toS3ResponseDto(
+      return S3Converter.toS3ImageResponseDto(
           originalName, ext, fileName, url, profileImage.getSize());
 
     } catch (SdkClientException e) {
@@ -124,30 +128,25 @@ public class S3Service {
   }
 
   @Transactional(propagation = Propagation.NOT_SUPPORTED)
-  public List<S3ResponseDto> uploadProductImageList(
-      List<MultipartFile> productImageList, String nickname){
-    List<S3ResponseDto> s3ResponseDtoList = new ArrayList<>();
+  public List<S3ImageResponseDto> uploadProductImageList(
+      List<MultipartFile> productImageList, String nickname) {
+    List<S3ImageResponseDto> s3ResponseDtoList = new ArrayList<>();
     for (MultipartFile productImage : productImageList) {
       try {
         String originalName = productImage.getOriginalFilename();
-        Extension ext = Extension.extractFromFilename(originalName);
+        ImageExtension ext = FileUtils.extractFromImageName(originalName);
 
         String fileName = createUUIDFile(productImage);
         String filePath
             = S3Utils.USER_PREFIX + nickname
             + S3Utils.PRODUCT_PREFIX + fileName;
 
-        ObjectMetadata metadata = setObjectMetadata(productImage);
+        uploadS3Bucket(filePath, productImage);
 
-        amazonS3Client.putObject(
-            bucket, filePath, productImage.getInputStream(), metadata);
-
-        String url = amazonS3Client.getUrl(bucket, filePath).toString();
-
-        log.info("s3 서비스에 파일을 등록했습니다. : " +url);
-
-        s3ResponseDtoList.add(S3Converter.toS3ResponseDto(
-            originalName, ext, fileName, url, productImage.getSize()));
+        s3ResponseDtoList.add(S3Converter.toS3ImageResponseDto(
+            originalName, ext, fileName,
+            amazonS3Client.getUrl(bucket, filePath).toString(),
+            productImage.getSize()));
 
       } catch (SdkClientException e) {
         log.error("AWS SDK exception occurred during file upload: {}", e.getMessage(), e);
@@ -160,7 +159,39 @@ public class S3Service {
     return s3ResponseDtoList;
   }
 
-  private String createUUIDFile(MultipartFile file){
+  @Transactional(propagation = Propagation.NOT_SUPPORTED)
+  public List<S3FileResponseDto> uploadCertificateFileList(
+      List<MultipartFile> multipartFileList, String nickname) {
+    List<S3FileResponseDto> s3ResponseDtoList = new ArrayList<>();
+    for (MultipartFile certificateFile : multipartFileList) {
+      try {
+        String originalName = certificateFile.getOriginalFilename();
+        FileExtension ext = FileUtils.extractFromFilename(originalName);
+
+        String fileName = createUUIDFile(certificateFile);
+        String filePath
+            = S3Utils.USER_PREFIX + nickname
+            + S3Utils.CERTIFICATE_PREFIX + fileName;
+
+        uploadS3Bucket(filePath, certificateFile);
+
+        s3ResponseDtoList.add(S3Converter.toS3FileResponseDto(
+            originalName, ext, fileName,
+            amazonS3Client.getUrl(bucket, filePath).toString(),
+            certificateFile.getSize()));
+
+      } catch (SdkClientException e) {
+        log.error("AWS SDK exception occurred during file upload: {}", e.getMessage(), e);
+        throw new AWSCustomException(GlobalExceptionCode.UPLOAD_FAIL);
+      } catch (IOException e) {
+        log.error("IO exception occurred during file upload: {}", e.getMessage(), e);
+        throw new AWSCustomException(GlobalExceptionCode.UPLOAD_FAIL);
+      }
+    }
+    return s3ResponseDtoList;
+  }
+
+  private String createUUIDFile(MultipartFile file) {
     String originalFilename = file.getOriginalFilename();
     if (originalFilename == null || originalFilename.isBlank()) {
       throw new AWSCustomException(GlobalExceptionCode.BLANK_FILE);
@@ -170,10 +201,22 @@ public class S3Service {
     return uuid + "_" + file.getOriginalFilename();
   }
 
-  private ObjectMetadata setObjectMetadata(MultipartFile multipartFile){
+  private ObjectMetadata setObjectMetadata(MultipartFile multipartFile) {
     ObjectMetadata metadata = new ObjectMetadata();
     metadata.setContentType(multipartFile.getContentType());
     metadata.setContentLength(multipartFile.getSize());
     return metadata;
+  }
+
+  private void uploadS3Bucket(
+      String filePath, MultipartFile file) throws IOException {
+    ObjectMetadata metadata = setObjectMetadata(file);
+
+    amazonS3Client.putObject(
+        bucket, filePath, file.getInputStream(), metadata);
+
+    String url = amazonS3Client.getUrl(bucket, filePath).toString();
+
+    log.info("s3 서비스에 파일을 등록했습니다. : " + url);
   }
 }

@@ -26,6 +26,15 @@ public enum FileExceptionCode {
   FAILED_DELETE_IMAGE_S3(
       HttpStatus.BAD_REQUEST, "FILE-006",
       "S3 버킷에서 이미지 파일을 삭제하는데, 실패하였습니다"),
+  COUNT_OUT_OF_RANGE(
+      HttpStatus.BAD_REQUEST, "FILE-007",
+      "판매자 등록 파일은 최소 4개, 최대 10개까지 등록 가능합니다."),
+  EMPTY_FILE_LIST(
+      HttpStatus.BAD_REQUEST, "FILE-008",
+      "요청에 대한 파일 리스트는 비어있으면 안됩니다."),
+  EMPTY_FILE(
+      HttpStatus.BAD_REQUEST, "FILE-009",
+      "요청에 대한 파일은 비어있으면 안됩니다."),
   ;
 
   private final HttpStatus httpStatus;

@@ -1,6 +1,6 @@
 package com.example.memecommerceback.domain.images.dto;
 
-import com.example.memecommerceback.domain.images.entity.Extension;
+import com.example.memecommerceback.domain.images.entity.ImageExtension;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,9 +12,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ImageResponseDto {
+
   private UUID imageId;
   private String url;
-  private Extension extension;
+  private ImageExtension extension;
   private int height;
   private int width;
 }
