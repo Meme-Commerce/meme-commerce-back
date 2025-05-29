@@ -61,10 +61,15 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
     // 2. 제목/설명에 비속어가 들어갔는지?
     validateProfanityText(requestDto.getName(), requestDto.getDescription(), loginUser);
 
-    // 3. 상품을 만듦.
+    // 3. 상품을 등록하려는 판매자의 닉네임이 없으면 상품 등록 실패
+    if(loginUser.getNickname() == null){
+      throw new ProductCustomException(ProductExceptionCode.NEED_TO_USER_NICKNAME);
+    }
+
+    // 4. 상품을 만듦.
     Product product = ProductConverter.toEntity(requestDto, loginUser);
 
-    // 4. 상품에 카테고리, 해시태그 연결
+    // 5. 상품에 카테고리, 해시태그 연결
     if (requestDto.getCategoryIdList() != null
         && !requestDto.getCategoryIdList().isEmpty()) {
       productCategoryService.resetCategories(
@@ -86,7 +91,7 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
           productImageList, loginUser.getNickname());
 
       // 2. DB 작업들 (트랜잭션 내부 - 실패 시 롤백)
-      imageList = imageService.toEntityListAndSaveAll(uploadedImages, loginUser);
+      imageList = imageService.toEntityProductListAndSaveAll(uploadedImages, loginUser);
 
       product.addImageList(imageList);
       productRepository.save(product);
@@ -96,9 +101,9 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
       if (uploadedImages != null && !uploadedImages.isEmpty()) {
         for (S3ImageResponseDto dto : uploadedImages) {
           try {
-            imageService.deleteS3Object(dto.getUrl());
+            imageService.deleteS3Object(dto.getPrefixUrl()+dto.getFileName());
           } catch (Exception cleanupEx) {
-            log.warn("S3 보상 삭제 실패: {}", dto.getUrl(), cleanupEx);
+            log.warn("S3 보상 삭제 실패: {}", dto.getPrefixUrl()+dto.getFileName(), cleanupEx);
           }
         }
       }
@@ -169,7 +174,7 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
         uploadedImages = imageService.uploadProductImageList(multipartFileList,
             seller.getNickname());
         // 2. DB 작업들
-        newImageList = imageService.toEntityListAndSaveAll(uploadedImages, seller);
+        newImageList = imageService.toEntityProductListAndSaveAll(uploadedImages, seller);
         // 3. 업로드 성공 시에만 기존 이미지 삭제
         imageService.deleteProductImageList(product.getId(), seller.getId());
         // 4. 새 이미지와 상품 연결
@@ -180,9 +185,9 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
       if (uploadedImages != null && !uploadedImages.isEmpty()) {
         for (S3ImageResponseDto dto : uploadedImages) {
           try {
-            imageService.deleteS3Object(dto.getUrl());
+            imageService.deleteS3Object(dto.getPrefixUrl()+dto.getFileName());
           } catch (Exception cleanupEx) {
-            log.warn("S3 보상 삭제 실패: {}", dto.getUrl(), cleanupEx);
+            log.warn("S3 보상 삭제 실패: {}", dto.getPrefixUrl()+dto.getFileName(), cleanupEx);
           }
         }
       }

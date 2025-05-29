@@ -22,9 +22,13 @@ public interface ImageServiceV1 {
 
   void deleteS3Object(String url);
 
-  List<Image> toEntityListAndSaveAll(
+  List<Image> toEntityProductListAndSaveAll(
       List<S3ImageResponseDto> uploadedImageList, User loginUser);
 
   List<Image> uploadAndRegisterProductImage(
       List<MultipartFile> productImageList, User user);
+
+  Image uploadEmojiImage(MultipartFile multipartFile, User admin);
+
+  void changeUserPath(String beforeNickname, String afterNickname);
 }

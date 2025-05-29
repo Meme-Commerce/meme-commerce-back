@@ -52,21 +52,18 @@ public class UserServiceImplV1 implements UserServiceV1 {
 
     User user = findById(loginUser.getId());
     String beforeNickname = user.getNickname();
+    String afterNickname = requestDto.getNickname();
 
+    // 1. 닉네임 변경이 있는 경우, 이미지 경로 일괄 변경
+    if (afterNickname != null && !afterNickname.equals(beforeNickname)) {
+      imageService.changeUserPath(beforeNickname, afterNickname);
+      user.updateNickname(afterNickname);
+    }
+
+    // 2. 새 프로필 이미지가 있는 경우: 기존 이미지 삭제 후 새 이미지 업로드
     String profileImageUrl = null;
-
-    // 1. 새 프로필 이미지가 있는 경우: 기존 이미지 삭제 후 새 이미지 업로드
     if (profileImage != null) {
-      if (user.getNickname() == null) {
-        throw new UserCustomException(
-            UserExceptionCode.NEED_TO_REGISTER_NICKNAME);
-      }
-
-      if (requestDto.getNickname() != null
-          && !user.getNickname().equals(requestDto.getNickname())) {
-        user.updateNickname(requestDto.getNickname());
-      }
-
+      // 새 닉네임으로 경로 이동 후에 업로드해야 S3 위치가 올바름
       profileImageUrl = getProfileImageUrl(profileImage, user);
 
       if (profileImageUrl != null && user.getProfileImage() != null) {
@@ -74,22 +71,12 @@ public class UserServiceImplV1 implements UserServiceV1 {
       }
     }
 
-    // 2. 닉네임만 변경 & 새 프로필 이미지는 없는 경우: 기존 이미지 경로 이동, 새 URL 할당
-    String newProfileUrl = null;
-    if (profileImage == null
-        && requestDto.getNickname() != null
-        && !requestDto.getNickname().equals(beforeNickname)) {
-      newProfileUrl = imageService.changeProfilePath(
-          null, beforeNickname, requestDto.getNickname());
-    }
-
-    // 3. 유저 정보 업데이트 (가장 우선: 새 업로드 > 경로 이동 > 기존값)
+    // 3. 유저 정보 업데이트 (contact, nickname, address, profileImage)
     user.updateProfile(
         requestDto.getContact(),
-        requestDto.getNickname(),
+        afterNickname,
         requestDto.getAddress(),
-        profileImageUrl != null ? profileImageUrl :
-            (newProfileUrl != null ? newProfileUrl : user.getProfileImage())
+        profileImageUrl != null ? profileImageUrl : user.getProfileImage()
     );
 
     return UserConverter.toUpdateProfileDto(user);
@@ -200,6 +187,7 @@ public class UserServiceImplV1 implements UserServiceV1 {
         () -> new UserCustomException(UserExceptionCode.NOT_FOUND));
   }
 
+  // 일단 새로운 경로에 대한 profileImageUrl
   private String getProfileImageUrl(MultipartFile profileImage, User user) {
     if (profileImage == null) {
       return null; // 이미지가 없으면 null 반환

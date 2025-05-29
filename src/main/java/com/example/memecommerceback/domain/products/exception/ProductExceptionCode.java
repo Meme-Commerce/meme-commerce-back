@@ -37,8 +37,10 @@ public enum ProductExceptionCode {
       "해당 유저는 읽을 권한이 없습니다."),
   UNAUTHORIZED_DELETE(
       HttpStatus.FORBIDDEN, "PRODUCT-010",
-      "해당 유저는 삭제할 권한이 없습니다."
-  ),
+      "해당 유저는 삭제할 권한이 없습니다."),
+  NEED_TO_USER_NICKNAME(
+      HttpStatus.BAD_REQUEST, "PRODUCT-011",
+      "상품 이미지 업로드를 위해 유저의 닉네임 설정은 필수입니다."),
   ;
 
   private final HttpStatus httpStatus;

@@ -41,7 +41,7 @@ public class Image extends CommonEntity {
   private String originalName;
 
   @Column(nullable = false)
-  private String url;
+  private String prefixUrl;
 
   @Column(nullable = false)
   private Long size;
@@ -61,22 +61,32 @@ public class Image extends CommonEntity {
 
   private String ownerNickname;
 
+  @Column(nullable = false)
+  @Enumerated(EnumType.STRING)
+  private ImageType imageType;
+
   @JoinColumn(name = "product_id")
   @ManyToOne(fetch = FetchType.LAZY)
   private Product product;
 
-  public void updateProfile(String ownerNickname, String url) {
+  public void updateProfile(
+      String ownerNickname, String prefixUrl, String fileName) {
     this.ownerNickname = ownerNickname;
-    this.url = url;
+    this.prefixUrl = prefixUrl;
+    this.fileName = fileName;
   }
 
-  public void updateImage(String url, String fileName) {
-    this.url = url;
+  public void updateImage(String prefixUrl, String fileName) {
+    this.prefixUrl = prefixUrl;
     this.fileName = fileName;
   }
 
   public void registerProduct(Product product) {
     this.product = product;
+  }
+
+  public String getUrl(){
+    return this.prefixUrl + this.fileName;
   }
 }
 
