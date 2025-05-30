@@ -11,10 +11,10 @@ public class S3Utils {
       = "https://meme-commerce-bucket.s3.ap-northeast-2.amazonaws.com/";
 
   public static String getS3UserProfilePrefix(String nickname){
-    return S3_URL + USER_PREFIX + nickname + PROFILE_PREFIX;
+    return USER_PREFIX + nickname + PROFILE_PREFIX;
   }
 
   public static String getS3UserProductPrefix(String nickname){
-    return S3_URL + USER_PREFIX + nickname + PRODUCT_PREFIX;
+    return USER_PREFIX + nickname + PRODUCT_PREFIX;
   }
 }

@@ -45,14 +45,13 @@ public class S3Service {
       MultipartFile profileImage, String nickname) {
     try {
       String originalName = profileImage.getOriginalFilename();
-      ImageExtension ext = FileUtils.extractFromImageName(originalName);
+      ImageExtension ext = FileUtils.extractExtensionFromImageName(originalName);
 
       ObjectMetadata metadata = setObjectMetadata(profileImage);
 
       String prefixUrl = S3Utils.getS3UserProfilePrefix(nickname);
       String fileName = createUUIDFile(profileImage);
       String filePath = prefixUrl + fileName;
-
       amazonS3Client.putObject(
           bucket, filePath, profileImage.getInputStream(), metadata);
 
@@ -155,54 +154,15 @@ public class S3Service {
   }
 
   @Transactional(propagation = Propagation.NOT_SUPPORTED)
-  public String changeProfilePath(String beforenickname, String afternickname) {
-    String oldPrefix = S3Utils.USER_PREFIX + beforenickname + S3Utils.PROFILE_PREFIX;
-    String newPrefix = S3Utils.USER_PREFIX + afternickname + S3Utils.PROFILE_PREFIX;
-
-    // 1. afternickname 경로가 이미 존재하면 에러 (다른 사용자가 이미 사용 중)
-    var afterListing = amazonS3Client.listObjects(bucket, newPrefix);
-    if (!afterListing.getObjectSummaries().isEmpty()) {
-      log.warn("afterNickname 경로에 이미 파일이 존재합니다: {}", newPrefix);
-      throw new AWSCustomException(GlobalExceptionCode.ALREADY_EXISTS_FILE_URL);
-    }
-
-    // 2. beforeNickname 경로 확인
-    var beforeListing = amazonS3Client.listObjects(bucket, oldPrefix);
-    if (!beforeListing.getObjectSummaries().isEmpty()) {
-      // 2-1. before 경로의 모든 파일을 after 경로로 이동
-      String newUrl = null;
-      for (var s3Object : beforeListing.getObjectSummaries()) {
-        String oldKey = s3Object.getKey();
-        String fileName = oldKey.substring(oldPrefix.length());
-        String newKey = newPrefix + fileName;
-
-        amazonS3Client.copyObject(bucket, oldKey, bucket, newKey);
-        amazonS3Client.deleteObject(bucket, oldKey);
-
-        log.info("프로필 이미지 경로 변경: {} → {}", oldKey, newKey);
-        newUrl = amazonS3Client.getUrl(bucket, newKey).toString();
-      }
-      if (newUrl == null) {
-        throw new AWSCustomException(GlobalExceptionCode.UPLOAD_FAIL);
-      }
-      return newUrl;
-    }
-
-    log.warn("beforeNickname, afterNickname 모두 해당 경로에 이미지가 존재하지 않습니다.");
-    // 필요하다면 기본값 or null or 예외 처리 (업로드 분기에서 저장)
-    return null;
-  }
-
-  @Transactional(propagation = Propagation.NOT_SUPPORTED)
   public List<S3ImageResponseDto> uploadProductImageList(
       List<MultipartFile> productImageList, String nickname) {
     List<S3ImageResponseDto> s3ResponseDtoList = new ArrayList<>();
     for (MultipartFile productImage : productImageList) {
       try {
         String originalName = productImage.getOriginalFilename();
-        ImageExtension ext = FileUtils.extractFromImageName(originalName);
+        ImageExtension ext = FileUtils.extractExtensionFromImageName(originalName);
 
-        String prefixUrl = S3Utils.getS3UserProfilePrefix(nickname);
+        String prefixUrl = S3Utils.getS3UserProductPrefix(nickname);
         String fileName = createUUIDFile(productImage);
         String filePath = prefixUrl + fileName;
 
@@ -229,7 +189,7 @@ public class S3Service {
     for (MultipartFile certificateFile : multipartFileList) {
       try {
         String originalName = certificateFile.getOriginalFilename();
-        FileExtension ext = FileUtils.extractFromFilename(originalName);
+        FileExtension ext = FileUtils.extractExtensionFromFilename(originalName);
 
         String fileName = createUUIDFile(certificateFile);
         String filePath
@@ -257,7 +217,7 @@ public class S3Service {
   public S3ImageResponseDto uploadEmojiImage(MultipartFile multipartFile) {
     try {
       String originalName = multipartFile.getOriginalFilename();
-      ImageExtension ext = FileUtils.extractFromImageName(originalName);
+      ImageExtension ext = FileUtils.extractExtensionFromImageName(originalName);
 
       ObjectMetadata metadata = setObjectMetadata(multipartFile);
 

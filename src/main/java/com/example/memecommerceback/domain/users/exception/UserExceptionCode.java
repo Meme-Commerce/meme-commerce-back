@@ -33,6 +33,12 @@ public enum UserExceptionCode {
   CANNOT_CHANGE_ADMIN_ROLE(
       HttpStatus.BAD_REQUEST, "USER-008",
       "관리자는 다른 관리자의 권한을 변경할 수 없습니다."),
+  CONFLICT_IMAGE_UPDATE_AND_DELETE(
+      HttpStatus.BAD_REQUEST, "USER-009",
+      "프로필 이미지 삭제와 업로드를 동시에 요청할 수 없습니다."),
+  EXIST_NICKNAME(
+      HttpStatus.BAD_REQUEST, "USER-010",
+      "중복되는 닉네임이 존재합니다."),
   ;
 
   private final HttpStatus httpStatus;

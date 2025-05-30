@@ -12,9 +12,6 @@ public interface ImageServiceV1 {
   String uploadAndRegisterUserProfileImage(
       MultipartFile profileImage, User user);
 
-  String changeProfilePath(
-      MultipartFile profileImage, String beforeNickname, String afterNickname);
-
   void deleteProductImageList(UUID productId, UUID userId);
 
   List<S3ImageResponseDto> uploadProductImageList(
@@ -30,5 +27,10 @@ public interface ImageServiceV1 {
 
   Image uploadEmojiImage(MultipartFile multipartFile, User admin);
 
-  void changeUserPath(String beforeNickname, String afterNickname);
+  String changeUserPath(String beforeNickname, String afterNickname);
+
+  void deleteProfileImage(String ownerNickname);
+
+  String reloadImageAndChangeUserPath(
+      User user, MultipartFile profile, String beforeNickname, String afterNickname);
 }

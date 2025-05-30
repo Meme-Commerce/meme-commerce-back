@@ -70,6 +70,8 @@ public class UserConverter {
         .contact(user.getContact())
         .age(user.getAge())
         .createdAt(user.getCreatedAt())
+        .profileImage(user.getProfileImage())
+        .address(user.getAddress())
         .registeredCompanyName(user.getCompanyName())
         .build();
   }

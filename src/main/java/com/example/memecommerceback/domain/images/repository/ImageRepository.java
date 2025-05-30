@@ -13,14 +13,11 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface ImageRepository extends JpaRepository<Image, UUID> {
 
-  Optional<Image> findByUserId(UUID userId);
+  Optional<Image> findByUserIdAndImageType(UUID userId, ImageType imageType);
 
   Optional<Image> findByOwnerNickname(String ownerNickname);
 
   List<Image> findAllByProductId(UUID productId);
-
-  List<Image> findAllByOwnerNicknameAndImageTypeNot(
-      String ownerNickname, ImageType imageType);
 
   @Modifying
   @Query("UPDATE Image i SET i.ownerNickname = :afterNickname, i.prefixUrl = :newPrefixUrl " +
@@ -31,4 +28,7 @@ public interface ImageRepository extends JpaRepository<Image, UUID> {
       @Param("imageType") ImageType imageType,
       @Param("newPrefixUrl") String newPrefixUrl
   );
+
+  Optional<Image> findByOwnerNicknameAndImageType(
+      String ownerNickname, ImageType imageType);
 }

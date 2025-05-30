@@ -35,7 +35,8 @@ public class ImageServiceImplV1 implements ImageServiceV1 {
 
   @Override
   @Transactional
-  public String uploadAndRegisterUserProfileImage(MultipartFile profileImage, User user) {
+  public String uploadAndRegisterUserProfileImage(
+      MultipartFile profileImage, User user) {
     if (profileImage == null || profileImage.isEmpty()) {
       throw new FileCustomException(FileExceptionCode.FILE_IS_REQUIRED);
     }
@@ -44,14 +45,18 @@ public class ImageServiceImplV1 implements ImageServiceV1 {
     }
 
     String originalFilename = profileImage.getOriginalFilename();
-    FileUtils.extractFromImageName(originalFilename);
+    FileUtils.extractExtensionFromImageName(originalFilename);
 
     S3ImageResponseDto s3ImageResponseDto
         = s3Service.uploadProfile(profileImage, user.getNickname());
 
-    Image originalImage = findByUserIdGet(user.getId());
+    Image originalImage
+        = imageRepository.findByUserIdAndImageType(
+            user.getId(), ImageType.PROFILE).orElse(null);
+
     if (originalImage != null) {
-      s3Service.deleteS3Object(originalImage.getPrefixUrl() + originalImage.getFileName());
+      String s3ProfileUrl = S3Utils.S3_URL+originalImage.getPrefixUrl()+originalImage.getFileName();
+      s3Service.deleteS3Object(s3ProfileUrl);
       originalImage.updateImage(
           s3ImageResponseDto.getPrefixUrl(), s3ImageResponseDto.getFileName());
       return originalImage.getUrl();
@@ -83,7 +88,7 @@ public class ImageServiceImplV1 implements ImageServiceV1 {
         throw new FileCustomException(FileExceptionCode.FILE_IS_REQUIRED);
       }
       String originalFilename = productImage.getOriginalFilename();
-      FileUtils.extractFromImageName(originalFilename);
+      FileUtils.extractExtensionFromImageName(originalFilename);
     }
 
     List<S3ImageResponseDto> uploadedImages = s3Service.uploadProductImageList(productImageList,
@@ -109,18 +114,17 @@ public class ImageServiceImplV1 implements ImageServiceV1 {
 
   @Override
   @Transactional
-  public void changeUserPath(String beforeNickname, String afterNickname) {
+  public String changeUserPath(String beforeNickname, String afterNickname) {
     // 이모지 타입은 가지고 오지 않는 이유는 Emoji타입의 주인은 admin이 등록하기 때문
     // s3 경로도 Emoji는 해당 어드민의 닉네임으로 보관하지 않기에,
     s3Service.changePath(beforeNickname, afterNickname);
 
-    int updatedProfileImageRow = imageRepository.updateImageOwnerNicknameAndPrefixByType(
-        beforeNickname, afterNickname, ImageType.PROFILE,
-        S3Utils.getS3UserProfilePrefix(afterNickname));
-    if(updatedProfileImageRow > 1){
-      throw new FileCustomException(FileExceptionCode.DUPLICATE_PROFILE_IMAGE);
-    }
-    log.info("총 {}건의 프로필 이미지 row가 업데이트되었습니다.", updatedProfileImageRow);
+    Image image
+        = imageRepository.findByOwnerNicknameAndImageType(
+            beforeNickname, ImageType.PROFILE).orElseThrow(
+        ()-> new FileCustomException(FileExceptionCode.NOT_FOUND));
+    image.updateOwnerNicknameAndPrefix(
+        afterNickname, S3Utils.getS3UserProfilePrefix(afterNickname));
 
     int updatedProductImageRow = imageRepository.updateImageOwnerNicknameAndPrefixByType(
         beforeNickname, afterNickname, ImageType.PRODUCT,
@@ -128,26 +132,7 @@ public class ImageServiceImplV1 implements ImageServiceV1 {
     log.info("총 {}건의 상품 이미지 row가 업데이트되었습니다.", updatedProductImageRow);
 
     entityManager.clear();
-  }
-
-  @Override
-  @Transactional
-  public String changeProfilePath(MultipartFile profileImage, String beforeNickname,
-      String afterNickname) {
-    Image image = imageRepository.findByOwnerNickname(beforeNickname).orElse(null);
-    if (image == null && profileImage != null && !profileImage.isEmpty()) {
-      String originalFilename = profileImage.getOriginalFilename();
-      FileUtils.extractFromImageName(originalFilename);
-      S3ImageResponseDto s3ImageResponseDto
-          = s3Service.uploadProfile(profileImage, afterNickname);
-      return s3ImageResponseDto.getPrefixUrl() + s3ImageResponseDto.getFileName();
-    }
-    String newUrl = s3Service.changeProfilePath(beforeNickname, afterNickname);
-    if (image != null) {
-      image.updateProfile(
-          afterNickname, image.getPrefixUrl(), image.getFileName());
-    }
-    return newUrl;
+    return S3Utils.S3_URL + image.getUrl();
   }
 
   @Transactional
@@ -156,10 +141,6 @@ public class ImageServiceImplV1 implements ImageServiceV1 {
     Image image = ImageConverter.toEntity(s3ResponseDto, user, imageType);
     imageRepository.save(image);
     return image;
-  }
-
-  public Image findByUserIdGet(UUID userId) {
-    return imageRepository.findByUserId(userId).orElse(null);
   }
 
   @Override
@@ -194,5 +175,26 @@ public class ImageServiceImplV1 implements ImageServiceV1 {
   @Transactional
   public void deleteS3Object(String url) {
     s3Service.deleteS3Object(url);
+  }
+
+  public void deleteProfileImage(String ownerNickname){
+    Image image
+        = imageRepository.findByOwnerNicknameAndImageType(ownerNickname, ImageType.PROFILE)
+        .orElseThrow( () -> new FileCustomException(FileExceptionCode.NOT_FOUND));
+    s3Service.deleteS3Object(image.getUrl());
+    imageRepository.deleteById(image.getId());
+  }
+
+  @Override
+  @Transactional
+  public String reloadImageAndChangeUserPath(
+      User user, MultipartFile profile, String beforeNickname, String afterNickname) {
+    if(user.getProfileImage() == null){
+      uploadAndRegisterUserProfileImage(profile, user);
+      return changeUserPath(beforeNickname, afterNickname);
+    }
+    deleteS3Object(user.getProfileImage());
+    uploadAndRegisterUserProfileImage(profile, user);
+    return changeUserPath(beforeNickname, afterNickname);
   }
 }
