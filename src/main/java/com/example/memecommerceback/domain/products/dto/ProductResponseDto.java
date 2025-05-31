@@ -1,5 +1,6 @@
 package com.example.memecommerceback.domain.products.dto;
 
+import com.example.memecommerceback.domain.emoji.dto.EmojiResponseDto;
 import com.example.memecommerceback.domain.images.dto.ImageResponseDto;
 import com.example.memecommerceback.domain.productCategory.dto.ProductCategoryResponseDto;
 import com.example.memecommerceback.domain.productHashtag.dto.ProductHashtagResponseDto;
@@ -231,13 +232,16 @@ public class ProductResponseDto {
     @Schema(description = "상품 소유자명", example = "홍길동")
     private String ownerName;
 
-    @Schema(description = "상품 이미지 리스트", example = "[]")
-    private List<ImageResponseDto> imageResponseDtoList;
+    @Schema(description = "상품 응답 리스트", example = "[]")
+    private List<ImageResponseDto> mainImageResponseDtoList;
 
-    @Schema(description = "상품 카테고리 리스트", example = "[전자기기, 생활용품]")
+    @Schema(description = "이모지 응답 리스트", example = "[]")
+    private List<EmojiResponseDto> emojiResponseDtoList;
+
+    @Schema(description = "상품 카테고리 응답 리스트", example = "[전자기기, 생활용품]")
     private List<ProductCategoryResponseDto> productCategoryResponseDtoList;
 
-    @Schema(description = "상품 해시태그 리스트", example = "[편안함, 엔티크]")
+    @Schema(description = "상품 해시태그 응답 리스트", example = "[편안함, 엔티크]")
     private List<ProductHashtagResponseDto> productHashtagResponseDtoList;
 
     @Schema(description = "상품 재고 수량", example = "100")

@@ -26,7 +26,7 @@ public class EmojiServiceImplV1 implements EmojiServiceV1 {
 
   @Override
   @Transactional
-  public void register(
+  public List<Emoji> register(
       List<MultipartFile> emojiImageList, Product product, User seller,
       String emojiPackName, List<RegisterEmojiDto> emojiDescriptionList) {
     // 1. 이모지 설명 욕설 존재하는지 확인
@@ -44,6 +44,10 @@ public class EmojiServiceImplV1 implements EmojiServiceV1 {
     emojiRepository.saveAll(emojiList);
 
     // 4. 이모지 연관관계 설정
-    emojiList.forEach(emoji -> emoji.addProduct(product));
+    for (int i = 0; i < emojiList.size(); i++) {
+      emojiList.get(i).addProductAndImage(product, imageList.get(i));
+    }
+
+    return emojiList;
   }
 }

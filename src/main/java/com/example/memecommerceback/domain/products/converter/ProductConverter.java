@@ -1,5 +1,7 @@
 package com.example.memecommerceback.domain.products.converter;
 
+import com.example.memecommerceback.domain.emoji.converter.EmojiConverter;
+import com.example.memecommerceback.domain.emoji.entity.Emoji;
 import com.example.memecommerceback.domain.images.converter.ImageConverter;
 import com.example.memecommerceback.domain.images.entity.Image;
 import com.example.memecommerceback.domain.productCategory.converter.ProductCategoryConverter;
@@ -110,7 +112,8 @@ public class ProductConverter {
   }
 
   public static ProductResponseDto.RegisterEmojiPackDto toRegisterEmojiPackDto(
-      Product product, String ownerName, List<Image> productImageList) {
+      Product product, String ownerName, List<Image> mainProductImageList,
+      List<Emoji> emojiList) {
     return ProductResponseDto.RegisterEmojiPackDto.builder()
         .productId(product.getId())
         .createdAt(product.getCreatedAt())
@@ -119,11 +122,13 @@ public class ProductConverter {
         .stock(product.getStock())
         .price(product.getPrice())
         .ownerName(ownerName)
-        .imageResponseDtoList(ImageConverter.toResponseDtoList(productImageList))
+        .mainImageResponseDtoList(ImageConverter.toResponseDtoList(mainProductImageList))
         .productCategoryResponseDtoList(
             ProductCategoryConverter.toResponseDtoList(product.getProductCategoryList()))
         .productHashtagResponseDtoList(
             ProductHashtagConverter.toResponseDtoList(product.getProductHashtagList()))
+        .emojiResponseDtoList(
+            EmojiConverter.toResponseDtoList(emojiList))
         .status(product.getStatus())
         .sellStartDate(product.getSellStartDate())
         .sellEndDate(product.getSellEndDate())

@@ -1,5 +1,6 @@
 package com.example.memecommerceback.domain.products.service;
 
+import com.example.memecommerceback.domain.emoji.entity.Emoji;
 import com.example.memecommerceback.domain.emoji.service.EmojiServiceV1;
 import com.example.memecommerceback.domain.images.entity.Image;
 import com.example.memecommerceback.domain.images.service.ImageServiceV1;
@@ -395,7 +396,7 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
     // 9. 이모지 이미지 업로드
     List<S3ImageResponseDto> uploadedImages = null;
     List<Image> imageList = null;
-
+    List<Emoji> emojiList = null;
     try {
       // 1. S3 업로드 먼저 (트랜잭션 외부)
       uploadedImages
@@ -409,7 +410,7 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
       product.addImageList(imageList);
       productRepository.save(product);
 
-      emojiService.register(
+      emojiList = emojiService.register(
           emojiImageList, product, seller,
           requestDto.getName(), requestDto.getEmojiDescriptionList());
     } catch (Exception e) {
@@ -427,7 +428,7 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
     }
 
     return ProductConverter.toRegisterEmojiPackDto(
-        product, seller.getName(), imageList);
+        product, seller.getName(), imageList, emojiList);
   }
 
   @Override

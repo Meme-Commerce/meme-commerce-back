@@ -2,6 +2,7 @@ package com.example.memecommerceback.domain.emoji.dto;
 
 import com.example.memecommerceback.domain.images.dto.ImageResponseDto;
 import java.time.LocalDateTime;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -17,5 +18,5 @@ public class EmojiResponseDto {
   private String name;
   private LocalDateTime createdAt;
   private LocalDateTime modifiedAt;
-  private ImageResponseDto imageResponseDto;
+  private ImageResponseDto emojiImageResponseDto;
 }

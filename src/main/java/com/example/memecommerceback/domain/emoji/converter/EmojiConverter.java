@@ -1,6 +1,8 @@
 package com.example.memecommerceback.domain.emoji.converter;
 
+import com.example.memecommerceback.domain.emoji.dto.EmojiResponseDto;
 import com.example.memecommerceback.domain.emoji.entity.Emoji;
+import com.example.memecommerceback.domain.images.converter.ImageConverter;
 import com.example.memecommerceback.domain.images.entity.Image;
 import com.example.memecommerceback.domain.products.dto.ProductRequestDto.RegisterEmojiDto;
 import com.example.memecommerceback.domain.products.entity.Product;
@@ -31,5 +33,20 @@ public class EmojiConverter {
             .product(product)
             .build())
         .collect(Collectors.toList());
+  }
+
+  public static List<EmojiResponseDto> toResponseDtoList(List<Emoji> emojiList){
+    return emojiList.stream().map(EmojiConverter::toResponseDto).toList();
+  }
+
+  public static EmojiResponseDto toResponseDto(Emoji emoji){
+    return EmojiResponseDto.builder()
+        .emojiId(emoji.getId())
+        .name(emoji.getName())
+        .modifiedAt(emoji.getModifiedAt())
+        .createdAt(emoji.getCreatedAt())
+        .emojiImageResponseDto(
+            ImageConverter.toResponseDto(emoji.getImage()))
+        .build();
   }
 }
