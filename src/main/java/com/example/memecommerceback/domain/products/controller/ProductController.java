@@ -270,4 +270,22 @@ public class ProductController {
             "상품 삭제 성공하였습니다.",
             HttpStatus.OK.value()));
   }
+
+  @PreAuthorize("hasAuthority('ROLE_SELLER')")
+  @PostMapping(value = "/products/emoji-pack", consumes = "multipart/form-data")
+  public ResponseEntity<
+      CommonResponseDto<ProductResponseDto.RegisterEmojiPackDto>> registerEmojiPack(
+          @RequestPart(name = "data") @Valid ProductRequestDto.RegisterEmojiPackDto requestDto,
+          @RequestPart(name = "main-product-image-list") List<MultipartFile> mainProductImageList,
+          @RequestPart(name = "image-list") List<MultipartFile> emojiImageList,
+          @AuthenticationPrincipal UserDetailsImpl userDetails){
+    ProductResponseDto.RegisterEmojiPackDto responseDto =
+        productService.registerEmojiPack(
+            requestDto, mainProductImageList, emojiImageList, userDetails.getUser());
+    return ResponseEntity.status(HttpStatus.OK).body(
+        new CommonResponseDto<>(
+            responseDto,
+            "이모지팩(이모지 세트) 상품 등록하였습니다.",
+            HttpStatus.OK.value()));
+  }
 }

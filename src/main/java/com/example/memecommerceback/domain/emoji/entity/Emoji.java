@@ -45,10 +45,15 @@ public class Emoji extends CommonEntity {
   @OneToOne(fetch = FetchType.LAZY)
   private Image image;
 
-  @OneToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "user_id")
   private User user;
 
   @JoinColumn(name = "product_id")
   @ManyToOne(fetch = FetchType.LAZY)
   private Product product;
+
+  public void addProduct(Product product){
+    this.product = product;
+  }
 }

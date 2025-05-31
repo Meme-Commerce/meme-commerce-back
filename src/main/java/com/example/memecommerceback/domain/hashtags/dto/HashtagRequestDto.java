@@ -20,7 +20,7 @@ public class HashtagRequestDto {
 
     @NotNull(message = "이름 리스트는 필수 입력 값입니다.")
     @Size(min = 1, message = "최소 1개의 해시태그명을 입력해야 합니다.")
-    @Schema(description = "생성할 해시태그명 리스트", example = "[\"밈\", \"유머\", \"트렌드\"]")
+    @Schema(description = "생성할 해시태그명 리스트", example = "[\"편안함\", \"엔티크\"]")
     private List<
         @Pattern(regexp = "^[가-힣a-zA-Z0-9]{1,20}$",
             message = "한글/영문/숫자로 1~20자까지 입력 가능합니다.")

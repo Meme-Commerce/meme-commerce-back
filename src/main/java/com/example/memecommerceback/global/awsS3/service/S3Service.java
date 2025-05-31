@@ -214,32 +214,38 @@ public class S3Service {
     return s3ResponseDtoList;
   }
 
-  public S3ImageResponseDto uploadEmojiImage(MultipartFile multipartFile) {
-    try {
-      String originalName = multipartFile.getOriginalFilename();
-      ImageExtension ext = FileUtils.extractExtensionFromImageName(originalName);
+  public List<S3ImageResponseDto> uploadEmojiImageList(
+      List<MultipartFile> multipartFileList, String nickname, String emojiPackName) {
+    List<S3ImageResponseDto> s3ResponseDtoList = new ArrayList<>();
+    for (MultipartFile multipartFile: multipartFileList) {
+      try {
+        String originalName = multipartFile.getOriginalFilename();
+        ImageExtension ext = FileUtils.extractExtensionFromImageName(originalName);
 
-      ObjectMetadata metadata = setObjectMetadata(multipartFile);
+        ObjectMetadata metadata = setObjectMetadata(multipartFile);
 
-      String filePath = S3Utils.EMOJI_PREFIX;
-      String fileName = createUUIDFile(multipartFile);
+        String fileName = createUUIDFile(multipartFile);
+        String filePath
+            = S3Utils.getS3UserEmojiPrefix(nickname, emojiPackName)
+            + "/"+ fileName;
 
-      amazonS3Client.putObject(
-          bucket, filePath, multipartFile.getInputStream(), metadata);
+        amazonS3Client.putObject(
+            bucket, filePath, multipartFile.getInputStream(), metadata);
 
-      String url = amazonS3Client.getUrl(bucket, filePath).toString();
+        String url = amazonS3Client.getUrl(bucket, filePath).toString();
 
-      log.info("s3 서비스에 파일을 등록했습니다. : " + url);
+        log.info("s3 서비스에 파일을 등록했습니다. : " + url);
 
-      return S3Converter.toS3ImageResponseDto(
-          originalName, ext, fileName, filePath, multipartFile.getSize());
+        s3ResponseDtoList.add(S3Converter.toS3ImageResponseDto(
+            originalName, ext, fileName, filePath, multipartFile.getSize()));
 
-    } catch (SdkClientException e) {
-      log.error("AWS SDK exception occurred during file upload: {}", e.getMessage(), e);
-    } catch (IOException e) {
-      log.error("IO exception occurred during file upload: {}", e.getMessage(), e);
+      } catch (SdkClientException e) {
+        log.error("AWS SDK exception occurred during file upload: {}", e.getMessage(), e);
+      } catch (IOException e) {
+        log.error("IO exception occurred during file upload: {}", e.getMessage(), e);
+      }
     }
-    throw new AWSCustomException(GlobalExceptionCode.UPLOAD_FAIL);
+    return s3ResponseDtoList;
   }
 
 

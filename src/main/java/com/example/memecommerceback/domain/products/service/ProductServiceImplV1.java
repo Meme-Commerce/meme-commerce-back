@@ -1,11 +1,13 @@
 package com.example.memecommerceback.domain.products.service;
 
+import com.example.memecommerceback.domain.emoji.service.EmojiServiceV1;
 import com.example.memecommerceback.domain.images.entity.Image;
 import com.example.memecommerceback.domain.images.service.ImageServiceV1;
 import com.example.memecommerceback.domain.productCategory.service.ProductCategoryServiceV1;
 import com.example.memecommerceback.domain.productHashtag.service.ProductHashtagServiceV1;
 import com.example.memecommerceback.domain.products.converter.ProductConverter;
 import com.example.memecommerceback.domain.products.dto.ProductRequestDto;
+import com.example.memecommerceback.domain.products.dto.ProductRequestDto.RegisterEmojiDto;
 import com.example.memecommerceback.domain.products.dto.ProductResponseDto;
 import com.example.memecommerceback.domain.products.dto.ProductResponseDto.ReadOneDto;
 import com.example.memecommerceback.domain.products.dto.ProductTitleDescriptionProjection;
@@ -41,6 +43,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class ProductServiceImplV1 implements ProductServiceV1 {
 
   private final ImageServiceV1 imageService;
+  private final EmojiServiceV1 emojiService;
   private final ProfanityFilterService profanityFilterService;
   private final ProductHashtagServiceV1 productHashtagService;
   private final ProductCategoryServiceV1 productCategoryService;
@@ -59,7 +62,7 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
     DateUtils.validateDateTime(requestDto.getSellStartDate(), requestDto.getSellEndDate());
 
     // 2. 제목/설명에 비속어가 들어갔는지?
-    validateProfanityText(requestDto.getName(), requestDto.getDescription(), loginUser);
+    validateProfanityTextAndSimilarity(requestDto.getName(), requestDto.getDescription(), loginUser);
 
     // 3. 상품을 등록하려는 판매자의 닉네임이 없으면 상품 등록 실패
     if(loginUser.getNickname() == null){
@@ -136,7 +139,7 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
       throw new ProductCustomException(ProductExceptionCode.CANNOT_MODIFY_STATUS);
     }
 
-    validateProfanityText(requestDto.getName(), requestDto.getDescription(), seller);
+    validateProfanityTextAndSimilarity(requestDto.getName(), requestDto.getDescription(), seller);
 
     // TODO : stock 변경 시, 재고락 서비스에서 해당 재고 업데이트 로직 필요
     if (afterStatus == ProductStatus.RESALE_SOON || afterStatus == ProductStatus.ON_SALE) {
@@ -349,12 +352,94 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
 
   @Override
   @Transactional
+  public ProductResponseDto.RegisterEmojiPackDto registerEmojiPack(
+      ProductRequestDto.RegisterEmojiPackDto requestDto,
+      List<MultipartFile> mainProductImageList, List<MultipartFile> emojiImageList,
+      User seller) {
+    // 1. 판매 기간 검증
+    DateUtils.validateDateTime(requestDto.getSellStartDate(), requestDto.getSellEndDate());
+
+    // 2. 제목/설명에 비속어가 들어갔는지?, 다른 상품들과의 이름이 유사한지?
+    for(RegisterEmojiDto emojiDescription : requestDto.getEmojiDescriptionList()){
+      validateProfanityTextAndSimilarity(
+          requestDto.getName(), emojiDescription.getDescription(), seller);
+    }
+
+    // 3. 이모지 이미지 누락
+    if(emojiImageList.isEmpty()){
+      throw new ProductCustomException(ProductExceptionCode.REGISTER_IMAGE);
+    }
+
+    // 4. 이모지 이미지와 이모지 이름, 설명의 매치가 안됨.
+    if(emojiImageList.size() != requestDto.getEmojiDescriptionList().size()){
+      throw new ProductCustomException(
+          ProductExceptionCode.NEED_TO_MATCH_IMAGE_AND_EMOJI_NAME);
+    }
+
+    // 5. 상품을 등록하려는 판매자의 닉네임이 없으면 상품 등록 실패
+    if(seller.getNickname() == null){
+      throw new ProductCustomException(ProductExceptionCode.NEED_TO_USER_NICKNAME);
+    }
+
+    // 6. 상품을 만듦.
+    Product product = ProductConverter.toEntity(requestDto, seller);
+
+    // 7. 카테고리는 Emoji(무조건 1L에 등록)로 고정
+    productCategoryService.resetCategories(product, List.of(1L));
+
+    // 8. 해시태그 연결
+    if (requestDto.getHashtagIdList() != null
+        && !requestDto.getHashtagIdList().isEmpty()) {
+      productHashtagService.resetHashtags(
+          product, requestDto.getHashtagIdList());
+    }
+
+    // 9. 이모지 이미지 업로드
+    List<S3ImageResponseDto> uploadedImages = null;
+    List<Image> imageList = null;
+
+    try {
+      // 1. S3 업로드 먼저 (트랜잭션 외부)
+      uploadedImages
+          = imageService.uploadProductImageList(
+              emojiImageList, seller.getNickname());
+
+      // 2. DB 작업들 (트랜잭션 내부 - 실패 시 롤백)
+      imageList = imageService.toEntityProductListAndSaveAll(
+          uploadedImages, seller);
+
+      product.addImageList(imageList);
+      productRepository.save(product);
+
+    } catch (Exception e) {
+      // 3. S3 업로드는 성공했지만 DB 작업 실패 시 S3 정리
+      if (uploadedImages != null && !uploadedImages.isEmpty()) {
+        for (S3ImageResponseDto dto : uploadedImages) {
+          try {
+            imageService.deleteS3Object(dto.getPrefixUrl()+dto.getFileName());
+          } catch (Exception cleanupEx) {
+            log.warn("S3 보상 삭제 실패: {}", dto.getPrefixUrl()+dto.getFileName(), cleanupEx);
+          }
+        }
+      }
+      throw e;
+    }
+
+    emojiService.register(
+        emojiImageList, product, seller,
+        requestDto.getName(), requestDto.getEmojiDescriptionList());
+    return ProductConverter.toRegisterEmojiPackDto(
+        product, seller.getName(), imageList);
+  }
+
+  @Override
+  @Transactional
   public Product findById(UUID productId) {
     return productRepository.findById(productId).orElseThrow(
         () -> new ProductCustomException(ProductExceptionCode.NOT_FOUND));
   }
 
-  private void validateProfanityText(String newTitle, String newDescription, User user) {
+  private void validateProfanityTextAndSimilarity(String newTitle, String newDescription, User user) {
     profanityFilterService.validateListNoProfanity(List.of(newTitle, newDescription));
 
     List<ProductTitleDescriptionProjection> myProducts = productRepository.findAllByOwner(user);

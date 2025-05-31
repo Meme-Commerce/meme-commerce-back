@@ -152,13 +152,19 @@ public class ImageServiceImplV1 implements ImageServiceV1 {
 
   @Override
   @Transactional
-  public Image uploadEmojiImage(List<MultipartFile> multipartFileList, User admin) {
-/*    if(multipartFile == null || multipartFile.isEmpty()){
+  public List<Image> uploadEmojiImage(
+      List<MultipartFile> multipartFileList, User seller, String emojiPackName) {
+    if(multipartFileList == null || multipartFileList.isEmpty()){
       throw new FileCustomException(FileExceptionCode.EMPTY_FILE);
-    }*/
-    S3ImageResponseDto s3ImageResponseDto
-        = s3Service.uploadEmojiImage(null);//multipartFile);
-    return createAndSaveImage(s3ImageResponseDto, admin, ImageType.EMOJI);
+    }
+    List<S3ImageResponseDto> s3ImageResponseDtoList
+        = s3Service.uploadEmojiImageList(
+            multipartFileList, seller.getNickname(), emojiPackName);
+    return s3ImageResponseDtoList.stream().map(
+        s3ImageResponseDto -> {
+          return createAndSaveImage(s3ImageResponseDto, seller, ImageType.EMOJI);
+        }
+    ).toList();
   }
 
   @Override

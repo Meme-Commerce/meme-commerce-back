@@ -3,7 +3,7 @@ package com.example.memecommerceback.global.awsS3.utils;
 public class S3Utils {
 
   public static final String USER_PREFIX = "users/";
-  public static final String EMOJI_PREFIX = "emojis/";
+  public static final String EMOJI_PREFIX = "/emojis/";
   public static final String PROFILE_PREFIX = "/profile/";
   public static final String PRODUCT_PREFIX = "/products/";
   public static final String CERTIFICATE_PREFIX = "/certificates";
@@ -16,5 +16,9 @@ public class S3Utils {
 
   public static String getS3UserProductPrefix(String nickname){
     return USER_PREFIX + nickname + PRODUCT_PREFIX;
+  }
+
+  public static String getS3UserEmojiPrefix(String nickname, String emojiPackName){
+    return USER_PREFIX + nickname + EMOJI_PREFIX + emojiPackName;
   }
 }

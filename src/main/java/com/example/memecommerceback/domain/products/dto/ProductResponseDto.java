@@ -205,4 +205,52 @@ public class ProductResponseDto {
         description = "연결된 해시태그 아이디 리스트", example = "[1,2,3]")
     private List<Long> hashtagIdList;
   }
+
+  @Getter
+  @Builder
+  @AllArgsConstructor
+  @NoArgsConstructor
+  public static class RegisterEmojiPackDto {
+    @Schema(description = "생성된 상품의 식별자", example = "d290f1ee-6c54-4b01-90e6-d701748f0851")
+    private UUID productId;
+
+    @Schema(description = "상품명", example = "빈티지 램프")
+    private String name;
+
+    @Schema(description = "상품 설명", example = "아름다운 앤티크 램프")
+    private String description;
+
+    @Schema(description = "상품 가격(원)", example = "15000")
+    private Long price;
+
+    @Schema(description = "상품 소유자명", example = "홍길동")
+    private String ownerName;
+
+    @Schema(description = "상품 이미지 리스트", example = "[]")
+    private List<ImageResponseDto> imageResponseDtoList;
+
+    @Schema(description = "상품 카테고리 리스트", example = "[전자기기, 생활용품]")
+    private List<ProductCategoryResponseDto> productCategoryResponseDtoList;
+
+    @Schema(description = "상품 해시태그 리스트", example = "[편안함, 엔티크]")
+    private List<ProductHashtagResponseDto> productHashtagResponseDtoList;
+
+    @Schema(description = "상품 재고 수량", example = "100")
+    private Long stock;
+
+    @Schema(description = "등록된 회사명", example = "홍길동상사")
+    private String registeredCompanyName;
+
+    @Schema(description = "상품 상태", example = "PENDING")
+    private ProductStatus status;
+
+    @Schema(description = "생성 시각", example = "2025-05-15T10:15:30")
+    private LocalDateTime createdAt;
+
+    @Schema(description = "상품 판매 시작일 (ISO 8601 형식의 날짜/시간)", example = "2025-05-20T10:00:00")
+    private LocalDateTime sellStartDate;
+
+    @Schema(description = "상품 판매 종료일 (ISO 8601 형식의 날짜/시간)", example = "2025-05-30T23:59:59")
+    private LocalDateTime sellEndDate;
+  }
 }

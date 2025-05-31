@@ -186,6 +186,11 @@ public interface ProductServiceV1 {
    */
   void updateHiddenStatus();
 
+  ProductResponseDto.RegisterEmojiPackDto registerEmojiPack(
+      ProductRequestDto.RegisterEmojiPackDto requestDto,
+      List<MultipartFile> mainProductImageList, List<MultipartFile> emojiImageList,
+      User seller);
+
   /**
    * 상품 ID로 상품 엔티티를 조회합니다.
    * <p>

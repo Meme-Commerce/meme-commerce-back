@@ -41,6 +41,12 @@ public enum ProductExceptionCode {
   NEED_TO_USER_NICKNAME(
       HttpStatus.BAD_REQUEST, "PRODUCT-011",
       "상품 이미지 업로드를 위해 유저의 닉네임 설정은 필수입니다."),
+  REGISTER_IMAGE(
+      HttpStatus.BAD_REQUEST, "PRODUCT-012",
+      "이미지 등록을 위해 이미지는 필수적으로 등록해야합니다."),
+  NEED_TO_MATCH_IMAGE_AND_EMOJI_NAME(
+      HttpStatus.BAD_REQUEST, "PRODUCT-013",
+      "이모지 이름 갯수에 맞는 이미지를 등록해주셔야 합니다."),
   ;
 
   private final HttpStatus httpStatus;

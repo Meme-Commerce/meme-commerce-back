@@ -25,6 +25,19 @@ public class ProductConverter {
         .build();
   }
 
+  public static Product toEntity(
+      ProductRequestDto.RegisterEmojiPackDto requestDto, User user){
+    return Product.builder()
+        .owner(user)
+        .name(requestDto.getName())
+        .description(requestDto.getDescription())
+        .price(requestDto.getPrice())
+        .stock(requestDto.getStock())
+        .sellStartDate(requestDto.getSellStartDate())
+        .sellEndDate(requestDto.getSellEndDate())
+        .build();
+  }
+
   public static ProductResponseDto.RegisterOneDto toRegisterOneDto(
       Product product, String ownerName, List<Image> productImageList){
     return ProductResponseDto.RegisterOneDto.builder()
@@ -93,5 +106,26 @@ public class ProductConverter {
   public static Page<ProductResponseDto.ReadOneDto> toReadPageDto(
       Page<Product> productPage){
     return productPage.map(ProductConverter::toReadOneDto);
+  }
+
+  public static ProductResponseDto.RegisterEmojiPackDto toRegisterEmojiPackDto(
+      Product product, String ownerName, List<Image> productImageList){
+    return ProductResponseDto.RegisterEmojiPackDto.builder()
+        .productId(product.getId())
+        .createdAt(product.getCreatedAt())
+        .name(product.getName())
+        .description(product.getDescription())
+        .stock(product.getStock())
+        .price(product.getPrice())
+        .ownerName(ownerName)
+        .imageResponseDtoList(ImageConverter.toResponseDtoList(productImageList))
+        .productCategoryResponseDtoList(
+            ProductCategoryConverter.toResponseDtoList(product.getProductCategoryList()))
+        .productHashtagResponseDtoList(
+            ProductHashtagConverter.toResponseDtoList(product.getProductHashtagList()))
+        .status(product.getStatus())
+        .sellStartDate(product.getSellStartDate())
+        .sellEndDate(product.getSellEndDate())
+        .build();
   }
 }

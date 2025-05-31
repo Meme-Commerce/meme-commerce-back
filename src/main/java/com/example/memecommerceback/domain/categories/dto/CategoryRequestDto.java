@@ -20,7 +20,10 @@ public class CategoryRequestDto {
   public static class CreateDto {
     @NotNull(message = "이름 리스트는 필수 입력 값입니다.")
     @Size(min = 1, message = "최소 1개의 카테고리명을 입력해야 합니다.")
-    @Schema(description = "삭제할 카테고리 ID 리스트", example = "[지성, 상혁, 허수]")
+    @Schema(
+        description = "생성할 카테고리 이름 리스트 (한글 1~20자)",
+        example = "[\"이모지\", \"의류\", \"전자제품\", \"식품\"]"
+    )
     private List<
         @Pattern(regexp = "^[가-힣]{1,20}$",
             message = "한글로 1~20자까지 입력 가능합니다.")
