@@ -90,7 +90,7 @@ public class UserServiceImplV1 implements UserServiceV1 {
 
       user.updateProfile(
           changeProfileImageUrl, afterNickname,
-          requestDto.getAddress(), requestDto.getContact());
+          requestDto.getContact(), requestDto.getAddress());
       // imageService에서 1차 캐시를 초기화하는 로직이 있어서, save 해야함.
       userRepository.save(user);
     }
@@ -101,7 +101,7 @@ public class UserServiceImplV1 implements UserServiceV1 {
           = imageService.changeUserPath(currentNickname, afterNickname);
       user.updateProfile(
           changeProfileImageUrl, afterNickname,
-          requestDto.getAddress(), requestDto.getContact());
+          requestDto.getContact(), requestDto.getAddress());
       userRepository.save(user);
     }
     // 6. 이미지 변경만
@@ -112,7 +112,7 @@ public class UserServiceImplV1 implements UserServiceV1 {
           = imageService.uploadAndRegisterUserProfileImage(profileImage, user);
       user.updateProfile(
           changeProfileImageUrl, afterNickname,
-          requestDto.getAddress(), requestDto.getContact());
+          requestDto.getContact(), requestDto.getAddress());
     }
     // 7. 모두 변경하지 않을 때 (연락처, 주소 등만 변경)
     else {

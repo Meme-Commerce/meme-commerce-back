@@ -11,5 +11,4 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class EmojiRequestDto {
 
-  private String name;
 }

@@ -25,7 +25,7 @@ public interface ImageServiceV1 {
   List<Image> uploadAndRegisterProductImage(
       List<MultipartFile> productImageList, User user);
 
-  Image uploadEmojiImage(MultipartFile multipartFile, User admin);
+  Image uploadEmojiImage(List<MultipartFile> multipartFileList, User admin);
 
   String changeUserPath(String beforeNickname, String afterNickname);
 
