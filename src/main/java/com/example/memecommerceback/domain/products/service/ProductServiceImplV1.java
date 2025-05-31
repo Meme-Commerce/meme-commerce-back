@@ -380,20 +380,26 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
       throw new ProductCustomException(ProductExceptionCode.NEED_TO_USER_NICKNAME);
     }
 
-    // 6. 상품을 만듦.
+    // 6. mainProductImage는 최대 5개까지, emojiImage는 최대 24개까지 등록
+    if(mainProductImageList.size() > 5 || emojiImageList.size() > 24){
+      throw new ProductCustomException(
+          ProductExceptionCode.EMOJI_PACK_IMAGE_COUNT_LIMIT_EXCEEDED);
+    }
+
+    // 7. 상품을 만듦.
     Product product = ProductConverter.toEntity(requestDto, seller);
 
-    // 7. 카테고리는 Emoji(무조건 1L에 등록)로 고정
+    // 8. 카테고리는 Emoji(무조건 1L에 등록)로 고정
     productCategoryService.resetCategories(product, List.of(1L));
 
-    // 8. 해시태그 연결
+    // 9. 해시태그 연결
     if (requestDto.getHashtagIdList() != null
         && !requestDto.getHashtagIdList().isEmpty()) {
       productHashtagService.resetHashtags(
           product, requestDto.getHashtagIdList());
     }
 
-    // 9. 이모지 이미지 업로드
+    // 10. 이모지 이미지 업로드
     List<S3ImageResponseDto> uploadedImages = null;
     List<Image> imageList = null;
     List<Emoji> emojiList = null;

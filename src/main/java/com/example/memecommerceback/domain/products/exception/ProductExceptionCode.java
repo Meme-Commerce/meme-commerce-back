@@ -47,6 +47,11 @@ public enum ProductExceptionCode {
   NEED_TO_MATCH_IMAGE_AND_EMOJI_NAME(
       HttpStatus.BAD_REQUEST, "PRODUCT-013",
       "이모지 이름 갯수에 맞는 이미지를 등록해주셔야 합니다."),
+  EMOJI_PACK_IMAGE_COUNT_LIMIT_EXCEEDED(
+      HttpStatus.BAD_REQUEST, "PRODUCT-014",
+      "이모지 팩의 메인 이미지는 최대 5개, "
+          + "이모지 이미지는 최대 24개까지 등록 가능합니다."),
+
   ;
 
   private final HttpStatus httpStatus;
