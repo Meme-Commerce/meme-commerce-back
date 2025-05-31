@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class EmojiResponseDto {
+
   private Long emojiId;
   private String name;
   private LocalDateTime createdAt;

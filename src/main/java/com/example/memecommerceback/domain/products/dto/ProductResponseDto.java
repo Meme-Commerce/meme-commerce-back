@@ -2,7 +2,6 @@ package com.example.memecommerceback.domain.products.dto;
 
 import com.example.memecommerceback.domain.images.dto.ImageResponseDto;
 import com.example.memecommerceback.domain.productCategory.dto.ProductCategoryResponseDto;
-import com.example.memecommerceback.domain.productCategory.entity.ProductCategory;
 import com.example.memecommerceback.domain.productHashtag.dto.ProductHashtagResponseDto;
 import com.example.memecommerceback.domain.products.entity.ProductStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -15,6 +14,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 public class ProductResponseDto {
+
   @Getter
   @Builder
   @AllArgsConstructor
@@ -22,6 +22,7 @@ public class ProductResponseDto {
   @Schema(name = "ProductResponseDto.RegisterOneDto",
       description = "상품 하나 등록 응답 DTO")
   public static class RegisterOneDto {
+
     @Schema(description = "생성된 상품의 식별자", example = "d290f1ee-6c54-4b01-90e6-d701748f0851")
     private UUID productId;
 
@@ -72,6 +73,7 @@ public class ProductResponseDto {
   @Schema(name = "ProductResponseDto.UpdateOneDto",
       description = "상품 하나 수정 응답 DTO")
   public static class UpdateOneDto {
+
     @Schema(description = "상품 식별자", example = "d290f1ee-6c54-4b01-90e6-d701748f0851")
     private UUID productId;
 
@@ -123,6 +125,7 @@ public class ProductResponseDto {
   @Schema(name = "ProductResponseDto.UpdateOneStatusDto",
       description = "상품 하나 상태 수정 응답 DTO")
   public static class UpdateOneStatusDto {
+
     @Schema(description = "상품 식별자", example = "d290f1ee-6c54-4b01-90e6-d701748f0851")
     private UUID productId;
 
@@ -159,6 +162,7 @@ public class ProductResponseDto {
   @Schema(name = "ProductResponseDto.ReadOneDto",
       description = "상품 하나 조회 응답 DTO")
   public static class ReadOneDto {
+
     @Schema(description = "상품 식별자", example = "d290f1ee-6c54-4b01-90e6-d701748f0851")
     private UUID productId;
 
@@ -211,6 +215,7 @@ public class ProductResponseDto {
   @AllArgsConstructor
   @NoArgsConstructor
   public static class RegisterEmojiPackDto {
+
     @Schema(description = "생성된 상품의 식별자", example = "d290f1ee-6c54-4b01-90e6-d701748f0851")
     private UUID productId;
 

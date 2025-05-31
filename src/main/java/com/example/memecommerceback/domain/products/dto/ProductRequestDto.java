@@ -15,6 +15,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 public class ProductRequestDto {
+
   @Getter
   @Builder
   @AllArgsConstructor
@@ -22,6 +23,7 @@ public class ProductRequestDto {
   @Schema(name = "ProductRequestDto.RegisterOneDto",
       description = "상품 등록 요청 DTO")
   public static class RegisterOneDto {
+
     @Size(min = 1, max = 30,
         message = "상품명은 최소 1자부터 30자를 입력하셔야합니다.")
     @NotNull(message = "상품 명은 필수 입력란입니다.")
@@ -66,6 +68,7 @@ public class ProductRequestDto {
   @Schema(name = "ProductRequestDto.UpdateOneDto",
       description = "상품 수정 요청 DTO")
   public static class UpdateOneDto {
+
     @Size(min = 1, max = 30,
         message = "상품명은 최소 1자부터 30자를 입력하셔야합니다.")
     @NotNull(message = "상품 명은 필수 입력란입니다.")
@@ -111,6 +114,7 @@ public class ProductRequestDto {
   @Schema(name = "ProductRequestDto.DeleteDto",
       description = "상품 삭제 요청 DTO")
   public static class DeleteDto {
+
     @Size(min = 1, message = "삭제할 상품을 최소 1개 이상 선택해주세요.")
     @NotNull(message = "삭제하려는 아이디 리스트는 필수 입력란입니다.")
     @Schema(
@@ -124,6 +128,7 @@ public class ProductRequestDto {
   @AllArgsConstructor
   @NoArgsConstructor
   public static class RegisterEmojiPackDto {
+
     @Size(min = 1, max = 30,
         message = "상품명은 최소 1자부터 30자를 입력하셔야합니다.")
     @NotNull(message = "상품 명은 필수 입력란입니다.")
@@ -166,6 +171,7 @@ public class ProductRequestDto {
   @AllArgsConstructor
   @NoArgsConstructor
   public static class RegisterEmojiDto {
+
     @Size(max = 200, message = "설명은 200자까지 입력 가능합니다.")
     @NotNull(message = "이모지 설명은 필수 입력란입니다.")
     @Schema(description = "상품 설명", example = "고양이 눕는 자세")

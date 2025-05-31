@@ -1,6 +1,5 @@
 package com.example.memecommerceback.domain.emoji.converter;
 
-import com.example.memecommerceback.domain.emoji.dto.EmojiResponseDto;
 import com.example.memecommerceback.domain.emoji.entity.Emoji;
 import com.example.memecommerceback.domain.images.entity.Image;
 import com.example.memecommerceback.domain.products.dto.ProductRequestDto.RegisterEmojiDto;
@@ -11,8 +10,9 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class EmojiConverter {
+
   public static Emoji toEntity(
-      String name, User seller, Image image, Product product){
+      String name, User seller, Image image, Product product) {
     return Emoji.builder()
         .name(name)
         .user(seller)
@@ -22,7 +22,7 @@ public class EmojiConverter {
   }
 
   public static List<Emoji> toEntityList(
-      List<Image> imageList, List<RegisterEmojiDto> descriptionList, Product product, User seller){
+      List<Image> imageList, List<RegisterEmojiDto> descriptionList, Product product, User seller) {
     return IntStream.range(0, imageList.size())
         .mapToObj(i -> Emoji.builder()
             .name(descriptionList.get(i).getDescription())

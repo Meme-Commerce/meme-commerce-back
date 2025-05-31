@@ -7,7 +7,6 @@ import com.example.memecommerceback.domain.productCategory.service.ProductCatego
 import com.example.memecommerceback.domain.productHashtag.service.ProductHashtagServiceV1;
 import com.example.memecommerceback.domain.products.converter.ProductConverter;
 import com.example.memecommerceback.domain.products.dto.ProductRequestDto;
-import com.example.memecommerceback.domain.products.dto.ProductRequestDto.RegisterEmojiDto;
 import com.example.memecommerceback.domain.products.dto.ProductResponseDto;
 import com.example.memecommerceback.domain.products.dto.ProductResponseDto.ReadOneDto;
 import com.example.memecommerceback.domain.products.dto.ProductTitleDescriptionProjection;
@@ -62,10 +61,11 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
     DateUtils.validateDateTime(requestDto.getSellStartDate(), requestDto.getSellEndDate());
 
     // 2. 제목/설명에 비속어가 들어갔는지?
-    validateProfanityTextAndSimilarity(requestDto.getName(), requestDto.getDescription(), loginUser);
+    validateProfanityTextAndSimilarity(requestDto.getName(), requestDto.getDescription(),
+        loginUser);
 
     // 3. 상품을 등록하려는 판매자의 닉네임이 없으면 상품 등록 실패
-    if(loginUser.getNickname() == null){
+    if (loginUser.getNickname() == null) {
       throw new ProductCustomException(ProductExceptionCode.NEED_TO_USER_NICKNAME);
     }
 
@@ -104,9 +104,9 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
       if (uploadedImages != null && !uploadedImages.isEmpty()) {
         for (S3ImageResponseDto dto : uploadedImages) {
           try {
-            imageService.deleteS3Object(dto.getPrefixUrl()+dto.getFileName());
+            imageService.deleteS3Object(dto.getPrefixUrl() + dto.getFileName());
           } catch (Exception cleanupEx) {
-            log.warn("S3 보상 삭제 실패: {}", dto.getPrefixUrl()+dto.getFileName(), cleanupEx);
+            log.warn("S3 보상 삭제 실패: {}", dto.getPrefixUrl() + dto.getFileName(), cleanupEx);
           }
         }
       }
@@ -188,9 +188,9 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
       if (uploadedImages != null && !uploadedImages.isEmpty()) {
         for (S3ImageResponseDto dto : uploadedImages) {
           try {
-            imageService.deleteS3Object(dto.getPrefixUrl()+dto.getFileName());
+            imageService.deleteS3Object(dto.getPrefixUrl() + dto.getFileName());
           } catch (Exception cleanupEx) {
-            log.warn("S3 보상 삭제 실패: {}", dto.getPrefixUrl()+dto.getFileName(), cleanupEx);
+            log.warn("S3 보상 삭제 실패: {}", dto.getPrefixUrl() + dto.getFileName(), cleanupEx);
           }
         }
       }
@@ -230,7 +230,7 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
   @Transactional(readOnly = true)
   public ProductResponseDto.ReadOneDto readOne(UUID productId) {
     Product product = productRepository.findDetailsById(productId);
-    if(product == null){
+    if (product == null) {
       throw new ProductCustomException(ProductExceptionCode.NOT_FOUND);
     }
     // TODO : viewCount 로직 Redis로 할 지?, 엔티티에 increaseViewCount()로 구현할지?
@@ -286,13 +286,13 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
         = ProductStatus.fromStatusList(statusList);
     Page<Product> productPage
         = productRepository.readPageByAll(
-            pageable, sortList, productStatusList);
+        pageable, sortList, productStatusList);
     return ProductConverter.toReadPageDto(productPage);
   }
 
   @Override
   @Transactional
-  public void deleteMany(ProductRequestDto.DeleteDto requestDto, User loginUser){
+  public void deleteMany(ProductRequestDto.DeleteDto requestDto, User loginUser) {
     List<UUID> requestedIdList = requestDto.getProductIdList();
     List<Product> productList = productRepository.findAllById(requestedIdList);
 
@@ -319,7 +319,7 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
       throw new ProductCustomException(ProductExceptionCode.NOT_FOUND,
           "요청하신 아이디 " + notFoundIds + "에 대한 상품 정보가 없습니다.");
     }
-    for(Product product : productList){
+    for (Product product : productList) {
       imageService.deleteProductImageList(product.getId(), loginUser.getId());
     }
     // 이후 삭제 처리 등 원하는 비즈니스 로직
@@ -330,21 +330,21 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
   // TODO : ProductStatus는 Indexing 고려
   @Override
   @Transactional
-  public void updateOnSaleStatus(){
+  public void updateOnSaleStatus() {
     List<Product> updateStatusList
         = productRepository.findAllByStatusAndSellStartDateBefore(
-            ProductStatus.RESALE_SOON, LocalDateTime.now());
-    for(Product product : updateStatusList) {
+        ProductStatus.RESALE_SOON, LocalDateTime.now());
+    for (Product product : updateStatusList) {
       product.updateStatus(ProductStatus.HIDDEN);
     }
   }
 
   @Override
   @Transactional
-  public void updateHiddenStatus(){
+  public void updateHiddenStatus() {
     List<Product> updateStatusList
         = productRepository.findAllBySellEndDateBefore(LocalDateTime.now());
-    for(Product product : updateStatusList) {
+    for (Product product : updateStatusList) {
       product.updateStatusAndDate(
           ProductStatus.HIDDEN, null, null);
     }
@@ -360,24 +360,22 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
     DateUtils.validateDateTime(requestDto.getSellStartDate(), requestDto.getSellEndDate());
 
     // 2. 제목/설명에 비속어가 들어갔는지?, 다른 상품들과의 이름이 유사한지?
-    for(RegisterEmojiDto emojiDescription : requestDto.getEmojiDescriptionList()){
-      validateProfanityTextAndSimilarity(
-          requestDto.getName(), emojiDescription.getDescription(), seller);
-    }
+    validateProfanityTextAndSimilarity(
+        requestDto.getName(), requestDto.getDescription(), seller);
 
     // 3. 이모지 이미지 누락
-    if(emojiImageList.isEmpty()){
+    if (emojiImageList.isEmpty()) {
       throw new ProductCustomException(ProductExceptionCode.REGISTER_IMAGE);
     }
 
     // 4. 이모지 이미지와 이모지 이름, 설명의 매치가 안됨.
-    if(emojiImageList.size() != requestDto.getEmojiDescriptionList().size()){
+    if (emojiImageList.size() != requestDto.getEmojiDescriptionList().size()) {
       throw new ProductCustomException(
           ProductExceptionCode.NEED_TO_MATCH_IMAGE_AND_EMOJI_NAME);
     }
 
     // 5. 상품을 등록하려는 판매자의 닉네임이 없으면 상품 등록 실패
-    if(seller.getNickname() == null){
+    if (seller.getNickname() == null) {
       throw new ProductCustomException(ProductExceptionCode.NEED_TO_USER_NICKNAME);
     }
 
@@ -402,7 +400,7 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
       // 1. S3 업로드 먼저 (트랜잭션 외부)
       uploadedImages
           = imageService.uploadProductImageList(
-              emojiImageList, seller.getNickname());
+          emojiImageList, seller.getNickname());
 
       // 2. DB 작업들 (트랜잭션 내부 - 실패 시 롤백)
       imageList = imageService.toEntityProductListAndSaveAll(
@@ -411,23 +409,23 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
       product.addImageList(imageList);
       productRepository.save(product);
 
+      emojiService.register(
+          emojiImageList, product, seller,
+          requestDto.getName(), requestDto.getEmojiDescriptionList());
     } catch (Exception e) {
       // 3. S3 업로드는 성공했지만 DB 작업 실패 시 S3 정리
       if (uploadedImages != null && !uploadedImages.isEmpty()) {
         for (S3ImageResponseDto dto : uploadedImages) {
           try {
-            imageService.deleteS3Object(dto.getPrefixUrl()+dto.getFileName());
+            imageService.deleteS3Object(dto.getPrefixUrl() + dto.getFileName());
           } catch (Exception cleanupEx) {
-            log.warn("S3 보상 삭제 실패: {}", dto.getPrefixUrl()+dto.getFileName(), cleanupEx);
+            log.warn("S3 보상 삭제 실패: {}", dto.getPrefixUrl() + dto.getFileName(), cleanupEx);
           }
         }
       }
       throw e;
     }
 
-    emojiService.register(
-        emojiImageList, product, seller,
-        requestDto.getName(), requestDto.getEmojiDescriptionList());
     return ProductConverter.toRegisterEmojiPackDto(
         product, seller.getName(), imageList);
   }
@@ -439,7 +437,8 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
         () -> new ProductCustomException(ProductExceptionCode.NOT_FOUND));
   }
 
-  private void validateProfanityTextAndSimilarity(String newTitle, String newDescription, User user) {
+  private void validateProfanityTextAndSimilarity(String newTitle, String newDescription,
+      User user) {
     profanityFilterService.validateListNoProfanity(List.of(newTitle, newDescription));
 
     List<ProductTitleDescriptionProjection> myProducts = productRepository.findAllByOwner(user);
@@ -460,7 +459,7 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
   }
 
   private Pageable validateSortFieldsAndGetPageable(
-      List<String> sortList, int page, int size){
+      List<String> sortList, int page, int size) {
     PageUtils.validateProductSortFields(sortList);
     return PageRequest.of(page, size);
   }

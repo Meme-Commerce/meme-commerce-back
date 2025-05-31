@@ -57,7 +57,7 @@ public class ProductRepositoryQueryImpl
     // 3. 동적 OrderSpecifier 생성
     List<OrderSpecifier<?>> orderSpecifiers
         = PageUtils.createOrderSpecifiers(
-            Product.class, qProduct.getMetadata().getName(), sortList, allowedFields);
+        Product.class, qProduct.getMetadata().getName(), sortList, allowedFields);
 
     JPAQuery<Product> query = jpaQueryFactory
         .selectFrom(qProduct)

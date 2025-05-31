@@ -85,11 +85,11 @@ public class Image extends CommonEntity {
     this.product = product;
   }
 
-  public String getUrl(){
+  public String getUrl() {
     return this.prefixUrl + this.fileName;
   }
 
-  public void updateOwnerNicknameAndPrefix(String ownerNickname, String prefixUrl){
+  public void updateOwnerNicknameAndPrefix(String ownerNickname, String prefixUrl) {
     this.ownerNickname = ownerNickname;
     this.prefixUrl = prefixUrl;
   }

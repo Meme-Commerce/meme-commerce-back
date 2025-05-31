@@ -12,8 +12,9 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 
 public class ProductConverter {
+
   public static Product toEntity(
-      ProductRequestDto.RegisterOneDto requestDto, User user){
+      ProductRequestDto.RegisterOneDto requestDto, User user) {
     return Product.builder()
         .owner(user)
         .name(requestDto.getName())
@@ -26,7 +27,7 @@ public class ProductConverter {
   }
 
   public static Product toEntity(
-      ProductRequestDto.RegisterEmojiPackDto requestDto, User user){
+      ProductRequestDto.RegisterEmojiPackDto requestDto, User user) {
     return Product.builder()
         .owner(user)
         .name(requestDto.getName())
@@ -39,7 +40,7 @@ public class ProductConverter {
   }
 
   public static ProductResponseDto.RegisterOneDto toRegisterOneDto(
-      Product product, String ownerName, List<Image> productImageList){
+      Product product, String ownerName, List<Image> productImageList) {
     return ProductResponseDto.RegisterOneDto.builder()
         .productId(product.getId())
         .createdAt(product.getCreatedAt())
@@ -60,7 +61,7 @@ public class ProductConverter {
   }
 
   public static ProductResponseDto.UpdateOneStatusDto toUpdateOneStatusDto(
-      Product product){
+      Product product) {
     return ProductResponseDto.UpdateOneStatusDto.builder()
         .productId(product.getId())
         .name(product.getName())
@@ -71,7 +72,7 @@ public class ProductConverter {
   }
 
   public static ProductResponseDto.UpdateOneDto toUpdateOneDto(
-      Product product, String ownerName, List<Image> productImageList){
+      Product product, String ownerName, List<Image> productImageList) {
     return ProductResponseDto.UpdateOneDto.builder()
         .productId(product.getId())
         .createdAt(product.getCreatedAt())
@@ -86,7 +87,7 @@ public class ProductConverter {
   }
 
   public static ProductResponseDto.ReadOneDto toReadOneDto(
-      Product product){
+      Product product) {
     return ProductResponseDto.ReadOneDto.builder()
         .productId(product.getId())
         .createdAt(product.getCreatedAt())
@@ -104,12 +105,12 @@ public class ProductConverter {
   }
 
   public static Page<ProductResponseDto.ReadOneDto> toReadPageDto(
-      Page<Product> productPage){
+      Page<Product> productPage) {
     return productPage.map(ProductConverter::toReadOneDto);
   }
 
   public static ProductResponseDto.RegisterEmojiPackDto toRegisterEmojiPackDto(
-      Product product, String ownerName, List<Image> productImageList){
+      Product product, String ownerName, List<Image> productImageList) {
     return ProductResponseDto.RegisterEmojiPackDto.builder()
         .productId(product.getId())
         .createdAt(product.getCreatedAt())

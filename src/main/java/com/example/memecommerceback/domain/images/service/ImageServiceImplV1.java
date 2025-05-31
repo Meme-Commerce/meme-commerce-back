@@ -8,7 +8,6 @@ import com.example.memecommerceback.domain.images.entity.ImageType;
 import com.example.memecommerceback.domain.images.repository.ImageRepository;
 import com.example.memecommerceback.domain.users.entity.User;
 import com.example.memecommerceback.global.awsS3.dto.S3ImageResponseDto;
-import com.example.memecommerceback.global.awsS3.dto.S3ImageSummaryResponseDto;
 import com.example.memecommerceback.global.awsS3.service.S3Service;
 import com.example.memecommerceback.global.awsS3.utils.S3Utils;
 import com.example.memecommerceback.global.utils.FileUtils;
@@ -52,10 +51,11 @@ public class ImageServiceImplV1 implements ImageServiceV1 {
 
     Image originalImage
         = imageRepository.findByUserIdAndImageType(
-            user.getId(), ImageType.PROFILE).orElse(null);
+        user.getId(), ImageType.PROFILE).orElse(null);
 
     if (originalImage != null) {
-      String s3ProfileUrl = S3Utils.S3_URL+originalImage.getPrefixUrl()+originalImage.getFileName();
+      String s3ProfileUrl =
+          S3Utils.S3_URL + originalImage.getPrefixUrl() + originalImage.getFileName();
       s3Service.deleteS3Object(s3ProfileUrl);
       originalImage.updateImage(
           s3ImageResponseDto.getPrefixUrl(), s3ImageResponseDto.getFileName());
@@ -121,8 +121,8 @@ public class ImageServiceImplV1 implements ImageServiceV1 {
 
     Image image
         = imageRepository.findByOwnerNicknameAndImageType(
-            beforeNickname, ImageType.PROFILE).orElseThrow(
-        ()-> new FileCustomException(FileExceptionCode.NOT_FOUND));
+        beforeNickname, ImageType.PROFILE).orElseThrow(
+        () -> new FileCustomException(FileExceptionCode.NOT_FOUND));
     image.updateOwnerNicknameAndPrefix(
         afterNickname, S3Utils.getS3UserProfilePrefix(afterNickname));
 
@@ -154,12 +154,12 @@ public class ImageServiceImplV1 implements ImageServiceV1 {
   @Transactional
   public List<Image> uploadEmojiImage(
       List<MultipartFile> multipartFileList, User seller, String emojiPackName) {
-    if(multipartFileList == null || multipartFileList.isEmpty()){
+    if (multipartFileList == null || multipartFileList.isEmpty()) {
       throw new FileCustomException(FileExceptionCode.EMPTY_FILE);
     }
     List<S3ImageResponseDto> s3ImageResponseDtoList
         = s3Service.uploadEmojiImageList(
-            multipartFileList, seller.getNickname(), emojiPackName);
+        multipartFileList, seller.getNickname(), emojiPackName);
     return s3ImageResponseDtoList.stream().map(
         s3ImageResponseDto -> {
           return createAndSaveImage(s3ImageResponseDto, seller, ImageType.EMOJI);
@@ -173,7 +173,7 @@ public class ImageServiceImplV1 implements ImageServiceV1 {
       List<S3ImageResponseDto> uploadedImageList, User loginUser) {
     List<Image> imageList
         = ImageConverter.toEntityList(
-            uploadedImageList, loginUser, ImageType.PRODUCT);
+        uploadedImageList, loginUser, ImageType.PRODUCT);
     return imageRepository.saveAll(imageList);
   }
 
@@ -183,10 +183,10 @@ public class ImageServiceImplV1 implements ImageServiceV1 {
     s3Service.deleteS3Object(url);
   }
 
-  public void deleteProfileImage(String ownerNickname){
+  public void deleteProfileImage(String ownerNickname) {
     Image image
         = imageRepository.findByOwnerNicknameAndImageType(ownerNickname, ImageType.PROFILE)
-        .orElseThrow( () -> new FileCustomException(FileExceptionCode.NOT_FOUND));
+        .orElseThrow(() -> new FileCustomException(FileExceptionCode.NOT_FOUND));
     s3Service.deleteS3Object(image.getUrl());
     imageRepository.deleteById(image.getId());
   }
@@ -195,7 +195,7 @@ public class ImageServiceImplV1 implements ImageServiceV1 {
   @Transactional
   public String reloadImageAndChangeUserPath(
       User user, MultipartFile profile, String beforeNickname, String afterNickname) {
-    if(user.getProfileImage() == null){
+    if (user.getProfileImage() == null) {
       uploadAndRegisterUserProfileImage(profile, user);
       return changeUserPath(beforeNickname, afterNickname);
     }

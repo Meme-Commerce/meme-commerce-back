@@ -1,11 +1,7 @@
 package com.example.memecommerceback.domain.emoji.service;
 
 import com.example.memecommerceback.domain.emoji.converter.EmojiConverter;
-import com.example.memecommerceback.domain.emoji.dto.EmojiRequestDto;
-import com.example.memecommerceback.domain.emoji.dto.EmojiResponseDto;
 import com.example.memecommerceback.domain.emoji.entity.Emoji;
-import com.example.memecommerceback.domain.emoji.excpetion.EmojiCustomException;
-import com.example.memecommerceback.domain.emoji.excpetion.EmojiExceptionCode;
 import com.example.memecommerceback.domain.emoji.repository.EmojiRepository;
 import com.example.memecommerceback.domain.images.entity.Image;
 import com.example.memecommerceback.domain.images.service.ImageServiceV1;
@@ -31,14 +27,23 @@ public class EmojiServiceImplV1 implements EmojiServiceV1 {
   @Override
   @Transactional
   public void register(
-      List<MultipartFile> emojiImageList,  Product product, User seller,
-      String emojiPackName, List<RegisterEmojiDto> emojiDescriptionList){
+      List<MultipartFile> emojiImageList, Product product, User seller,
+      String emojiPackName, List<RegisterEmojiDto> emojiDescriptionList) {
+    // 1. 이모지 설명 욕설 존재하는지 확인
+    profanityFilterService.validateListNoProfanity(
+        emojiDescriptionList.stream().map(RegisterEmojiDto::getDescription).toList());
+
+    // 2. 이모지 설명에 대한 이미지 업로드
     List<Image> imageList
         = imageService.uploadEmojiImage(emojiImageList, seller, emojiPackName);
+
+    // 3. 이모지 리스트 생성 및 반환
     List<Emoji> emojiList
         = EmojiConverter.toEntityList(
-            imageList, emojiDescriptionList, product, seller);
+        imageList, emojiDescriptionList, product, seller);
     emojiRepository.saveAll(emojiList);
-    emojiList.forEach(emoji-> emoji.addProduct(product));
+
+    // 4. 이모지 연관관계 설정
+    emojiList.forEach(emoji -> emoji.addProduct(product));
   }
 }
