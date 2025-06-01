@@ -6,12 +6,12 @@ import com.example.memecommerceback.domain.files.exception.FileExceptionCode;
 import com.example.memecommerceback.domain.images.entity.ImageExtension;
 
 public class FileUtils {
-  public static ImageExtension extractFromImageName(String imageName) {
+  public static ImageExtension extractExtensionFromImageName(String imageName) {
     String ext = extractExtension(imageName);
     return ImageExtension.from(ext);
   }
 
-  public static FileExtension extractFromFilename(String fileName) {
+  public static FileExtension extractExtensionFromFilename(String fileName) {
     String ext = extractExtension(fileName);
     return FileExtension.from(ext);
   }

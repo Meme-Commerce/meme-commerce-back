@@ -40,7 +40,7 @@ public class Product extends CommonEntity {
   @Column(columnDefinition = "UUID", updatable = false, nullable = false)
   private UUID id;
 
-  @Column(nullable = false)
+  @Column(nullable = false, unique = true)
   private String name;
 
   @Column(nullable = false, length = 200)
@@ -85,7 +85,7 @@ public class Product extends CommonEntity {
   private User owner;
 
   // entity methods
-  public void addImageList(List<Image> imageList){
+  public void addImageList(List<Image> imageList) {
     this.imageList.clear();
     for (Image image : imageList) {
       image.registerProduct(this);
@@ -93,13 +93,13 @@ public class Product extends CommonEntity {
     this.imageList.addAll(imageList);
   }
 
-  public void updateStatus(ProductStatus status){
+  public void updateStatus(ProductStatus status) {
     this.status = status;
   }
 
   public void update(
       ProductStatus status, LocalDateTime sellStartDate, LocalDateTime sellEndDate,
-      String name, String description, Long price, Long stock){
+      String name, String description, Long price, Long stock) {
     this.status = status;
     this.sellStartDate = sellStartDate;
     this.sellEndDate = sellEndDate;

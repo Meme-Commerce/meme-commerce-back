@@ -1,5 +1,7 @@
 package com.example.memecommerceback.domain.products.converter;
 
+import com.example.memecommerceback.domain.emoji.converter.EmojiConverter;
+import com.example.memecommerceback.domain.emoji.entity.Emoji;
 import com.example.memecommerceback.domain.images.converter.ImageConverter;
 import com.example.memecommerceback.domain.images.entity.Image;
 import com.example.memecommerceback.domain.productCategory.converter.ProductCategoryConverter;
@@ -9,11 +11,26 @@ import com.example.memecommerceback.domain.products.dto.ProductResponseDto;
 import com.example.memecommerceback.domain.products.entity.Product;
 import com.example.memecommerceback.domain.users.entity.User;
 import java.util.List;
+import java.util.UUID;
 import org.springframework.data.domain.Page;
 
 public class ProductConverter {
+
   public static Product toEntity(
-      ProductRequestDto.RegisterOneDto requestDto, User user){
+      ProductRequestDto.RegisterOneDto requestDto, User user) {
+    return Product.builder()
+        .owner(user)
+        .name(requestDto.getName())
+        .description(requestDto.getDescription())
+        .price(requestDto.getPrice())
+        .stock(requestDto.getStock())
+        .sellStartDate(requestDto.getSellStartDate())
+        .sellEndDate(requestDto.getSellEndDate())
+        .build();
+  }
+
+  public static Product toEntity(
+      ProductRequestDto.EmojiPackDto requestDto, User user) {
     return Product.builder()
         .owner(user)
         .name(requestDto.getName())
@@ -26,7 +43,7 @@ public class ProductConverter {
   }
 
   public static ProductResponseDto.RegisterOneDto toRegisterOneDto(
-      Product product, String ownerName, List<Image> productImageList){
+      Product product, String ownerName, List<Image> productImageList) {
     return ProductResponseDto.RegisterOneDto.builder()
         .productId(product.getId())
         .createdAt(product.getCreatedAt())
@@ -47,7 +64,7 @@ public class ProductConverter {
   }
 
   public static ProductResponseDto.UpdateOneStatusDto toUpdateOneStatusDto(
-      Product product){
+      Product product) {
     return ProductResponseDto.UpdateOneStatusDto.builder()
         .productId(product.getId())
         .name(product.getName())
@@ -58,7 +75,7 @@ public class ProductConverter {
   }
 
   public static ProductResponseDto.UpdateOneDto toUpdateOneDto(
-      Product product, String ownerName, List<Image> productImageList){
+      Product product, String ownerName, List<Image> productImageList) {
     return ProductResponseDto.UpdateOneDto.builder()
         .productId(product.getId())
         .createdAt(product.getCreatedAt())
@@ -73,7 +90,7 @@ public class ProductConverter {
   }
 
   public static ProductResponseDto.ReadOneDto toReadOneDto(
-      Product product){
+      Product product) {
     return ProductResponseDto.ReadOneDto.builder()
         .productId(product.getId())
         .createdAt(product.getCreatedAt())
@@ -91,7 +108,31 @@ public class ProductConverter {
   }
 
   public static Page<ProductResponseDto.ReadOneDto> toReadPageDto(
-      Page<Product> productPage){
+      Page<Product> productPage) {
     return productPage.map(ProductConverter::toReadOneDto);
+  }
+
+  public static ProductResponseDto.EmojiPackDto toEmojiPackDto(
+      Product product, String ownerName, List<Image> mainProductImageList,
+      List<Emoji> emojiList) {
+    return ProductResponseDto.EmojiPackDto.builder()
+        .productId(product.getId())
+        .createdAt(product.getCreatedAt())
+        .name(product.getName())
+        .description(product.getDescription())
+        .stock(product.getStock())
+        .price(product.getPrice())
+        .ownerName(ownerName)
+        .mainImageResponseDtoList(ImageConverter.toResponseDtoList(mainProductImageList))
+        .productCategoryResponseDtoList(
+            ProductCategoryConverter.toResponseDtoList(product.getProductCategoryList()))
+        .productHashtagResponseDtoList(
+            ProductHashtagConverter.toResponseDtoList(product.getProductHashtagList()))
+        .emojiResponseDtoList(
+            EmojiConverter.toResponseDtoList(emojiList))
+        .status(product.getStatus())
+        .sellStartDate(product.getSellStartDate())
+        .sellEndDate(product.getSellEndDate())
+        .build();
   }
 }

@@ -10,9 +10,14 @@ import java.util.List;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface ProductRepository extends JpaRepository<Product, UUID> ,ProductRepositoryQuery {
+public interface ProductRepository extends JpaRepository<Product, UUID>, ProductRepositoryQuery {
+
   List<ProductTitleDescriptionProjection> findAllByOwner(User owner);
+
   List<Product> findAllByStatusAndSellStartDateBefore(
       ProductStatus status, LocalDateTime now);
+
   List<Product> findAllBySellEndDateBefore(LocalDateTime now);
+
+  List<Product> findAllByOwnerId(UUID ownerId);
 }

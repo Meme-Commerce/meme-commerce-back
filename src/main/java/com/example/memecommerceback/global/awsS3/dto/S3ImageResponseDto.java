@@ -12,9 +12,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class S3ImageResponseDto {
 
-  private String fileName;
   private String originalName;
-  private String url;
+  private String prefixUrl;
+  private String fileName;
   private ImageExtension extension;
   private Long size;
   private Integer width;

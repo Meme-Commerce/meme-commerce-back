@@ -35,6 +35,10 @@ public enum FileExceptionCode {
   EMPTY_FILE(
       HttpStatus.BAD_REQUEST, "FILE-009",
       "요청에 대한 파일은 비어있으면 안됩니다."),
+  DUPLICATE_PROFILE_IMAGE(
+      HttpStatus.BAD_REQUEST, "FILE-010",
+      "프로필 이미지는 두 개이상 보관될 수 없습니다."
+  ),
   ;
 
   private final HttpStatus httpStatus;

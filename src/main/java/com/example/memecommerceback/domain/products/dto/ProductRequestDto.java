@@ -15,6 +15,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 public class ProductRequestDto {
+
   @Getter
   @Builder
   @AllArgsConstructor
@@ -22,6 +23,7 @@ public class ProductRequestDto {
   @Schema(name = "ProductRequestDto.RegisterOneDto",
       description = "상품 등록 요청 DTO")
   public static class RegisterOneDto {
+
     @Size(min = 1, max = 30,
         message = "상품명은 최소 1자부터 30자를 입력하셔야합니다.")
     @NotNull(message = "상품 명은 필수 입력란입니다.")
@@ -66,6 +68,7 @@ public class ProductRequestDto {
   @Schema(name = "ProductRequestDto.UpdateOneDto",
       description = "상품 수정 요청 DTO")
   public static class UpdateOneDto {
+
     @Size(min = 1, max = 30,
         message = "상품명은 최소 1자부터 30자를 입력하셔야합니다.")
     @NotNull(message = "상품 명은 필수 입력란입니다.")
@@ -111,11 +114,107 @@ public class ProductRequestDto {
   @Schema(name = "ProductRequestDto.DeleteDto",
       description = "상품 삭제 요청 DTO")
   public static class DeleteDto {
+
     @Size(min = 1, message = "삭제할 상품을 최소 1개 이상 선택해주세요.")
     @NotNull(message = "삭제하려는 아이디 리스트는 필수 입력란입니다.")
     @Schema(
         description = "삭제할 상품의 UUID 리스트",
         example = "[\"e7c0c57f-543e-4a5c-bd5a-b2c938a1c250\", \"c0d90fb2-4ed1-4a82-9e5a-298c3422ba4d\"]")
     private List<UUID> productIdList;
+  }
+
+  @Getter
+  @Builder
+  @AllArgsConstructor
+  @NoArgsConstructor
+  public static class EmojiPackDto {
+    @Size(min = 1, max = 30,
+        message = "상품명은 최소 1자부터 30자를 입력하셔야합니다.")
+    @NotNull(message = "상품 명은 필수 입력란입니다.")
+    @Schema(description = "상품명", example = "고양이 이모지")
+    private String name;
+    @NotNull(message = "상품 설명은 필수 입력란입니다.")
+    @Schema(description = "상품명", example = "고양이 이모지의 한 줄 설명")
+    private String description;
+    @Min(value = 1, message = "재고 최소 재고량은 1개입니다.")
+    @NotNull(message = "재고는 필수 입력란입니다.")
+    @Schema(description = "상품 재고 수량", example = "100")
+    private Long stock;
+    @Positive(message = "음수는 사용할 수 없고 최소 0원 부터 입력 가능합니다.")
+    @Min(value = 0, message = "최소 가격은 0원 이상입니다.")
+    @Schema(description = "상품 가격(원)", example = "15000")
+    private Long price;
+    @NotNull(message = "판매 시작 일은 필수 입력란입니다.")
+    @Schema(
+        description = "상품 판매 시작일 (ISO 8601 형식의 날짜/시간)",
+        example = "2025-05-20T10:00:00")
+    private LocalDateTime sellStartDate;
+    @NotNull(message = "판매 마감 일은 필수 입력란입니다.")
+    @Schema(
+        description = "상품 판매 종료일 (ISO 8601 형식의 날짜/시간)",
+        example = "2025-05-30T23:59:59")
+    private LocalDateTime sellEndDate;
+    @Schema(
+        description = "연결할 해시태그 아이디 리스트", example = "[1,2,3]")
+    @Size(max = 10, message = "해시태그는 최대 10개까지 연결 가능합니다.")
+    private List<Long> hashtagIdList;
+    @Schema(
+        description = "등록할 이모지(개별 설명 포함) 리스트",
+        example = "[{\"description\": \"눕는 자세\"},"
+            + " {\"description\": \"꼬리 흔드는 자세\"}]")
+    @NotNull(message = "이모지 설명란 리스트는 필수 입력란입니다.")
+    private List<EmojiDto> emojiDescriptionList;
+  }
+
+  @Getter
+  @Builder
+  @AllArgsConstructor
+  @NoArgsConstructor
+  public static class EmojiDto {
+    @Size(max = 200, message = "설명은 200자까지 입력 가능합니다.")
+    @NotNull(message = "이모지 설명은 필수 입력란입니다.")
+    @Schema(description = "상품 설명", example = "고양이 눕는 자세")
+    private String description;
+  }
+
+  @Getter
+  @Builder
+  @AllArgsConstructor
+  @NoArgsConstructor
+  public static class UpdateEmojiPackDto {
+    @Size(min = 1, max = 30,
+        message = "상품명은 최소 1자부터 30자를 입력하셔야합니다.")
+    @NotNull(message = "상품 명은 필수 입력란입니다.")
+    @Schema(description = "상품명", example = "고양이 이모지")
+    private String name;
+    @NotNull(message = "상품 설명은 필수 입력란입니다.")
+    @Schema(description = "상품명", example = "고양이 이모지의 한 줄 설명")
+    private String description;
+    @Min(value = 1, message = "재고 최소 재고량은 1개입니다.")
+    @NotNull(message = "재고는 필수 입력란입니다.")
+    @Schema(description = "상품 재고 수량", example = "100")
+    private Long stock;
+    @Positive(message = "음수는 사용할 수 없고 최소 0원 부터 입력 가능합니다.")
+    @Min(value = 0, message = "최소 가격은 0원 이상입니다.")
+    @Schema(description = "상품 가격(원)", example = "15000")
+    private Long price;
+    @Schema(description = "상품 상태",
+        example = "[PENDING, TEMP_OUT_OF_STOCK, HIDDEN, "
+            + "ON_SALE, RESALE_SOON, REJECTED] 중 선택")
+    private ProductStatus status;
+    @NotNull(message = "판매 시작 일은 필수 입력란입니다.")
+    @Schema(
+        description = "상품 판매 시작일 (ISO 8601 형식의 날짜/시간)",
+        example = "2025-05-20T10:00:00")
+    private LocalDateTime sellStartDate;
+    @NotNull(message = "판매 마감 일은 필수 입력란입니다.")
+    @Schema(
+        description = "상품 판매 종료일 (ISO 8601 형식의 날짜/시간)",
+        example = "2025-05-30T23:59:59")
+    private LocalDateTime sellEndDate;
+    @Schema(
+        description = "연결할 해시태그 아이디 리스트", example = "[1,2,3]")
+    @Size(max = 10, message = "해시태그는 최대 10개까지 연결 가능합니다.")
+    private List<Long> hashtagIdList;
   }
 }

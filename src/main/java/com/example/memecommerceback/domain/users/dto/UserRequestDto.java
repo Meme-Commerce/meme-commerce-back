@@ -1,6 +1,7 @@
 package com.example.memecommerceback.domain.users.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -30,5 +31,8 @@ public class UserRequestDto {
     @Pattern(regexp = "^[\\p{L}\\p{N}\\s,.'-]+$",
         message = "주소는 유효한 문자만 포함해야 합니다.")
     private String address;
+
+    @NotNull(message = "이미지 삭제 여부는 필수 입력란입니다.")
+    private boolean deleteProfileImage;
   }
 }

@@ -3,10 +3,15 @@ package com.example.memecommerceback.domain.products.controller;
 import com.example.memecommerceback.domain.products.dto.ProductRequestDto;
 import com.example.memecommerceback.domain.products.dto.ProductResponseDto;
 import com.example.memecommerceback.domain.products.service.ProductServiceV1;
-import com.example.memecommerceback.domain.users.dto.UserResponseDto;
 import com.example.memecommerceback.global.exception.dto.CommonResponseDto;
 import com.example.memecommerceback.global.exception.dto.ErrorResponseDto;
 import com.example.memecommerceback.global.security.UserDetailsImpl;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
@@ -26,13 +31,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
-import io.swagger.v3.oas.annotations.tags.Tag;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 
 @RestController
 @RequiredArgsConstructor
@@ -118,7 +116,8 @@ public class ProductController {
       @RequestPart(name = "file-list") List<MultipartFile> multipartFileList,
       @AuthenticationPrincipal UserDetailsImpl userDetails) {
     ProductResponseDto.UpdateOneDto responseDto =
-        productService.updateOneBySeller(productId, requestDto, multipartFileList, userDetails.getUser());
+        productService.updateOneBySeller(productId, requestDto, multipartFileList,
+            userDetails.getUser());
     return ResponseEntity.status(HttpStatus.OK).body(
         new CommonResponseDto<>(
             responseDto,
@@ -268,6 +267,42 @@ public class ProductController {
         new CommonResponseDto<>(
             null,
             "상품 삭제 성공하였습니다.",
+            HttpStatus.OK.value()));
+  }
+
+  @PreAuthorize("hasAuthority('ROLE_SELLER')")
+  @PostMapping(value = "/products/emoji-pack", consumes = "multipart/form-data")
+  public ResponseEntity<
+      CommonResponseDto<ProductResponseDto.EmojiPackDto>> registerEmojiPack(
+      @RequestPart(name = "data") @Valid ProductRequestDto.EmojiPackDto requestDto,
+      @RequestPart(name = "main-product-image-list") List<MultipartFile> mainProductImageList,
+      @RequestPart(name = "emoji-image-list") List<MultipartFile> emojiImageList,
+      @AuthenticationPrincipal UserDetailsImpl userDetails) {
+    ProductResponseDto.EmojiPackDto responseDto =
+        productService.registerEmojiPack(
+            requestDto, mainProductImageList, emojiImageList, userDetails.getUser());
+    return ResponseEntity.status(HttpStatus.OK).body(
+        new CommonResponseDto<>(
+            responseDto,
+            "이모지팩(이모지 세트) 상품 등록하였습니다.",
+            HttpStatus.OK.value()));
+  }
+
+  @PreAuthorize("hasAuthority('ROLE_SELLER')")
+  @PatchMapping(value = "/products/{productId}/emoji-pack", consumes = "multipart/form-data")
+  public ResponseEntity<
+      CommonResponseDto<ProductResponseDto.EmojiPackDto>> updateEmojiPack(
+      @PathVariable UUID productId,
+      @RequestPart(name = "data") @Valid ProductRequestDto.UpdateEmojiPackDto requestDto,
+      @RequestPart(name = "main-product-image-list") List<MultipartFile> mainProductImageList,
+      @AuthenticationPrincipal UserDetailsImpl userDetails) {
+    ProductResponseDto.EmojiPackDto responseDto =
+        productService.updateEmojiPack(
+            productId, requestDto, mainProductImageList, userDetails.getUser());
+    return ResponseEntity.status(HttpStatus.OK).body(
+        new CommonResponseDto<>(
+            responseDto,
+            "이모지팩(이모지 세트) 상품을 수정 하였습니다.",
             HttpStatus.OK.value()));
   }
 }

@@ -1,6 +1,5 @@
 package com.example.memecommerceback.domain.hashtags.entity;
 
-import com.example.memecommerceback.domain.productCategory.entity.ProductCategory;
 import com.example.memecommerceback.domain.productHashtag.entity.ProductHashtag;
 import com.example.memecommerceback.global.common.CommonEntity;
 import jakarta.persistence.CascadeType;

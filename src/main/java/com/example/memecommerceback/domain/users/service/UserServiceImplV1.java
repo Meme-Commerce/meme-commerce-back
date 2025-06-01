@@ -4,6 +4,8 @@ import com.example.memecommerceback.domain.files.entity.File;
 import com.example.memecommerceback.domain.files.entity.FileType;
 import com.example.memecommerceback.domain.files.service.FileServiceV1;
 import com.example.memecommerceback.domain.images.service.ImageServiceV1;
+import com.example.memecommerceback.domain.products.entity.Product;
+import com.example.memecommerceback.domain.products.service.ProductServiceV1;
 import com.example.memecommerceback.domain.users.converter.UserConverter;
 import com.example.memecommerceback.domain.users.dto.UserRequestDto;
 import com.example.memecommerceback.domain.users.dto.UserResponseDto;
@@ -28,6 +30,7 @@ public class UserServiceImplV1 implements UserServiceV1 {
 
   private final FileServiceV1 fileService;
   private final ImageServiceV1 imageService;
+  private final ProductServiceV1 productService;
   private final ProfanityFilterService profanityFilterService;
 
   private final UserRepository userRepository;
@@ -51,46 +54,84 @@ public class UserServiceImplV1 implements UserServiceV1 {
       MultipartFile profileImage, User loginUser) {
 
     User user = findById(loginUser.getId());
-    String beforeNickname = user.getNickname();
+    String currentNickname = user.getNickname();
+    String afterNickname = requestDto.getNickname();
 
-    String profileImageUrl = null;
-
-    // 1. 새 프로필 이미지가 있는 경우: 기존 이미지 삭제 후 새 이미지 업로드
-    if (profileImage != null) {
-      if (user.getNickname() == null) {
-        throw new UserCustomException(
-            UserExceptionCode.NEED_TO_REGISTER_NICKNAME);
-      }
-
-      if (requestDto.getNickname() != null
-          && !user.getNickname().equals(requestDto.getNickname())) {
-        user.updateNickname(requestDto.getNickname());
-      }
-
-      profileImageUrl = getProfileImageUrl(profileImage, user);
-
-      if (profileImageUrl != null && user.getProfileImage() != null) {
-        imageService.deleteS3Object(user.getProfileImage());
-      }
+    // 1. 이전에 닉네임의 설정이 안되어있는 경우
+    if(loginUser.getNickname() == null){
+      throw new UserCustomException(UserExceptionCode.NEED_TO_REGISTER_NICKNAME);
     }
 
-    // 2. 닉네임만 변경 & 새 프로필 이미지는 없는 경우: 기존 이미지 경로 이동, 새 URL 할당
-    String newProfileUrl = null;
-    if (profileImage == null
-        && requestDto.getNickname() != null
-        && !requestDto.getNickname().equals(beforeNickname)) {
-      newProfileUrl = imageService.changeProfilePath(
-          null, beforeNickname, requestDto.getNickname());
+    if(!afterNickname.equals(currentNickname)
+        && userRepository.existsByNickname(afterNickname)){
+      throw new UserCustomException(UserExceptionCode.EXIST_NICKNAME);
+    }
+    // 2. deleteProfileImage는 프로필 삭제 플래그-> null or 현상 유지
+    // 프로필 삭제를 요청하지 않고 profileImage를 넣엇을 때 -> 그대로 동작
+    // 프로필 삭제를 요청하지 않고 profileImage를 넣었을 때 -> 그대로 동작
+    // 프로필 삭제를 요청하고 profileImage를 넣었을 때 -> 예외
+    // 프로필 삭제를 요청하고 profileImage를 안 넣었을 때 -> 그대로 동작
+    if(requestDto.isDeleteProfileImage()
+        && profileImage != null && !profileImage.isEmpty()){
+      throw new UserCustomException(
+          UserExceptionCode.CONFLICT_IMAGE_UPDATE_AND_DELETE);
     }
 
-    // 3. 유저 정보 업데이트 (가장 우선: 새 업로드 > 경로 이동 > 기존값)
-    user.updateProfile(
-        requestDto.getContact(),
-        requestDto.getNickname(),
-        requestDto.getAddress(),
-        profileImageUrl != null ? profileImageUrl :
-            (newProfileUrl != null ? newProfileUrl : user.getProfileImage())
-    );
+    // 3. 프로필 이미지 삭제 선택 -> 삭제를 원함.
+    if (requestDto.isDeleteProfileImage()) {
+      if (user.getProfileImage() != null && !user.getProfileImage().isEmpty()
+          && afterNickname.equals(currentNickname)) {
+        imageService.deleteProfileImage(user.getNickname());
+        user.updateProfileImage(null);
+      }
+    }
+    // 4. 닉네임 변경 + 이미지 변경
+    else if (!afterNickname.equals(currentNickname)
+        && profileImage != null && !profileImage.isEmpty()) {
+      List<UUID> productIdList
+          = productService.findAllByOwnerId(loginUser.getId())
+          .stream().map(Product::getId).toList();
+      String changeProfileImageUrl
+          = imageService.reloadImageAndChangeUserPath(
+              user, profileImage, currentNickname, afterNickname, productIdList);
+
+      user.updateProfile(
+          changeProfileImageUrl, afterNickname,
+          requestDto.getContact(), requestDto.getAddress());
+      // imageService에서 1차 캐시를 초기화하는 로직이 있어서, save 해야함.
+      userRepository.save(user);
+    }
+    // 5. 닉네임만 변경
+    else if (!afterNickname.equals(currentNickname)
+        && (profileImage == null || profileImage.isEmpty())) {
+      List<UUID> productIdList
+          = productService.findAllByOwnerId(loginUser.getId())
+          .stream().map(Product::getId).toList();
+      String changeProfileImageUrl
+          = imageService.changeUserPath(currentNickname, afterNickname, productIdList);
+      user.updateProfile(
+          changeProfileImageUrl, afterNickname,
+          requestDto.getContact(), requestDto.getAddress());
+      userRepository.save(user);
+    }
+    // 6. 이미지 변경만
+    else if (afterNickname.equals(currentNickname)
+        && profileImage != null && !profileImage.isEmpty()) {
+      imageService.deleteS3Object(user.getProfileImage());
+      String changeProfileImageUrl
+          = imageService.uploadAndRegisterUserProfileImage(profileImage, user);
+      user.updateProfile(
+          changeProfileImageUrl, afterNickname,
+          requestDto.getContact(), requestDto.getAddress());
+    }
+    // 7. 모두 변경하지 않을 때 (연락처, 주소 등만 변경)
+    else {
+      // 연락처, 주소 등만 업데이트
+      user.updateContactAndAddress(
+          requestDto.getContact(),
+          requestDto.getAddress()
+      );
+    }
 
     return UserConverter.toUpdateProfileDto(user);
   }
@@ -198,12 +239,5 @@ public class UserServiceImplV1 implements UserServiceV1 {
   public User findById(UUID loginUserId) {
     return userRepository.findById(loginUserId).orElseThrow(
         () -> new UserCustomException(UserExceptionCode.NOT_FOUND));
-  }
-
-  private String getProfileImageUrl(MultipartFile profileImage, User user) {
-    if (profileImage == null) {
-      return null; // 이미지가 없으면 null 반환
-    }
-    return imageService.uploadAndRegisterUserProfileImage(profileImage, user);
   }
 }

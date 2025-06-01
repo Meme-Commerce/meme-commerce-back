@@ -23,6 +23,13 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
       AuthenticationException authException) throws IOException {
     String uri = request.getRequestURI();
 
+    if (uri != null && uri.equals("/login")) {
+      response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+      response.setContentType("application/json;charset=UTF-8");
+      response.getWriter().write("{\"error\":\"Unauthorized\"}");
+      return;
+    }
+
     if (uri != null && uri.startsWith("/api/")) {
       ErrorResponseDto error = ErrorResponseDto.of(
           Error.JWT_AUTHENTICATION_ERROR.getCode(),
@@ -34,8 +41,6 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
       response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
       response.setContentType("application/json;charset=UTF-8");
       response.getWriter().write(objectMapper.writeValueAsString(body));
-    } else {
-      response.sendRedirect("/login");
     }
   }
 }

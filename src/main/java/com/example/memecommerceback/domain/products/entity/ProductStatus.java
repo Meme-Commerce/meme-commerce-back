@@ -55,11 +55,11 @@ public enum ProductStatus {
       // ON_SALE은 해당 시간에 ON_SALE로 자동으로 변경되도록 함.
       // TEMP_OUT_OF_STOCK은 재고가 0이 되면 자동으로 변경되도록 함.
       SELLER_ALLOWED_TRANSITIONS = Map.of(
-          PENDING, Set.of(PENDING),
-          HIDDEN, Set.of(RESALE_SOON),
-          ON_SALE, Set.of(HIDDEN, RESALE_SOON),
-          RESALE_SOON, Set.of(HIDDEN),
-          TEMP_OUT_OF_STOCK, Set.of(HIDDEN, RESALE_SOON)
+      PENDING, Set.of(PENDING),
+      HIDDEN, Set.of(RESALE_SOON),
+      ON_SALE, Set.of(HIDDEN, RESALE_SOON),
+      RESALE_SOON, Set.of(HIDDEN),
+      TEMP_OUT_OF_STOCK, Set.of(HIDDEN, RESALE_SOON)
   );
 
   // 검증 메서드
@@ -68,16 +68,16 @@ public enum ProductStatus {
         .getOrDefault(this, Set.of()).contains(to);
   }
 
-  public static List<ProductStatus> fromStatusList(List<String> statusList){
+  public static List<ProductStatus> fromStatusList(List<String> statusList) {
     return statusList.stream().map(ProductStatus::fromStatus).toList();
   }
 
   public static List<ProductStatus> getAndValidateStatusListByUser(
-      List<String> statusList){
+      List<String> statusList) {
     List<ProductStatus> productStatusList
         = statusList.stream().map(ProductStatus::fromStatus).toList();
     for (ProductStatus productStatus : productStatusList) {
-      if(USER_RESTRICTED_STATUSES.contains(productStatus)){
+      if (USER_RESTRICTED_STATUSES.contains(productStatus)) {
         throw new ProductCustomException(ProductExceptionCode.UNAUTHORIZED_READ);
       }
     }

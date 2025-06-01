@@ -1,6 +1,7 @@
 package com.example.memecommerceback.domain.images.entity;
 
 import com.example.memecommerceback.domain.products.entity.Product;
+import com.example.memecommerceback.global.awsS3.utils.S3Utils;
 import com.example.memecommerceback.global.common.CommonEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -41,7 +42,7 @@ public class Image extends CommonEntity {
   private String originalName;
 
   @Column(nullable = false)
-  private String url;
+  private String prefixUrl;
 
   @Column(nullable = false)
   private Long size;
@@ -61,22 +62,39 @@ public class Image extends CommonEntity {
 
   private String ownerNickname;
 
+  @Column(nullable = false)
+  @Enumerated(EnumType.STRING)
+  private ImageType imageType;
+
   @JoinColumn(name = "product_id")
   @ManyToOne(fetch = FetchType.LAZY)
   private Product product;
 
-  public void updateProfile(String ownerNickname, String url) {
-    this.ownerNickname = ownerNickname;
-    this.url = url;
-  }
-
-  public void updateImage(String url, String fileName) {
-    this.url = url;
+  public void updateImage(String prefixUrl, String fileName) {
+    this.prefixUrl = prefixUrl;
     this.fileName = fileName;
   }
 
   public void registerProduct(Product product) {
     this.product = product;
   }
+
+  public String getUrl() {
+    return this.prefixUrl + this.fileName;
+  }
+
+  public void updateOwnerNicknameAndPrefix(String ownerNickname, String prefixUrl) {
+    this.ownerNickname = ownerNickname;
+    this.prefixUrl = prefixUrl;
+  }
+
+  public void updateEmojiImage(
+      String prefixUrl, String fileName, String originalName, ImageExtension extension){
+    this.prefixUrl = prefixUrl;
+    this.fileName = fileName;
+    this.originalName = originalName;
+    this.extension = extension;
+  }
+
 }
 

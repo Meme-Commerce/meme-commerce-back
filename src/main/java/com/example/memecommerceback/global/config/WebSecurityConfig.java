@@ -25,7 +25,10 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandlerImpl;
+import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 
 @Configuration
@@ -86,6 +89,7 @@ public class WebSecurityConfig {
             .requestMatchers(HttpMethod.GET, "/api/v1/products/**").permitAll()
             .requestMatchers(HttpMethod.GET, "/api/v1/categories").permitAll()
             .requestMatchers(HttpMethod.GET, "/api/v1/hashtags").permitAll()
+            .requestMatchers("/login").permitAll()
             .anyRequest().authenticated()
         )
         .sessionManagement((session) ->
@@ -103,8 +107,21 @@ public class WebSecurityConfig {
             .logoutSuccessHandler(customLogoutSuccessHandler)
         )
         .exceptionHandling(e -> e
-            .authenticationEntryPoint(new CustomAuthenticationEntryPoint(objectMapper))
-            .accessDeniedHandler(new CustomAccessDeniedHandler(objectMapper)))
+            .defaultAuthenticationEntryPointFor(
+                new CustomAuthenticationEntryPoint(objectMapper),
+                new AntPathRequestMatcher("/api/**")
+            )
+            .defaultAuthenticationEntryPointFor(
+                new LoginUrlAuthenticationEntryPoint("/login"),
+                new AntPathRequestMatcher("/**") // 나머지 모든 요청
+            )
+            .defaultAccessDeniedHandlerFor(
+                new CustomAccessDeniedHandler(objectMapper),
+                new AntPathRequestMatcher("/api/**")
+            )
+            .defaultAccessDeniedHandlerFor(
+                new AccessDeniedHandlerImpl(),
+                new AntPathRequestMatcher("/**")))
         .addFilterBefore(jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
     return http.build();
   }

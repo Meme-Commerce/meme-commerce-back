@@ -81,7 +81,7 @@ public class User extends CommonEntity {
 
   // entity method
   public void updateProfile(
-      String contact, String nickname, String address, String profileImage) {
+      String profileImage,  String nickname, String contact, String address) {
     if (contact != null && !contact.equals(this.contact)) {
       this.contact = contact;
     }
@@ -114,5 +114,10 @@ public class User extends CommonEntity {
 
   public void updateSellerStatus(SellerStatus sellerStatus) {
     this.sellerStatus = sellerStatus;
+  }
+
+  public void updateContactAndAddress(String contact, String address) {
+    if (contact != null) this.contact = contact;
+    if (address != null) this.address = address;
   }
 }
