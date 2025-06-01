@@ -1,5 +1,7 @@
 package com.example.memecommerceback.global.awsS3.utils;
 
+import java.util.UUID;
+
 public class S3Utils {
 
   public static final String USER_PREFIX = "users/";
@@ -14,11 +16,11 @@ public class S3Utils {
     return USER_PREFIX + nickname + PROFILE_PREFIX;
   }
 
-  public static String getS3UserProductPrefix(String nickname){
-    return USER_PREFIX + nickname + PRODUCT_PREFIX;
+  public static String getS3UserProductPrefix(String nickname, UUID productId){
+    return USER_PREFIX + nickname + PRODUCT_PREFIX + productId + "/";
   }
 
-  public static String getS3UserEmojiPrefix(String nickname, String emojiPackName){
-    return USER_PREFIX + nickname + EMOJI_PREFIX + emojiPackName;
+  public static String getS3UserEmojiPrefix(String nickname, UUID productId){
+    return USER_PREFIX + nickname + EMOJI_PREFIX + productId + "/";
   }
 }

@@ -1,5 +1,6 @@
 package com.example.memecommerceback.domain.images.service;
 
+import com.example.memecommerceback.domain.emoji.entity.Emoji;
 import com.example.memecommerceback.domain.images.entity.Image;
 import com.example.memecommerceback.domain.products.entity.Product;
 import com.example.memecommerceback.domain.users.entity.User;
@@ -16,7 +17,7 @@ public interface ImageServiceV1 {
   void deleteProductImageList(UUID productId, UUID userId);
 
   List<S3ImageResponseDto> uploadProductImageList(
-      List<MultipartFile> productImageList, String nickname);
+      List<MultipartFile> productImageList, String nickname, UUID productId);
 
   void deleteS3Object(String url);
 
@@ -24,12 +25,17 @@ public interface ImageServiceV1 {
       List<S3ImageResponseDto> uploadedImageList, User loginUser, Product product);
 
   List<Image> uploadEmojiImage(
-      List<MultipartFile> multipartFileList, User admin, String emojiPackName);
+      List<MultipartFile> multipartFileList, User seller, UUID productId);
 
-  String changeUserPath(String beforeNickname, String afterNickname);
+  String changeUserPath(
+      String beforeNickname, String afterNickname, List<UUID> productIdList);
 
   void deleteProfileImage(String ownerNickname);
 
   String reloadImageAndChangeUserPath(
-      User user, MultipartFile profile, String beforeNickname, String afterNickname);
+      User user, MultipartFile profile, String beforeNickname,
+      String afterNickname, List<UUID> productIdList);
+
+  Image changeEmojiImage(
+      MultipartFile emojiImage, Emoji emoji, User emojiOwner);
 }

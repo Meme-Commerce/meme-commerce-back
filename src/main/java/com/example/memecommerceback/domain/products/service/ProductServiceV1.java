@@ -185,4 +185,6 @@ public interface ProductServiceV1 {
    * @throws ProductCustomException 상품을 찾을 수 없는 경우
    */
   Product findById(UUID productId);
+
+  List<Product> findAllByOwnerId(UUID ownerId);
 }

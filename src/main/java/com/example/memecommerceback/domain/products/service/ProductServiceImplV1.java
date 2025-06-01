@@ -92,7 +92,7 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
     try {
       // 1. S3 업로드 먼저 (트랜잭션 외부)
       uploadedImages = imageService.uploadProductImageList(
-          productImageList, loginUser.getNickname());
+          productImageList, loginUser.getNickname(), product.getId());
 
       // 2. DB 작업들 (트랜잭션 내부 - 실패 시 롤백)
       imageList = imageService.toEntityProductListAndSaveAll(
@@ -370,6 +370,7 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
 
     // 7. 상품을 만듦.
     Product product = ProductConverter.toEntity(requestDto, seller);
+    productRepository.save(product);
 
     // 8. 카테고리는 Emoji(무조건 1L에 등록)로 고정
     productCategoryService.resetCategories(product, List.of(1L));
@@ -389,14 +390,13 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
       // 1. S3 업로드 먼저 (트랜잭션 외부)
       uploadedImages
           = imageService.uploadProductImageList(
-          emojiImageList, seller.getNickname());
+          mainProductImageList, seller.getNickname(), product.getId());
 
       // 2. DB 작업들 (트랜잭션 내부 - 실패 시 롤백)
       imageList = imageService.toEntityProductListAndSaveAll(
           uploadedImages, seller, product);
 
       product.addImageList(imageList);
-      productRepository.save(product);
 
       emojiList = emojiService.register(
           emojiImageList, product, seller,
@@ -497,10 +497,16 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
   }
 
   @Override
-  @Transactional
+  @Transactional(readOnly = true)
   public Product findById(UUID productId) {
     return productRepository.findById(productId).orElseThrow(
         () -> new ProductCustomException(ProductExceptionCode.NOT_FOUND));
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public List<Product> findAllByOwnerId(UUID ownerId) {
+    return productRepository.findAllByOwnerId(ownerId);
   }
 
   private void validateProfanityTextAndSimilarity(String newTitle, String newDescription,
@@ -536,16 +542,15 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
     List<Image> newImageList = null;
 
     try {
-      // 1. 새 이미지 S3 업로드
-      uploadedImages = imageService.uploadProductImageList(multipartFileList,
-          seller.getNickname());
-      // 2. DB 작업들
+      // 1. 업로드 성공 시에만 기존 이미지 삭제
+      imageService.deleteProductImageList(product.getId(), seller.getId());
+      // 2. 새 이미지 S3 업로드
+      uploadedImages
+          = imageService.uploadProductImageList(
+              multipartFileList, seller.getNickname(), product.getId());
+      // 3. DB 작업들
       newImageList = imageService.toEntityProductListAndSaveAll(
           uploadedImages, seller, product);
-      // 3. 업로드 성공 시에만 기존 이미지 삭제
-      imageService.deleteProductImageList(product.getId(), seller.getId());
-      // 4. 새 이미지와 상품 연결
-      product.addImageList(newImageList);
     } catch (Exception e) {
       // 보상 처리
       if (uploadedImages != null && !uploadedImages.isEmpty()) {
@@ -561,9 +566,5 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
       throw e;
     }
     return newImageList;
-  }
-
-  private void validateProductStatus(){
-
   }
 }

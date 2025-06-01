@@ -11,6 +11,7 @@ import com.example.memecommerceback.domain.products.dto.ProductResponseDto;
 import com.example.memecommerceback.domain.products.entity.Product;
 import com.example.memecommerceback.domain.users.entity.User;
 import java.util.List;
+import java.util.UUID;
 import org.springframework.data.domain.Page;
 
 public class ProductConverter {

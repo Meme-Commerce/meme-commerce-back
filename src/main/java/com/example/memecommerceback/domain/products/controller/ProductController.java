@@ -289,7 +289,7 @@ public class ProductController {
   }
 
   @PreAuthorize("hasAuthority('ROLE_SELLER')")
-  @PostMapping(value = "/products/{productId}/emoji-pack", consumes = "multipart/form-data")
+  @PatchMapping(value = "/products/{productId}/emoji-pack", consumes = "multipart/form-data")
   public ResponseEntity<
       CommonResponseDto<ProductResponseDto.EmojiPackDto>> updateEmojiPack(
       @PathVariable UUID productId,

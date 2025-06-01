@@ -1,5 +1,6 @@
 package com.example.memecommerceback.domain.emoji.service;
 
+import com.example.memecommerceback.domain.emoji.dto.EmojiResponseDto;
 import com.example.memecommerceback.domain.emoji.entity.Emoji;
 import com.example.memecommerceback.domain.products.dto.ProductRequestDto.EmojiDto;
 import com.example.memecommerceback.domain.products.entity.Product;
@@ -15,4 +16,7 @@ public interface EmojiServiceV1 {
       String emojiPackName, List<EmojiDto> emojiDescriptionList);
 
   List<Emoji> findAllByProductId(UUID productId);
+
+  EmojiResponseDto updateOne(
+      Long emojiId, String name, MultipartFile emojiImage, User seller);
 }

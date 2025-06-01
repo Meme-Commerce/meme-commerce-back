@@ -40,7 +40,7 @@ public class Product extends CommonEntity {
   @Column(columnDefinition = "UUID", updatable = false, nullable = false)
   private UUID id;
 
-  @Column(nullable = false)
+  @Column(nullable = false, unique = true)
   private String name;
 
   @Column(nullable = false, length = 200)

@@ -72,7 +72,6 @@ public class S3Service {
 
   @Transactional(propagation = Propagation.NOT_SUPPORTED)
   public void deleteS3Object(String imageUrl) {
-    System.out.println("imageUrl : "+imageUrl);
     try {
       String decodedUrl = URLDecoder.decode(imageUrl, StandardCharsets.UTF_8);
       String bucketUrlPart = bucket + ".s3.";
@@ -92,12 +91,12 @@ public class S3Service {
 
   @Transactional(propagation = Propagation.NOT_SUPPORTED)
   public List<S3ImageSummaryResponseDto> changePath(
-      String beforeNickname, String afterNickname) {
+      String beforeNickname, String afterNickname, UUID productId) {
 
     String oldProfilePrefix = S3Utils.getS3UserProfilePrefix(beforeNickname);
     String newProfilePrefix = S3Utils.getS3UserProfilePrefix(afterNickname);
-    String oldProductPrefix = S3Utils.getS3UserProductPrefix(beforeNickname);
-    String newProductPrefix = S3Utils.getS3UserProductPrefix(afterNickname);
+    String oldProductPrefix = S3Utils.getS3UserProductPrefix(beforeNickname, productId);
+    String newProductPrefix = S3Utils.getS3UserProductPrefix(afterNickname, productId);
 
     List<S3ImageSummaryResponseDto> resultList = new ArrayList<>();
 
@@ -155,15 +154,55 @@ public class S3Service {
   }
 
   @Transactional(propagation = Propagation.NOT_SUPPORTED)
+  public List<S3ImageSummaryResponseDto> changeProfilePath(
+      String beforeNickname, String afterNickname) {
+
+    String oldProfilePrefix = S3Utils.getS3UserProfilePrefix(beforeNickname);
+    String newProfilePrefix = S3Utils.getS3UserProfilePrefix(afterNickname);
+
+    List<S3ImageSummaryResponseDto> resultList = new ArrayList<>();
+
+    // 1. afternickname 경로가 이미 존재하면 에러 (다른 사용자가 이미 사용 중)
+    var afterProfileListing = amazonS3Client.listObjects(bucket, newProfilePrefix);
+    if (!afterProfileListing.getObjectSummaries().isEmpty()) {
+      log.warn("afterNickname 경로에 이미 파일이 존재합니다: {}", newProfilePrefix);
+      throw new AWSCustomException(GlobalExceptionCode.ALREADY_EXISTS_FILE_URL);
+    }
+
+    // 2. profile 이미지 이동
+    var beforeProfileListing = amazonS3Client.listObjects(bucket, oldProfilePrefix);
+    var profileSummaries = beforeProfileListing.getObjectSummaries();
+    if (!profileSummaries.isEmpty()) {
+      for (var s3Object : profileSummaries) {
+        String oldKey = s3Object.getKey();
+        String fileName = oldKey.substring(oldProfilePrefix.length());
+        String newKey = newProfilePrefix + fileName;
+
+        amazonS3Client.copyObject(bucket, oldKey, bucket, newKey);
+        amazonS3Client.deleteObject(bucket, oldKey);
+
+        log.info("프로필 이미지 경로 변경: {} → {}", oldKey, newKey);
+        resultList.add(S3Converter.toS3ImageSummaryDto(newKey, fileName));
+      }
+    }
+
+    if (resultList.isEmpty()) {
+      log.warn("beforeNickname, afterNickname 모두 해당 경로에 이미지가 존재하지 않습니다.");
+      return Collections.emptyList();
+    }
+    return resultList;
+  }
+
+  @Transactional(propagation = Propagation.NOT_SUPPORTED)
   public List<S3ImageResponseDto> uploadProductImageList(
-      List<MultipartFile> productImageList, String nickname) {
+      List<MultipartFile> productImageList, String nickname, UUID mainProductId) {
     List<S3ImageResponseDto> s3ResponseDtoList = new ArrayList<>();
     for (MultipartFile productImage : productImageList) {
       try {
         String originalName = productImage.getOriginalFilename();
         ImageExtension ext = FileUtils.extractExtensionFromImageName(originalName);
 
-        String prefixUrl = S3Utils.getS3UserProductPrefix(nickname);
+        String prefixUrl = S3Utils.getS3UserProductPrefix(nickname, mainProductId);
         String fileName = createUUIDFile(productImage);
         String filePath = prefixUrl + fileName;
 
@@ -216,7 +255,7 @@ public class S3Service {
   }
 
   public List<S3ImageResponseDto> uploadEmojiImageList(
-      List<MultipartFile> multipartFileList, String nickname, String emojiPackName) {
+      List<MultipartFile> multipartFileList, String nickname, UUID mainProductId) {
     List<S3ImageResponseDto> s3ResponseDtoList = new ArrayList<>();
     for (MultipartFile multipartFile: multipartFileList) {
       try {
@@ -227,8 +266,7 @@ public class S3Service {
 
         String fileName = createUUIDFile(multipartFile);
         String filePath
-            = S3Utils.getS3UserEmojiPrefix(nickname, emojiPackName)
-            + "/"+ fileName;
+            = S3Utils.getS3UserEmojiPrefix(nickname, mainProductId) + fileName;
 
         amazonS3Client.putObject(
             bucket, filePath, multipartFile.getInputStream(), metadata);

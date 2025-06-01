@@ -59,4 +59,16 @@ public class Emoji extends CommonEntity {
     this.product = product;
     this.image = image;
   }
+
+  public void update(String name){
+    this.name = name;
+  }
+
+  public void updateImage(Image image){
+    this.image = image;
+  }
+  public void updateNameAndImage(String name, Image image){
+    this.name = name;
+    this.image = image;
+  }
 }

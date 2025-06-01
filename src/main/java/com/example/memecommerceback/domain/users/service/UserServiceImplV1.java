@@ -4,6 +4,8 @@ import com.example.memecommerceback.domain.files.entity.File;
 import com.example.memecommerceback.domain.files.entity.FileType;
 import com.example.memecommerceback.domain.files.service.FileServiceV1;
 import com.example.memecommerceback.domain.images.service.ImageServiceV1;
+import com.example.memecommerceback.domain.products.entity.Product;
+import com.example.memecommerceback.domain.products.service.ProductServiceV1;
 import com.example.memecommerceback.domain.users.converter.UserConverter;
 import com.example.memecommerceback.domain.users.dto.UserRequestDto;
 import com.example.memecommerceback.domain.users.dto.UserResponseDto;
@@ -28,6 +30,7 @@ public class UserServiceImplV1 implements UserServiceV1 {
 
   private final FileServiceV1 fileService;
   private final ImageServiceV1 imageService;
+  private final ProductServiceV1 productService;
   private final ProfanityFilterService profanityFilterService;
 
   private final UserRepository userRepository;
@@ -84,9 +87,12 @@ public class UserServiceImplV1 implements UserServiceV1 {
     // 4. 닉네임 변경 + 이미지 변경
     else if (!afterNickname.equals(currentNickname)
         && profileImage != null && !profileImage.isEmpty()) {
+      List<UUID> productIdList
+          = productService.findAllByOwnerId(loginUser.getId())
+          .stream().map(Product::getId).toList();
       String changeProfileImageUrl
           = imageService.reloadImageAndChangeUserPath(
-              user, profileImage, currentNickname, afterNickname);
+              user, profileImage, currentNickname, afterNickname, productIdList);
 
       user.updateProfile(
           changeProfileImageUrl, afterNickname,
@@ -97,8 +103,11 @@ public class UserServiceImplV1 implements UserServiceV1 {
     // 5. 닉네임만 변경
     else if (!afterNickname.equals(currentNickname)
         && (profileImage == null || profileImage.isEmpty())) {
+      List<UUID> productIdList
+          = productService.findAllByOwnerId(loginUser.getId())
+          .stream().map(Product::getId).toList();
       String changeProfileImageUrl
-          = imageService.changeUserPath(currentNickname, afterNickname);
+          = imageService.changeUserPath(currentNickname, afterNickname, productIdList);
       user.updateProfile(
           changeProfileImageUrl, afterNickname,
           requestDto.getContact(), requestDto.getAddress());

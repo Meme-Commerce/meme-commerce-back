@@ -1,5 +1,6 @@
 package com.example.memecommerceback.domain.images.service;
 
+import com.example.memecommerceback.domain.emoji.entity.Emoji;
 import com.example.memecommerceback.domain.files.exception.FileCustomException;
 import com.example.memecommerceback.domain.files.exception.FileExceptionCode;
 import com.example.memecommerceback.domain.images.converter.ImageConverter;
@@ -84,10 +85,17 @@ public class ImageServiceImplV1 implements ImageServiceV1 {
 
   @Override
   @Transactional
-  public String changeUserPath(String beforeNickname, String afterNickname) {
+  public String changeUserPath(
+      String beforeNickname, String afterNickname, List<UUID> productIdList) {
     // 이모지 타입은 가지고 오지 않는 이유는 Emoji타입의 주인은 admin이 등록하기 때문
     // s3 경로도 Emoji는 해당 어드민의 닉네임으로 보관하지 않기에,
-    s3Service.changePath(beforeNickname, afterNickname);
+    if(productIdList == null || productIdList.isEmpty()){
+      s3Service.changeProfilePath(beforeNickname, afterNickname);
+    }else{
+      for(UUID productId : productIdList){
+        s3Service.changePath(beforeNickname, afterNickname, productId);
+      }
+    }
 
     Image image
         = imageRepository.findByOwnerNicknameAndImageType(
@@ -116,20 +124,20 @@ public class ImageServiceImplV1 implements ImageServiceV1 {
   @Override
   @Transactional
   public List<S3ImageResponseDto> uploadProductImageList(
-      List<MultipartFile> productImageList, String nickname) {
-    return s3Service.uploadProductImageList(productImageList, nickname);
+      List<MultipartFile> productImageList, String nickname, UUID productId) {
+    return s3Service.uploadProductImageList(productImageList, nickname, productId);
   }
 
   @Override
   @Transactional
   public List<Image> uploadEmojiImage(
-      List<MultipartFile> multipartFileList, User seller, String emojiPackName) {
+      List<MultipartFile> multipartFileList, User seller, UUID productId) {
     if (multipartFileList == null || multipartFileList.isEmpty()) {
       throw new FileCustomException(FileExceptionCode.EMPTY_FILE);
     }
     List<S3ImageResponseDto> s3ImageResponseDtoList
         = s3Service.uploadEmojiImageList(
-        multipartFileList, seller.getNickname(), emojiPackName);
+        multipartFileList, seller.getNickname(), productId);
     return s3ImageResponseDtoList.stream().map(
         s3ImageResponseDto -> {
           return createAndSaveImage(s3ImageResponseDto, seller, ImageType.EMOJI);
@@ -164,13 +172,33 @@ public class ImageServiceImplV1 implements ImageServiceV1 {
   @Override
   @Transactional
   public String reloadImageAndChangeUserPath(
-      User user, MultipartFile profile, String beforeNickname, String afterNickname) {
+      User user, MultipartFile profile, String beforeNickname,
+      String afterNickname, List<UUID> productIdList) {
     if (user.getProfileImage() == null) {
       uploadAndRegisterUserProfileImage(profile, user);
-      return changeUserPath(beforeNickname, afterNickname);
+      return changeUserPath(beforeNickname, afterNickname, productIdList);
     }
     deleteS3Object(user.getProfileImage());
     uploadAndRegisterUserProfileImage(profile, user);
-    return changeUserPath(beforeNickname, afterNickname);
+    return changeUserPath(beforeNickname, afterNickname, productIdList);
+  }
+
+  @Override
+  @Transactional
+  public Image changeEmojiImage(
+      MultipartFile emojiImage, Emoji emoji, User emojiOwner) {
+    Image image = emoji.getImage();
+    deleteS3Object(image.getS3FullUrl());
+
+    List<S3ImageResponseDto> s3ImageResponseDtoList
+        = s3Service.uploadEmojiImageList(
+        List.of(emojiImage), emojiOwner.getNickname(), emoji.getProduct().getId());
+
+    S3ImageResponseDto s3ImageResponseDto = s3ImageResponseDtoList.get(0);
+    image.updateEmojiImage(
+        s3ImageResponseDto.getPrefixUrl(), s3ImageResponseDto.getFileName(),
+        s3ImageResponseDto.getOriginalName(), s3ImageResponseDto.getExtension());
+
+    return image;
   }
 }

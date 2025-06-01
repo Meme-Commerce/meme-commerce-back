@@ -97,5 +97,14 @@ public class Image extends CommonEntity {
     this.ownerNickname = ownerNickname;
     this.prefixUrl = prefixUrl;
   }
+
+  public void updateEmojiImage(
+      String prefixUrl, String fileName, String originalName, ImageExtension extension){
+    this.prefixUrl = prefixUrl;
+    this.fileName = fileName;
+    this.originalName = originalName;
+    this.extension = extension;
+  }
+
 }
 
