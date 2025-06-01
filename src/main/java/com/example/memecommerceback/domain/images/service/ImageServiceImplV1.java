@@ -6,6 +6,7 @@ import com.example.memecommerceback.domain.images.converter.ImageConverter;
 import com.example.memecommerceback.domain.images.entity.Image;
 import com.example.memecommerceback.domain.images.entity.ImageType;
 import com.example.memecommerceback.domain.images.repository.ImageRepository;
+import com.example.memecommerceback.domain.products.entity.Product;
 import com.example.memecommerceback.domain.users.entity.User;
 import com.example.memecommerceback.global.awsS3.dto.S3ImageResponseDto;
 import com.example.memecommerceback.global.awsS3.service.S3Service;
@@ -68,43 +69,12 @@ public class ImageServiceImplV1 implements ImageServiceV1 {
 
   @Override
   @Transactional
-  public List<Image> uploadAndRegisterProductImage(
-      List<MultipartFile> productImageList, User user) {
-
-    // 검증 로직
-    if (productImageList == null || productImageList.isEmpty()) {
-      throw new FileCustomException(FileExceptionCode.FILE_IS_REQUIRED);
-    }
-    if (productImageList.size() > 5) {
-      throw new FileCustomException(FileExceptionCode.NOT_REGISTER_OVER_MAX_PRODUCT_IMAGES);
-    }
-    if (user.getNickname() == null) {
-      throw new FileCustomException(FileExceptionCode.NICKNAME_REQUIRED_FOR_PROFILE_UPLOAD);
-    }
-
-    // 확장자 검증
-    for (MultipartFile productImage : productImageList) {
-      if (productImage == null || productImage.isEmpty()) {
-        throw new FileCustomException(FileExceptionCode.FILE_IS_REQUIRED);
-      }
-      String originalFilename = productImage.getOriginalFilename();
-      FileUtils.extractExtensionFromImageName(originalFilename);
-    }
-
-    List<S3ImageResponseDto> uploadedImages = s3Service.uploadProductImageList(productImageList,
-        user.getNickname());
-    List<Image> imageList = ImageConverter.toEntityList(uploadedImages, user, ImageType.PRODUCT);
-    return imageRepository.saveAll(imageList);
-  }
-
-  @Override
-  @Transactional
   public void deleteProductImageList(UUID productId, UUID userId) {
     List<Image> imageList = imageRepository.findAllByProductId(productId);
     try {
       imageRepository.deleteAllById(imageList.stream().map(Image::getId).toList());
       for (Image image : imageList) {
-        s3Service.deleteS3Object(image.getUrl());
+        s3Service.deleteS3Object(image.getS3FullUrl());
       }
     } catch (Exception e) {
       log.error("상품 이미지 삭제 실패 (productId: {}, userId: {})", productId, userId, e);
@@ -170,10 +140,10 @@ public class ImageServiceImplV1 implements ImageServiceV1 {
   @Override
   @Transactional
   public List<Image> toEntityProductListAndSaveAll(
-      List<S3ImageResponseDto> uploadedImageList, User loginUser) {
+      List<S3ImageResponseDto> uploadedImageList, User loginUser, Product product) {
     List<Image> imageList
         = ImageConverter.toEntityList(
-        uploadedImageList, loginUser, ImageType.PRODUCT);
+        uploadedImageList, loginUser, ImageType.PRODUCT, product);
     return imageRepository.saveAll(imageList);
   }
 

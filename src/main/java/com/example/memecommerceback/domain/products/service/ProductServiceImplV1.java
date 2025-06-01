@@ -95,7 +95,8 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
           productImageList, loginUser.getNickname());
 
       // 2. DB 작업들 (트랜잭션 내부 - 실패 시 롤백)
-      imageList = imageService.toEntityProductListAndSaveAll(uploadedImages, loginUser);
+      imageList = imageService.toEntityProductListAndSaveAll(
+          uploadedImages, loginUser, product);
 
       product.addImageList(imageList);
       productRepository.save(product);
@@ -129,6 +130,10 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
       throw new ProductCustomException(ProductExceptionCode.NOT_OWNER);
     }
 
+    validateProfanityTextAndSimilarity(requestDto.getName(), requestDto.getDescription(), seller);
+
+    /* {@link ProductStatus#canSellerChangeTo}
+        판매자가 수정할 수 있는 상품의 상태는 한정 되어 있음.*/
     ProductStatus beforeStatus = product.getStatus();
     ProductStatus afterStatus = requestDto.getStatus();
 
@@ -139,8 +144,6 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
     if (!beforeStatus.canSellerChangeTo(afterStatus)) {
       throw new ProductCustomException(ProductExceptionCode.CANNOT_MODIFY_STATUS);
     }
-
-    validateProfanityTextAndSimilarity(requestDto.getName(), requestDto.getDescription(), seller);
 
     // TODO : stock 변경 시, 재고락 서비스에서 해당 재고 업데이트 로직 필요
     if (afterStatus == ProductStatus.RESALE_SOON || afterStatus == ProductStatus.ON_SALE) {
@@ -169,34 +172,12 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
           product, requestDto.getHashtagIdList());
     }
 
-    List<S3ImageResponseDto> uploadedImages = null;
-    List<Image> newImageList = null;
-
-    try {
-      if (multipartFileList != null && !multipartFileList.isEmpty()) {
-        // 1. 새 이미지 S3 업로드
-        uploadedImages = imageService.uploadProductImageList(multipartFileList,
-            seller.getNickname());
-        // 2. DB 작업들
-        newImageList = imageService.toEntityProductListAndSaveAll(uploadedImages, seller);
-        // 3. 업로드 성공 시에만 기존 이미지 삭제
-        imageService.deleteProductImageList(product.getId(), seller.getId());
-        // 4. 새 이미지와 상품 연결
-        product.addImageList(newImageList);
-      }
-    } catch (Exception e) {
-      // 보상 처리
-      if (uploadedImages != null && !uploadedImages.isEmpty()) {
-        for (S3ImageResponseDto dto : uploadedImages) {
-          try {
-            imageService.deleteS3Object(dto.getPrefixUrl() + dto.getFileName());
-          } catch (Exception cleanupEx) {
-            log.warn("S3 보상 삭제 실패: {}", dto.getPrefixUrl() + dto.getFileName(), cleanupEx);
-          }
-        }
-      }
-      throw e;
+    if(multipartFileList == null || multipartFileList.isEmpty()){
+      throw new ProductCustomException(ProductExceptionCode.REGISTER_IMAGE);
     }
+
+    List<Image> newImageList
+        = updateProductImage(multipartFileList, seller, product);
 
     return ProductConverter.toUpdateOneDto(
         product, seller.getName(), newImageList);
@@ -353,19 +334,20 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
 
   @Override
   @Transactional
-  public ProductResponseDto.RegisterEmojiPackDto registerEmojiPack(
-      ProductRequestDto.RegisterEmojiPackDto requestDto,
+  public ProductResponseDto.EmojiPackDto registerEmojiPack(
+      ProductRequestDto.EmojiPackDto requestDto,
       List<MultipartFile> mainProductImageList, List<MultipartFile> emojiImageList,
       User seller) {
     // 1. 판매 기간 검증
-    DateUtils.validateDateTime(requestDto.getSellStartDate(), requestDto.getSellEndDate());
+    DateUtils.validateDateTime(
+        requestDto.getSellStartDate(), requestDto.getSellEndDate());
 
     // 2. 제목/설명에 비속어가 들어갔는지?, 다른 상품들과의 이름이 유사한지?
     validateProfanityTextAndSimilarity(
         requestDto.getName(), requestDto.getDescription(), seller);
 
     // 3. 이모지 이미지 누락
-    if (emojiImageList.isEmpty()) {
+    if (emojiImageList.isEmpty() || mainProductImageList.isEmpty()) {
       throw new ProductCustomException(ProductExceptionCode.REGISTER_IMAGE);
     }
 
@@ -411,7 +393,7 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
 
       // 2. DB 작업들 (트랜잭션 내부 - 실패 시 롤백)
       imageList = imageService.toEntityProductListAndSaveAll(
-          uploadedImages, seller);
+          uploadedImages, seller, product);
 
       product.addImageList(imageList);
       productRepository.save(product);
@@ -433,8 +415,85 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
       throw e;
     }
 
-    return ProductConverter.toRegisterEmojiPackDto(
+    return ProductConverter.toEmojiPackDto(
         product, seller.getName(), imageList, emojiList);
+  }
+
+  @Override
+  @Transactional
+  public ProductResponseDto.EmojiPackDto updateEmojiPack(
+      UUID productId, ProductRequestDto.UpdateEmojiPackDto requestDto,
+      List<MultipartFile> mainProductImageList, User seller){
+    Product product = findById(productId);
+    List<Emoji> emojiList = emojiService.findAllByProductId(product.getId());
+    if(emojiList.isEmpty()){
+      throw new ProductCustomException(ProductExceptionCode.NOT_EMOJI_PACK_PRODUCT);
+    }
+    // 1. 판매 기간 검증
+    DateUtils.validateDateTime(
+        requestDto.getSellStartDate(), requestDto.getSellEndDate());
+
+    // 2. 제목/설명에 비속어가 들어갔는지?, 다른 상품들과의 이름이 유사한지?
+    validateProfanityTextAndSimilarity(
+        requestDto.getName(), requestDto.getDescription(), seller);
+
+    // 3. 이모지 이미지 누락
+    if (mainProductImageList.isEmpty()) {
+      throw new ProductCustomException(ProductExceptionCode.REGISTER_IMAGE);
+    }
+
+    // 4. 상품을 등록하려는 판매자의 닉네임이 없으면 상품 등록 실패
+    if (seller.getNickname() == null) {
+      throw new ProductCustomException(ProductExceptionCode.NEED_TO_USER_NICKNAME);
+    }
+
+    // 5. mainProductImage는 최대 5개까지, emojiImage는 최대 24개까지 등록
+    if(mainProductImageList.size() > 5){
+      throw new ProductCustomException(
+          ProductExceptionCode.EMOJI_PACK_IMAGE_COUNT_LIMIT_EXCEEDED);
+    }
+
+    // 6. 해시태그 연결
+    if (requestDto.getHashtagIdList() != null
+        && !requestDto.getHashtagIdList().isEmpty()) {
+      productHashtagService.resetHashtags(
+          product, requestDto.getHashtagIdList());
+    }
+
+    // 7. 상품 상태 검증
+    ProductStatus beforeStatus = product.getStatus();
+    ProductStatus afterStatus = requestDto.getStatus();
+
+    if (product.getStatus().equals(afterStatus)) {
+      throw new ProductCustomException(ProductExceptionCode.REQUEST_SAME_STATUS);
+    }
+
+    if (!beforeStatus.canSellerChangeTo(afterStatus)) {
+      throw new ProductCustomException(ProductExceptionCode.CANNOT_MODIFY_STATUS);
+    }
+
+    // TODO : stock 변경 시, 재고락 서비스에서 해당 재고 업데이트 로직 필요
+    if (afterStatus == ProductStatus.RESALE_SOON || afterStatus == ProductStatus.ON_SALE) {
+      if (requestDto.getSellStartDate() == null || requestDto.getSellEndDate() == null) {
+        throw new ProductCustomException(ProductExceptionCode.NEED_TO_SELL_DATE);
+      }
+      DateUtils.validateDateTime(requestDto.getSellStartDate(), requestDto.getSellEndDate());
+      product.update(
+          afterStatus, requestDto.getSellStartDate(), requestDto.getSellEndDate(),
+          requestDto.getName(), requestDto.getDescription(),
+          requestDto.getPrice(), requestDto.getStock());
+    } else if (afterStatus == ProductStatus.HIDDEN) {
+      product.update(
+          afterStatus, null, null,
+          requestDto.getName(), requestDto.getDescription(),
+          requestDto.getPrice(), requestDto.getStock());
+    }
+
+    // 8. 메인 상품 이미지 수정
+    List<Image> newImageList
+        = updateProductImage(mainProductImageList, seller, product);
+    return ProductConverter.toEmojiPackDto(
+        product, seller.getName(), newImageList, emojiList);
   }
 
   @Override
@@ -469,5 +528,42 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
       List<String> sortList, int page, int size) {
     PageUtils.validateProductSortFields(sortList);
     return PageRequest.of(page, size);
+  }
+
+  private List<Image> updateProductImage(
+      List<MultipartFile> multipartFileList, User seller, Product product){
+    List<S3ImageResponseDto> uploadedImages = null;
+    List<Image> newImageList = null;
+
+    try {
+      // 1. 새 이미지 S3 업로드
+      uploadedImages = imageService.uploadProductImageList(multipartFileList,
+          seller.getNickname());
+      // 2. DB 작업들
+      newImageList = imageService.toEntityProductListAndSaveAll(
+          uploadedImages, seller, product);
+      // 3. 업로드 성공 시에만 기존 이미지 삭제
+      imageService.deleteProductImageList(product.getId(), seller.getId());
+      // 4. 새 이미지와 상품 연결
+      product.addImageList(newImageList);
+    } catch (Exception e) {
+      // 보상 처리
+      if (uploadedImages != null && !uploadedImages.isEmpty()) {
+        for (S3ImageResponseDto dto : uploadedImages) {
+          try {
+            String fullUrl = dto.getPrefixUrl() + dto.getFileName();
+            imageService.deleteS3Object(fullUrl);
+          } catch (Exception cleanupEx) {
+            log.warn("S3 보상 삭제 실패: {}", dto.getPrefixUrl() + dto.getFileName(), cleanupEx);
+          }
+        }
+      }
+      throw e;
+    }
+    return newImageList;
+  }
+
+  private void validateProductStatus(){
+
   }
 }

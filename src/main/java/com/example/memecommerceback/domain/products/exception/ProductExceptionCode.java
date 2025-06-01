@@ -51,7 +51,9 @@ public enum ProductExceptionCode {
       HttpStatus.BAD_REQUEST, "PRODUCT-014",
       "이모지 팩의 메인 이미지는 최대 5개, "
           + "이모지 이미지는 최대 24개까지 등록 가능합니다."),
-
+  NOT_EMOJI_PACK_PRODUCT(
+      HttpStatus.BAD_REQUEST, "PRODUCT-015",
+      "해당 상품은 이모지 팩 상품이 아닙니다."),
   ;
 
   private final HttpStatus httpStatus;

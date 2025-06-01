@@ -273,18 +273,36 @@ public class ProductController {
   @PreAuthorize("hasAuthority('ROLE_SELLER')")
   @PostMapping(value = "/products/emoji-pack", consumes = "multipart/form-data")
   public ResponseEntity<
-      CommonResponseDto<ProductResponseDto.RegisterEmojiPackDto>> registerEmojiPack(
-      @RequestPart(name = "data") @Valid ProductRequestDto.RegisterEmojiPackDto requestDto,
+      CommonResponseDto<ProductResponseDto.EmojiPackDto>> registerEmojiPack(
+      @RequestPart(name = "data") @Valid ProductRequestDto.EmojiPackDto requestDto,
       @RequestPart(name = "main-product-image-list") List<MultipartFile> mainProductImageList,
-      @RequestPart(name = "image-list") List<MultipartFile> emojiImageList,
+      @RequestPart(name = "emoji-image-list") List<MultipartFile> emojiImageList,
       @AuthenticationPrincipal UserDetailsImpl userDetails) {
-    ProductResponseDto.RegisterEmojiPackDto responseDto =
+    ProductResponseDto.EmojiPackDto responseDto =
         productService.registerEmojiPack(
             requestDto, mainProductImageList, emojiImageList, userDetails.getUser());
     return ResponseEntity.status(HttpStatus.OK).body(
         new CommonResponseDto<>(
             responseDto,
             "이모지팩(이모지 세트) 상품 등록하였습니다.",
+            HttpStatus.OK.value()));
+  }
+
+  @PreAuthorize("hasAuthority('ROLE_SELLER')")
+  @PostMapping(value = "/products/{productId}/emoji-pack", consumes = "multipart/form-data")
+  public ResponseEntity<
+      CommonResponseDto<ProductResponseDto.EmojiPackDto>> updateEmojiPack(
+      @PathVariable UUID productId,
+      @RequestPart(name = "data") @Valid ProductRequestDto.UpdateEmojiPackDto requestDto,
+      @RequestPart(name = "main-product-image-list") List<MultipartFile> mainProductImageList,
+      @AuthenticationPrincipal UserDetailsImpl userDetails) {
+    ProductResponseDto.EmojiPackDto responseDto =
+        productService.updateEmojiPack(
+            productId, requestDto, mainProductImageList, userDetails.getUser());
+    return ResponseEntity.status(HttpStatus.OK).body(
+        new CommonResponseDto<>(
+            responseDto,
+            "이모지팩(이모지 세트) 상품을 수정 하였습니다.",
             HttpStatus.OK.value()));
   }
 }

@@ -29,7 +29,7 @@ public class ProductConverter {
   }
 
   public static Product toEntity(
-      ProductRequestDto.RegisterEmojiPackDto requestDto, User user) {
+      ProductRequestDto.EmojiPackDto requestDto, User user) {
     return Product.builder()
         .owner(user)
         .name(requestDto.getName())
@@ -111,10 +111,10 @@ public class ProductConverter {
     return productPage.map(ProductConverter::toReadOneDto);
   }
 
-  public static ProductResponseDto.RegisterEmojiPackDto toRegisterEmojiPackDto(
+  public static ProductResponseDto.EmojiPackDto toEmojiPackDto(
       Product product, String ownerName, List<Image> mainProductImageList,
       List<Emoji> emojiList) {
-    return ProductResponseDto.RegisterEmojiPackDto.builder()
+    return ProductResponseDto.EmojiPackDto.builder()
         .productId(product.getId())
         .createdAt(product.getCreatedAt())
         .name(product.getName())

@@ -215,7 +215,7 @@ public class ProductResponseDto {
   @Builder
   @AllArgsConstructor
   @NoArgsConstructor
-  public static class RegisterEmojiPackDto {
+  public static class EmojiPackDto {
 
     @Schema(description = "생성된 상품의 식별자", example = "d290f1ee-6c54-4b01-90e6-d701748f0851")
     private UUID productId;

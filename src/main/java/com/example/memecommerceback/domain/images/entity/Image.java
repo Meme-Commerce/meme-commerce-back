@@ -1,6 +1,7 @@
 package com.example.memecommerceback.domain.images.entity;
 
 import com.example.memecommerceback.domain.products.entity.Product;
+import com.example.memecommerceback.global.awsS3.utils.S3Utils;
 import com.example.memecommerceback.global.common.CommonEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -89,6 +90,9 @@ public class Image extends CommonEntity {
     return this.prefixUrl + this.fileName;
   }
 
+  public String getS3FullUrl(){
+    return S3Utils.S3_URL+this.getUrl();
+  }
   public void updateOwnerNicknameAndPrefix(String ownerNickname, String prefixUrl) {
     this.ownerNickname = ownerNickname;
     this.prefixUrl = prefixUrl;

@@ -2,14 +2,17 @@ package com.example.memecommerceback.domain.emoji.service;
 
 import com.example.memecommerceback.domain.emoji.converter.EmojiConverter;
 import com.example.memecommerceback.domain.emoji.entity.Emoji;
+import com.example.memecommerceback.domain.emoji.excpetion.EmojiCustomException;
+import com.example.memecommerceback.domain.emoji.excpetion.EmojiExceptionCode;
 import com.example.memecommerceback.domain.emoji.repository.EmojiRepository;
 import com.example.memecommerceback.domain.images.entity.Image;
 import com.example.memecommerceback.domain.images.service.ImageServiceV1;
-import com.example.memecommerceback.domain.products.dto.ProductRequestDto.RegisterEmojiDto;
+import com.example.memecommerceback.domain.products.dto.ProductRequestDto.EmojiDto;
 import com.example.memecommerceback.domain.products.entity.Product;
 import com.example.memecommerceback.domain.users.entity.User;
 import com.example.memecommerceback.global.service.ProfanityFilterService;
 import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,10 +31,10 @@ public class EmojiServiceImplV1 implements EmojiServiceV1 {
   @Transactional
   public List<Emoji> register(
       List<MultipartFile> emojiImageList, Product product, User seller,
-      String emojiPackName, List<RegisterEmojiDto> emojiDescriptionList) {
+      String emojiPackName, List<EmojiDto> emojiDescriptionList) {
     // 1. 이모지 설명 욕설 존재하는지 확인
     profanityFilterService.validateListNoProfanity(
-        emojiDescriptionList.stream().map(RegisterEmojiDto::getDescription).toList());
+        emojiDescriptionList.stream().map(EmojiDto::getDescription).toList());
 
     // 2. 이모지 설명에 대한 이미지 업로드
     List<Image> imageList
@@ -49,5 +52,11 @@ public class EmojiServiceImplV1 implements EmojiServiceV1 {
     }
 
     return emojiList;
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public List<Emoji> findAllByProductId(UUID productId) {
+    return emojiRepository.findAllByProductId(productId);
   }
 }

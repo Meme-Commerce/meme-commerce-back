@@ -1,6 +1,7 @@
 package com.example.memecommerceback.global.exception;
 
 import com.example.memecommerceback.domain.categories.exception.CategoryCustomException;
+import com.example.memecommerceback.domain.emoji.excpetion.EmojiCustomException;
 import com.example.memecommerceback.domain.files.exception.FileCustomException;
 import com.example.memecommerceback.domain.hashtags.exception.HashtagCustomException;
 import com.example.memecommerceback.domain.products.exception.ProductCustomException;
@@ -151,7 +152,8 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(
       {UserCustomException.class, FileCustomException.class,
           ProfanityFilterCustomException.class, ProductCustomException.class,
-          CategoryCustomException.class, HashtagCustomException.class})
+          CategoryCustomException.class, HashtagCustomException.class,
+          EmojiCustomException.class})
   public ResponseEntity<CommonResponseDto<ErrorResponseDto>> handleCustomException(
       CustomException ex) {
     String category;
@@ -167,6 +169,8 @@ public class GlobalExceptionHandler {
       category = "카테고리 오류";
     } else if (ex instanceof HashtagCustomException) {
       category = "해시태그 오류";
+    } else if( ex instanceof EmojiCustomException){
+      category = "이모지 오류";
     } else {
       category = "기타 오류";
     }

@@ -72,6 +72,7 @@ public class S3Service {
 
   @Transactional(propagation = Propagation.NOT_SUPPORTED)
   public void deleteS3Object(String imageUrl) {
+    System.out.println("imageUrl : "+imageUrl);
     try {
       String decodedUrl = URLDecoder.decode(imageUrl, StandardCharsets.UTF_8);
       String bucketUrlPart = bucket + ".s3.";

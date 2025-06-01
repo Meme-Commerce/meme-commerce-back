@@ -1,6 +1,7 @@
 package com.example.memecommerceback.domain.images.service;
 
 import com.example.memecommerceback.domain.images.entity.Image;
+import com.example.memecommerceback.domain.products.entity.Product;
 import com.example.memecommerceback.domain.users.entity.User;
 import com.example.memecommerceback.global.awsS3.dto.S3ImageResponseDto;
 import java.util.List;
@@ -20,10 +21,7 @@ public interface ImageServiceV1 {
   void deleteS3Object(String url);
 
   List<Image> toEntityProductListAndSaveAll(
-      List<S3ImageResponseDto> uploadedImageList, User loginUser);
-
-  List<Image> uploadAndRegisterProductImage(
-      List<MultipartFile> productImageList, User user);
+      List<S3ImageResponseDto> uploadedImageList, User loginUser, Product product);
 
   List<Image> uploadEmojiImage(
       List<MultipartFile> multipartFileList, User admin, String emojiPackName);
