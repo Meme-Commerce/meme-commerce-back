@@ -72,9 +72,8 @@ public class EmojiServiceImplV1 implements EmojiServiceV1 {
       Long emojiId, String name, MultipartFile emojiImage, User seller) {
     // 1. 이모지의 주인인지?
     Emoji emoji = findById(emojiId);
-    if(!emoji.getUser().getId().equals(seller.getId())){
-      throw new EmojiCustomException(EmojiExceptionCode.NOT_OWNER);
-    }
+    validateOwner(emoji.getUser().getId(), seller.getId());
+
     // name이 null이여도 false, 같지 않아도 false
     if (Objects.equals(emoji.getName(), name)) {
       throw new EmojiCustomException(EmojiExceptionCode.SAME_REQUEST_NAME);
@@ -105,9 +104,25 @@ public class EmojiServiceImplV1 implements EmojiServiceV1 {
     return EmojiConverter.toResponseDto(emoji);
   }
 
+  @Override
+  @Transactional
+  public void deleteOne(Long emojiId, User seller) {
+    Emoji emoji = findById(emojiId);
+    validateOwner(emoji.getUser().getId(), seller.getId());
+
+    imageService.deleteEmojiImage(emoji.getImage());
+    emojiRepository.deleteById(emojiId);
+  }
+
   @Transactional(readOnly = true)
   public Emoji findById(Long emojiId){
     return emojiRepository.findById(emojiId).orElseThrow(
         ()-> new EmojiCustomException(EmojiExceptionCode.NOT_FOUND));
+  }
+
+  private void validateOwner(UUID emojiOwnerId, UUID sellerId){
+    if (!emojiOwnerId.equals(sellerId)) {
+      throw new EmojiCustomException(EmojiExceptionCode.NOT_OWNER);
+    }
   }
 }

@@ -38,4 +38,6 @@ public interface ImageServiceV1 {
 
   Image changeEmojiImage(
       MultipartFile emojiImage, Emoji emoji, User emojiOwner);
+
+  void deleteEmojiImage(Image deleteImage);
 }

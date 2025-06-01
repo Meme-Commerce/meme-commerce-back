@@ -201,4 +201,11 @@ public class ImageServiceImplV1 implements ImageServiceV1 {
 
     return image;
   }
+
+  @Override
+  @Transactional
+  public void deleteEmojiImage(Image deleteImage){
+    s3Service.deleteS3Object(deleteImage.getS3FullUrl());
+    imageRepository.deleteById(deleteImage.getId());
+  }
 }

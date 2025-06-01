@@ -19,4 +19,6 @@ public interface EmojiServiceV1 {
 
   EmojiResponseDto updateOne(
       Long emojiId, String name, MultipartFile emojiImage, User seller);
+
+  void deleteOne(Long emojiId, User seller);
 }
