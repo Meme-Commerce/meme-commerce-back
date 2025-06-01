@@ -74,4 +74,13 @@ public class EmojiController {
             responseDtoPage, "이모지 페이지를 조회하였습니다.",
             HttpStatus.OK.value()));
   }
+
+  @GetMapping("/emojis/{emojiId}")
+  public ResponseEntity<CommonResponseDto<EmojiResponseDto>> readOne(
+          @PathVariable Long emojiId) {
+    EmojiResponseDto responseDto = emojiService.readOne(emojiId);
+    return ResponseEntity.status(HttpStatus.OK).body(
+        new CommonResponseDto<>(
+            responseDto, "이모지 페이지를 조회하였습니다.", HttpStatus.OK.value()));
+  }
 }

@@ -25,4 +25,6 @@ public interface EmojiServiceV1 {
   void deleteOne(Long emojiId, User seller);
 
   Page<EmojiThumbnailResponseDto> readPage(int page, int size);
+
+  EmojiResponseDto readOne(Long emojiId);
 }

@@ -127,6 +127,13 @@ public class EmojiServiceImplV1 implements EmojiServiceV1 {
     return EmojiConverter.toThumbnailResponseDtoPage(emojiPage);
   }
 
+  @Override
+  @Transactional(readOnly = true)
+  public EmojiResponseDto readOne(Long emojiId) {
+    Emoji emoji = findById(emojiId);
+    return EmojiConverter.toResponseDto(emoji);
+  }
+
   @Transactional(readOnly = true)
   public Emoji findById(Long emojiId){
     return emojiRepository.findById(emojiId).orElseThrow(
