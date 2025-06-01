@@ -2,6 +2,7 @@ package com.example.memecommerceback.domain.emoji.service;
 
 import com.example.memecommerceback.domain.emoji.converter.EmojiConverter;
 import com.example.memecommerceback.domain.emoji.dto.EmojiResponseDto;
+import com.example.memecommerceback.domain.emoji.dto.EmojiThumbnailResponseDto;
 import com.example.memecommerceback.domain.emoji.entity.Emoji;
 import com.example.memecommerceback.domain.emoji.excpetion.EmojiCustomException;
 import com.example.memecommerceback.domain.emoji.excpetion.EmojiExceptionCode;
@@ -13,11 +14,15 @@ import com.example.memecommerceback.domain.products.entity.Product;
 import com.example.memecommerceback.domain.users.entity.User;
 import com.example.memecommerceback.global.awsS3.dto.S3ImageResponseDto;
 import com.example.memecommerceback.global.service.ProfanityFilterService;
+import com.example.memecommerceback.global.utils.PageUtils;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -112,6 +117,14 @@ public class EmojiServiceImplV1 implements EmojiServiceV1 {
 
     imageService.deleteEmojiImage(emoji.getImage());
     emojiRepository.deleteById(emojiId);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public Page<EmojiThumbnailResponseDto> readPage(int page, int size) {
+    Pageable pageable = PageRequest.of(page, size);
+    Page<Emoji> emojiPage = emojiRepository.findAll(pageable);
+    return EmojiConverter.toThumbnailResponseDtoPage(emojiPage);
   }
 
   @Transactional(readOnly = true)

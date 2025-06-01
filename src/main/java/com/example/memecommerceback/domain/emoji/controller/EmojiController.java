@@ -1,6 +1,7 @@
 package com.example.memecommerceback.domain.emoji.controller;
 
 import com.example.memecommerceback.domain.emoji.dto.EmojiResponseDto;
+import com.example.memecommerceback.domain.emoji.dto.EmojiThumbnailResponseDto;
 import com.example.memecommerceback.domain.emoji.service.EmojiServiceV1;
 import com.example.memecommerceback.global.exception.dto.CommonResponseDto;
 import com.example.memecommerceback.global.security.UserDetailsImpl;
@@ -8,11 +9,13 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -56,6 +59,19 @@ public class EmojiController {
     return ResponseEntity.status(HttpStatus.OK).body(
         new CommonResponseDto<>(
             null, "이모지 하나를 삭제하였습니다.",
+            HttpStatus.OK.value()));
+  }
+
+  @GetMapping("/emojis")
+  public ResponseEntity<
+      CommonResponseDto<Page<EmojiThumbnailResponseDto>>> readPage(
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "100") int size) {
+    Page<EmojiThumbnailResponseDto> responseDtoPage
+        = emojiService.readPage(page, size);
+    return ResponseEntity.status(HttpStatus.OK).body(
+        new CommonResponseDto<>(
+            responseDtoPage, "이모지 페이지를 조회하였습니다.",
             HttpStatus.OK.value()));
   }
 }

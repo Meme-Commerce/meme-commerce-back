@@ -448,7 +448,7 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
     }
 
     // 5. mainProductImage는 최대 5개까지, emojiImage는 최대 24개까지 등록
-    if(mainProductImageList.size() > 5){
+    if(mainProductImageList.size() > 5 || emojiList.size() > 24){
       throw new ProductCustomException(
           ProductExceptionCode.EMOJI_PACK_IMAGE_COUNT_LIMIT_EXCEEDED);
     }

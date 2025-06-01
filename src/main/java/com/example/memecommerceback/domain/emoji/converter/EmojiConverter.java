@@ -1,6 +1,7 @@
 package com.example.memecommerceback.domain.emoji.converter;
 
 import com.example.memecommerceback.domain.emoji.dto.EmojiResponseDto;
+import com.example.memecommerceback.domain.emoji.dto.EmojiThumbnailResponseDto;
 import com.example.memecommerceback.domain.emoji.entity.Emoji;
 import com.example.memecommerceback.domain.images.converter.ImageConverter;
 import com.example.memecommerceback.domain.images.entity.Image;
@@ -10,6 +11,7 @@ import com.example.memecommerceback.domain.users.entity.User;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import org.springframework.data.domain.Page;
 
 public class EmojiConverter {
 
@@ -47,6 +49,21 @@ public class EmojiConverter {
         .createdAt(emoji.getCreatedAt())
         .emojiImageResponseDto(
             ImageConverter.toResponseDto(emoji.getImage()))
+        .build();
+  }
+
+  public static Page<EmojiThumbnailResponseDto> toThumbnailResponseDtoPage(
+      Page<Emoji> emojiPage){
+    return emojiPage.map(EmojiConverter::toThumbnailResponseDto);
+  }
+
+  public static EmojiThumbnailResponseDto toThumbnailResponseDto(
+      Emoji emoji){
+    return EmojiThumbnailResponseDto.builder()
+        .name(emoji.getName())
+        .emojiId(emoji.getId())
+        .imageSummaryResponseDto(
+            ImageConverter.toSummaryResponseDto(emoji.getImage()))
         .build();
   }
 }

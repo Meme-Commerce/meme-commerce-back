@@ -1,6 +1,7 @@
 package com.example.memecommerceback.domain.images.converter;
 
 import com.example.memecommerceback.domain.images.dto.ImageResponseDto;
+import com.example.memecommerceback.domain.images.dto.ImageSummaryResponseDto;
 import com.example.memecommerceback.domain.images.entity.Image;
 import com.example.memecommerceback.domain.images.entity.ImageType;
 import com.example.memecommerceback.domain.products.entity.Product;
@@ -60,7 +61,14 @@ public class ImageConverter {
         .extension(image.getExtension())
         .height(image.getHeight())
         .width(image.getWidth())
-        .url(image.getUrl())
+        .url(image.getS3FullUrl())
+        .build();
+  }
+
+  public static ImageSummaryResponseDto toSummaryResponseDto(Image image){
+    return ImageSummaryResponseDto.builder()
+        .imageId(image.getId())
+        .url(image.getS3FullUrl())
         .build();
   }
 }
