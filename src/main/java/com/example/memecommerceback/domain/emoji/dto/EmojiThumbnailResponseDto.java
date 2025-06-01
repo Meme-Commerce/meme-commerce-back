@@ -17,6 +17,6 @@ public class EmojiThumbnailResponseDto {
   private Long emojiId;
   @Schema(description = "이모지 이름 또는 설명", example = "고양이 눕는 자세")
   private String name;
-  @Schema(description = "이모지 이미지 리스트", example = "[]")
+  @Schema(description = "이모지 이미지 리스트", example = "[imageId, url]")
   private ImageSummaryResponseDto imageSummaryResponseDto;
 }

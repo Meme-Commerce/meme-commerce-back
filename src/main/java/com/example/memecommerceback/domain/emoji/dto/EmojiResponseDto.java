@@ -22,6 +22,7 @@ public class EmojiResponseDto {
   private LocalDateTime createdAt;
   @Schema(description = "수정 시각", example = "2025-05-16T10:15:30")
   private LocalDateTime modifiedAt;
-  @Schema(description = "이모지 이미지 리스트", example = "[]")
+  @Schema(description = "이모지 이미지 리스트",
+      example = "[imageId, url, extension, width, height]")
   private ImageResponseDto emojiImageResponseDto;
 }

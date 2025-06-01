@@ -97,7 +97,7 @@ public class EmojiController {
       @ApiResponse(responseCode = "404", description = "존재하지 않는 이모지",
           content = @Content(mediaType = "application/json",
               schema = @Schema(implementation = ErrorResponseDto.class)))})
-  public ResponseEntity<CommonResponseDto<EmojiResponseDto>> deleteOne(
+  public ResponseEntity<CommonResponseDto<Void>> deleteOne(
       @PathVariable Long emojiId,
       @AuthenticationPrincipal UserDetailsImpl userDetails){
     emojiService.deleteOne(emojiId, userDetails.getUser());
@@ -112,7 +112,7 @@ public class EmojiController {
   @ApiResponses({
       @ApiResponse(responseCode = "200", description = "이모지 페이지 조회 성공",
           content = @Content(mediaType = "application/json",
-              schema = @Schema(implementation = CommonResponseDto.class))),
+              schema = @Schema(implementation = EmojiThumbnailResponseDto.class))),
       @ApiResponse(responseCode = "400", description = "유효하지 않은 입력 또는 유저 없음",
           content = @Content(mediaType = "application/json",
               schema = @Schema(implementation = ErrorResponseDto.class))),
@@ -136,7 +136,7 @@ public class EmojiController {
   @ApiResponses({
       @ApiResponse(responseCode = "200", description = "이모지 하나 조회 성공",
           content = @Content(mediaType = "application/json",
-              schema = @Schema(implementation = CommonResponseDto.class))),
+              schema = @Schema(implementation = EmojiResponseDto.class))),
       @ApiResponse(responseCode = "400", description = "유효하지 않은 입력 또는 유저 없음",
           content = @Content(mediaType = "application/json",
               schema = @Schema(implementation = ErrorResponseDto.class))),
