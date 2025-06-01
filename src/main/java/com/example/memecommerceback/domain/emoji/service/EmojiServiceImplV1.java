@@ -4,17 +4,15 @@ import com.example.memecommerceback.domain.emoji.converter.EmojiConverter;
 import com.example.memecommerceback.domain.emoji.dto.EmojiResponseDto;
 import com.example.memecommerceback.domain.emoji.dto.EmojiThumbnailResponseDto;
 import com.example.memecommerceback.domain.emoji.entity.Emoji;
-import com.example.memecommerceback.domain.emoji.excpetion.EmojiCustomException;
-import com.example.memecommerceback.domain.emoji.excpetion.EmojiExceptionCode;
+import com.example.memecommerceback.domain.emoji.exception.EmojiCustomException;
+import com.example.memecommerceback.domain.emoji.exception.EmojiExceptionCode;
 import com.example.memecommerceback.domain.emoji.repository.EmojiRepository;
 import com.example.memecommerceback.domain.images.entity.Image;
 import com.example.memecommerceback.domain.images.service.ImageServiceV1;
 import com.example.memecommerceback.domain.products.dto.ProductRequestDto.EmojiDto;
 import com.example.memecommerceback.domain.products.entity.Product;
 import com.example.memecommerceback.domain.users.entity.User;
-import com.example.memecommerceback.global.awsS3.dto.S3ImageResponseDto;
 import com.example.memecommerceback.global.service.ProfanityFilterService;
-import com.example.memecommerceback.global.utils.PageUtils;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -51,6 +49,11 @@ public class EmojiServiceImplV1 implements EmojiServiceV1 {
         = imageService.uploadEmojiImage(
             emojiImageList, seller, product.getId());
 
+    // 이전의 ProductService에서 해당 로직 존재하진 함.
+    if (emojiImageList.size() != emojiDescriptionList.size()) {
+      throw new EmojiCustomException(EmojiExceptionCode.COUNT_MISMATCH);
+    }
+
     // 3. 이모지 리스트 생성 및 반환
     List<Emoji> emojiList
         = EmojiConverter.toEntityList(
@@ -80,7 +83,8 @@ public class EmojiServiceImplV1 implements EmojiServiceV1 {
     validateOwner(emoji.getUser().getId(), seller.getId());
 
     // name이 null이여도 false, 같지 않아도 false
-    if (Objects.equals(emoji.getName(), name)) {
+    if (name != null && Objects.equals(emoji.getName(), name)
+        && (emojiImage == null || emojiImage.isEmpty())) {
       throw new EmojiCustomException(EmojiExceptionCode.SAME_REQUEST_NAME);
     }
 

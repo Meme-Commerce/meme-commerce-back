@@ -70,13 +70,6 @@ public class Image extends CommonEntity {
   @ManyToOne(fetch = FetchType.LAZY)
   private Product product;
 
-  public void updateProfile(
-      String ownerNickname, String prefixUrl, String fileName) {
-    this.ownerNickname = ownerNickname;
-    this.prefixUrl = prefixUrl;
-    this.fileName = fileName;
-  }
-
   public void updateImage(String prefixUrl, String fileName) {
     this.prefixUrl = prefixUrl;
     this.fileName = fileName;
@@ -90,9 +83,6 @@ public class Image extends CommonEntity {
     return this.prefixUrl + this.fileName;
   }
 
-  public String getS3FullUrl(){
-    return S3Utils.S3_URL+this.getUrl();
-  }
   public void updateOwnerNicknameAndPrefix(String ownerNickname, String prefixUrl) {
     this.ownerNickname = ownerNickname;
     this.prefixUrl = prefixUrl;

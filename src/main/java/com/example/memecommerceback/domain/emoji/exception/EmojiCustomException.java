@@ -1,4 +1,4 @@
-package com.example.memecommerceback.domain.emoji.excpetion;
+package com.example.memecommerceback.domain.emoji.exception;
 
 import com.example.memecommerceback.global.exception.CustomException;
 

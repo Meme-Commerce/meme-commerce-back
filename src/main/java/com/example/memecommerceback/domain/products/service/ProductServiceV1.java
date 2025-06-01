@@ -165,11 +165,37 @@ public interface ProductServiceV1 {
    */
   void updateHiddenStatus();
 
+  /** 새로운 이모지 팩 상품을 등록합니다.
+  * <p>
+  * 이모지 팩 상품 정보와 메인 상품 이미지, 이모지 이미지들을 받아 새로운 이모지 팩을 시스템에 등록합니다.
+  * </p>
+  *
+  * @param requestDto 이모지 팩 등록 요청 데이터
+  * @param mainProductImageList 메인 상품 이미지 파일들
+  * @param emojiImageList 이모지 이미지 파일들
+  * @param seller 판매자 사용자
+  * @return 등록된 이모지 팩 정보를 포함한 응답 DTO
+  * @throws ProductCustomException 상품 등록 실패 시
+  * @throws FileCustomException 이미지 파일 업로드 실패 시
+  */
   ProductResponseDto.EmojiPackDto registerEmojiPack(
       ProductRequestDto.EmojiPackDto requestDto,
       List<MultipartFile> mainProductImageList, List<MultipartFile> emojiImageList,
       User seller);
 
+  /**
+  * 이모지 팩 상품을 수정합니다.
+  * <p>
+  * 판매자가 소유한 이모지 팩 상품의 정보를 수정합니다.
+  * </p>
+  *
+  * @param productId 수정할 상품의 고유 식별자
+  * @param requestDto 수정할 이모지 팩 정보
+  * @param mainProductImageList 새로운 메인 상품 이미지 파일들
+  * @param seller 판매자 사용자
+  * @return 수정된 이모지 팩 정보를 포함한 응답 DTO
+  * @throws ProductCustomException 상품 수정 실패 시
+  */
   ProductResponseDto.EmojiPackDto updateEmojiPack(
       UUID productId, ProductRequestDto.UpdateEmojiPackDto requestDto,
       List<MultipartFile> mainProductImageList, User seller);
@@ -186,5 +212,15 @@ public interface ProductServiceV1 {
    */
   Product findById(UUID productId);
 
+  /**
+   * 소유자 ID로 모든 상품을 조회합니다.
+   * <p>
+   * 특정 사용자가 소유한 모든 상품 목록을 반환합니다. 내부적으로 사용되는 메서드로, 사용자 경로 변경이나
+   * 기타 비즈니스 로직에서 특정 소유자의 상품 목록이 필요할 때 사용됩니다.
+   * </p>
+   *
+   * @param ownerId 조회할 소유자의 고유 식별자
+   * @return 소유자가 소유한 상품 목록 (소유한 상품이 없는 경우 빈 리스트 반환)
+   */
   List<Product> findAllByOwnerId(UUID ownerId);
 }

@@ -6,7 +6,6 @@ import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.example.memecommerceback.domain.files.entity.FileExtension;
 import com.example.memecommerceback.domain.images.entity.ImageExtension;
-import com.example.memecommerceback.domain.users.entity.User;
 import com.example.memecommerceback.global.awsS3.converter.S3Converter;
 import com.example.memecommerceback.global.awsS3.dto.S3FileResponseDto;
 import com.example.memecommerceback.global.awsS3.dto.S3ImageResponseDto;
@@ -22,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,33 +41,9 @@ public class S3Service {
   private String bucket;
 
   @Transactional(propagation = Propagation.NOT_SUPPORTED)
-  public S3ImageResponseDto uploadProfile(
-      MultipartFile profileImage, String nickname) {
-    try {
-      String originalName = profileImage.getOriginalFilename();
-      ImageExtension ext = FileUtils.extractExtensionFromImageName(originalName);
-
-      ObjectMetadata metadata = setObjectMetadata(profileImage);
-
-      String prefixUrl = S3Utils.getS3UserProfilePrefix(nickname);
-      String fileName = createUUIDFile(profileImage);
-      String filePath = prefixUrl + fileName;
-      amazonS3Client.putObject(
-          bucket, filePath, profileImage.getInputStream(), metadata);
-
-      String url = amazonS3Client.getUrl(bucket, filePath).toString();
-
-      log.info("s3 서비스에 파일을 등록했습니다. : " + url);
-
-      return S3Converter.toS3ImageResponseDto(
-          originalName, ext, fileName, prefixUrl, profileImage.getSize());
-
-    } catch (SdkClientException e) {
-      log.error("AWS SDK exception occurred during file upload: {}", e.getMessage(), e);
-    } catch (IOException e) {
-      log.error("IO exception occurred during file upload: {}", e.getMessage(), e);
-    }
-    throw new AWSCustomException(GlobalExceptionCode.UPLOAD_FAIL);
+  public S3ImageResponseDto uploadProfile(MultipartFile profileImage, String nickname) {
+    String prefixUrl = S3Utils.getS3UserProfilePrefix(nickname);
+    return uploadSingleImage(profileImage, prefixUrl);
   }
 
   @Transactional(propagation = Propagation.NOT_SUPPORTED)
@@ -98,53 +74,13 @@ public class S3Service {
     String oldProductPrefix = S3Utils.getS3UserProductPrefix(beforeNickname, productId);
     String newProductPrefix = S3Utils.getS3UserProductPrefix(afterNickname, productId);
 
+    // 경로 존재 확인
+    validatePathNotExists(newProfilePrefix, "프로필");
+    validatePathNotExists(newProductPrefix, "상품");
+
     List<S3ImageSummaryResponseDto> resultList = new ArrayList<>();
-
-    // 1. afternickname 경로가 이미 존재하면 에러 (다른 사용자가 이미 사용 중)
-    var afterProfileListing = amazonS3Client.listObjects(bucket, newProfilePrefix);
-    if (!afterProfileListing.getObjectSummaries().isEmpty()) {
-      log.warn("afterNickname 경로에 이미 파일이 존재합니다: {}", newProfilePrefix);
-      throw new AWSCustomException(GlobalExceptionCode.ALREADY_EXISTS_FILE_URL);
-    }
-    var afterProductListing = amazonS3Client.listObjects(bucket, newProductPrefix);
-    if (!afterProductListing.getObjectSummaries().isEmpty()) {
-      log.warn("afterNickname 경로에 이미 파일이 존재합니다: {}", newProductPrefix);
-      throw new AWSCustomException(GlobalExceptionCode.ALREADY_EXISTS_FILE_URL);
-    }
-
-    // 2. profile 이미지 이동
-    var beforeProfileListing = amazonS3Client.listObjects(bucket, oldProfilePrefix);
-    var profileSummaries = beforeProfileListing.getObjectSummaries();
-    if (!profileSummaries.isEmpty()) {
-      for (var s3Object : profileSummaries) {
-        String oldKey = s3Object.getKey();
-        String fileName = oldKey.substring(oldProfilePrefix.length());
-        String newKey = newProfilePrefix + fileName;
-
-        amazonS3Client.copyObject(bucket, oldKey, bucket, newKey);
-        amazonS3Client.deleteObject(bucket, oldKey);
-
-        log.info("프로필 이미지 경로 변경: {} → {}", oldKey, newKey);
-        resultList.add(S3Converter.toS3ImageSummaryDto(newKey, fileName));
-      }
-    }
-
-    // 3. product 이미지 이동
-    var beforeProductListing = amazonS3Client.listObjects(bucket, oldProductPrefix);
-    var productSummaries = beforeProductListing.getObjectSummaries();
-    if (!productSummaries.isEmpty()) {
-      for (var s3Object : productSummaries) {
-        String oldKey = s3Object.getKey();
-        String fileName = oldKey.substring(oldProductPrefix.length());
-        String newKey = newProductPrefix + fileName;
-
-        amazonS3Client.copyObject(bucket, oldKey, bucket, newKey);
-        amazonS3Client.deleteObject(bucket, oldKey);
-
-        log.info("상품 이미지 경로 변경: {} → {}", oldKey, newKey);
-        resultList.add(S3Converter.toS3ImageSummaryDto(newKey, fileName));
-      }
-    }
+    resultList.addAll(moveFiles(oldProfilePrefix, newProfilePrefix, "프로필 이미지 경로 변경"));
+    resultList.addAll(moveFiles(oldProductPrefix, newProductPrefix, "상품 이미지 경로 변경"));
 
     if (resultList.isEmpty()) {
       log.warn("beforeNickname, afterNickname 모두 해당 경로에 이미지가 존재하지 않습니다.");
@@ -160,31 +96,11 @@ public class S3Service {
     String oldProfilePrefix = S3Utils.getS3UserProfilePrefix(beforeNickname);
     String newProfilePrefix = S3Utils.getS3UserProfilePrefix(afterNickname);
 
-    List<S3ImageSummaryResponseDto> resultList = new ArrayList<>();
+    // 경로 존재 확인
+    validatePathNotExists(newProfilePrefix, "프로필");
 
-    // 1. afternickname 경로가 이미 존재하면 에러 (다른 사용자가 이미 사용 중)
-    var afterProfileListing = amazonS3Client.listObjects(bucket, newProfilePrefix);
-    if (!afterProfileListing.getObjectSummaries().isEmpty()) {
-      log.warn("afterNickname 경로에 이미 파일이 존재합니다: {}", newProfilePrefix);
-      throw new AWSCustomException(GlobalExceptionCode.ALREADY_EXISTS_FILE_URL);
-    }
-
-    // 2. profile 이미지 이동
-    var beforeProfileListing = amazonS3Client.listObjects(bucket, oldProfilePrefix);
-    var profileSummaries = beforeProfileListing.getObjectSummaries();
-    if (!profileSummaries.isEmpty()) {
-      for (var s3Object : profileSummaries) {
-        String oldKey = s3Object.getKey();
-        String fileName = oldKey.substring(oldProfilePrefix.length());
-        String newKey = newProfilePrefix + fileName;
-
-        amazonS3Client.copyObject(bucket, oldKey, bucket, newKey);
-        amazonS3Client.deleteObject(bucket, oldKey);
-
-        log.info("프로필 이미지 경로 변경: {} → {}", oldKey, newKey);
-        resultList.add(S3Converter.toS3ImageSummaryDto(newKey, fileName));
-      }
-    }
+    List<S3ImageSummaryResponseDto> resultList =
+        moveFiles(oldProfilePrefix, newProfilePrefix, "프로필 이미지 경로 변경");
 
     if (resultList.isEmpty()) {
       log.warn("beforeNickname, afterNickname 모두 해당 경로에 이미지가 존재하지 않습니다.");
@@ -196,30 +112,8 @@ public class S3Service {
   @Transactional(propagation = Propagation.NOT_SUPPORTED)
   public List<S3ImageResponseDto> uploadProductImageList(
       List<MultipartFile> productImageList, String nickname, UUID mainProductId) {
-    List<S3ImageResponseDto> s3ResponseDtoList = new ArrayList<>();
-    for (MultipartFile productImage : productImageList) {
-      try {
-        String originalName = productImage.getOriginalFilename();
-        ImageExtension ext = FileUtils.extractExtensionFromImageName(originalName);
-
-        String prefixUrl = S3Utils.getS3UserProductPrefix(nickname, mainProductId);
-        String fileName = createUUIDFile(productImage);
-        String filePath = prefixUrl + fileName;
-
-        uploadS3Bucket(filePath, productImage);
-
-        s3ResponseDtoList.add(S3Converter.toS3ImageResponseDto(
-            originalName, ext, fileName, prefixUrl, productImage.getSize()));
-
-      } catch (SdkClientException e) {
-        log.error("AWS SDK exception occurred during file upload: {}", e.getMessage(), e);
-        throw new AWSCustomException(GlobalExceptionCode.UPLOAD_FAIL);
-      } catch (IOException e) {
-        log.error("IO exception occurred during file upload: {}", e.getMessage(), e);
-        throw new AWSCustomException(GlobalExceptionCode.UPLOAD_FAIL);
-      }
-    }
-    return s3ResponseDtoList;
+    String prefixUrl = S3Utils.getS3UserProductPrefix(nickname, mainProductId);
+    return uploadImageList(productImageList, prefixUrl);
   }
 
   @Transactional(propagation = Propagation.NOT_SUPPORTED)
@@ -232,9 +126,7 @@ public class S3Service {
         FileExtension ext = FileUtils.extractExtensionFromFilename(originalName);
 
         String fileName = createUUIDFile(certificateFile);
-        String filePath
-            = S3Utils.USER_PREFIX + nickname
-            + S3Utils.CERTIFICATE_PREFIX + fileName;
+        String filePath = S3Utils.USER_PREFIX + nickname + S3Utils.CERTIFICATE_PREFIX + fileName;
 
         uploadS3Bucket(filePath, certificateFile);
 
@@ -243,50 +135,79 @@ public class S3Service {
             amazonS3Client.getUrl(bucket, filePath).toString(),
             certificateFile.getSize()));
 
-      } catch (SdkClientException e) {
-        log.error("AWS SDK exception occurred during file upload: {}", e.getMessage(), e);
-        throw new AWSCustomException(GlobalExceptionCode.UPLOAD_FAIL);
-      } catch (IOException e) {
-        log.error("IO exception occurred during file upload: {}", e.getMessage(), e);
+      } catch (SdkClientException | IOException e) {
+        log.error("Certificate file upload failed: {}", e.getMessage(), e);
         throw new AWSCustomException(GlobalExceptionCode.UPLOAD_FAIL);
       }
     }
     return s3ResponseDtoList;
   }
 
+  @Transactional(propagation = Propagation.NOT_SUPPORTED)
   public List<S3ImageResponseDto> uploadEmojiImageList(
       List<MultipartFile> multipartFileList, String nickname, UUID mainProductId) {
-    List<S3ImageResponseDto> s3ResponseDtoList = new ArrayList<>();
-    for (MultipartFile multipartFile: multipartFileList) {
-      try {
-        String originalName = multipartFile.getOriginalFilename();
-        ImageExtension ext = FileUtils.extractExtensionFromImageName(originalName);
-
-        ObjectMetadata metadata = setObjectMetadata(multipartFile);
-
-        String fileName = createUUIDFile(multipartFile);
-        String filePath
-            = S3Utils.getS3UserEmojiPrefix(nickname, mainProductId) + fileName;
-
-        amazonS3Client.putObject(
-            bucket, filePath, multipartFile.getInputStream(), metadata);
-
-        String url = amazonS3Client.getUrl(bucket, filePath).toString();
-
-        log.info("s3 서비스에 파일을 등록했습니다. : " + url);
-
-        s3ResponseDtoList.add(S3Converter.toS3ImageResponseDto(
-            originalName, ext, fileName, filePath, multipartFile.getSize()));
-
-      } catch (SdkClientException e) {
-        log.error("AWS SDK exception occurred during file upload: {}", e.getMessage(), e);
-      } catch (IOException e) {
-        log.error("IO exception occurred during file upload: {}", e.getMessage(), e);
-      }
-    }
-    return s3ResponseDtoList;
+    String prefixUrl = S3Utils.getS3UserEmojiPrefix(nickname, mainProductId);
+    return uploadImageList(multipartFileList, prefixUrl);
   }
 
+  // ===== 공통 메서드들 =====
+
+  private S3ImageResponseDto uploadSingleImage(MultipartFile file, String prefixUrl) {
+    try {
+      String originalName = file.getOriginalFilename();
+      ImageExtension ext = FileUtils.extractExtensionFromImageName(originalName);
+      String fileName = createUUIDFile(file);
+      String filePath = prefixUrl + fileName;
+
+      uploadS3Bucket(filePath, file);
+
+      return S3Converter.toS3ImageResponseDto(
+          originalName, ext, fileName, prefixUrl, file.getSize());
+
+    } catch (SdkClientException | IOException e) {
+      log.error("파일 업로드 실패: {}", e.getMessage(), e);
+      throw new AWSCustomException(GlobalExceptionCode.UPLOAD_FAIL);
+    }
+  }
+
+  private List<S3ImageResponseDto> uploadImageList(
+      List<MultipartFile> imageList, String prefixUrl) {
+    return imageList.stream()
+        .map(file -> uploadSingleImage(file, prefixUrl))
+        .collect(Collectors.toList());
+  }
+
+  private List<S3ImageSummaryResponseDto> moveFiles(
+      String oldPrefix, String newPrefix, String logMessage) {
+    List<S3ImageSummaryResponseDto> resultList = new ArrayList<>();
+
+    var listing = amazonS3Client.listObjects(bucket, oldPrefix);
+    var summaries = listing.getObjectSummaries();
+
+    if (!summaries.isEmpty()) {
+      for (var s3Object : summaries) {
+        String oldKey = s3Object.getKey();
+        String fileName = oldKey.substring(oldPrefix.length());
+        String newKey = newPrefix + fileName;
+
+        amazonS3Client.copyObject(bucket, oldKey, bucket, newKey);
+        amazonS3Client.deleteObject(bucket, oldKey);
+
+        log.info("{}: {} → {}", logMessage, oldKey, newKey);
+        resultList.add(S3Converter.toS3ImageSummaryDto(newPrefix, fileName));
+      }
+    }
+
+    return resultList;
+  }
+
+  private void validatePathNotExists(String prefix, String description) {
+    var listing = amazonS3Client.listObjects(bucket, prefix);
+    if (!listing.getObjectSummaries().isEmpty()) {
+      log.warn("{} 경로에 이미 파일이 존재합니다: {}", description, prefix);
+      throw new AWSCustomException(GlobalExceptionCode.ALREADY_EXISTS_FILE_URL);
+    }
+  }
 
   private String createUUIDFile(MultipartFile file) {
     String originalFilename = file.getOriginalFilename();
@@ -305,15 +226,12 @@ public class S3Service {
     return metadata;
   }
 
-  private void uploadS3Bucket(
-      String filePath, MultipartFile file) throws IOException {
+  private void uploadS3Bucket(String filePath, MultipartFile file) throws IOException {
     ObjectMetadata metadata = setObjectMetadata(file);
 
-    amazonS3Client.putObject(
-        bucket, filePath, file.getInputStream(), metadata);
+    amazonS3Client.putObject(bucket, filePath, file.getInputStream(), metadata);
 
     String url = amazonS3Client.getUrl(bucket, filePath).toString();
-
     log.info("s3 서비스에 파일을 등록했습니다. : " + url);
   }
 }

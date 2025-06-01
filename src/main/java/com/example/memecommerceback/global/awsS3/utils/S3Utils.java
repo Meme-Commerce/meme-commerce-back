@@ -9,8 +9,6 @@ public class S3Utils {
   public static final String PROFILE_PREFIX = "/profile/";
   public static final String PRODUCT_PREFIX = "/products/";
   public static final String CERTIFICATE_PREFIX = "/certificates";
-  public static final String S3_URL
-      = "https://meme-commerce-bucket.s3.ap-northeast-2.amazonaws.com/";
 
   public static String getS3UserProfilePrefix(String nickname){
     return USER_PREFIX + nickname + PROFILE_PREFIX;

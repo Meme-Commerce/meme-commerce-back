@@ -62,7 +62,8 @@ public class UserServiceImplV1 implements UserServiceV1 {
       throw new UserCustomException(UserExceptionCode.NEED_TO_REGISTER_NICKNAME);
     }
 
-    if(userRepository.existsByNickname(afterNickname)){
+    if(!afterNickname.equals(currentNickname)
+        && userRepository.existsByNickname(afterNickname)){
       throw new UserCustomException(UserExceptionCode.EXIST_NICKNAME);
     }
     // 2. deleteProfileImage는 프로필 삭제 플래그-> null or 현상 유지

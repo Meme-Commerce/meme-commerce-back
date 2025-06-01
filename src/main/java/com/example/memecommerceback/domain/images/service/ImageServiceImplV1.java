@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,6 +28,9 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 @RequiredArgsConstructor
 public class ImageServiceImplV1 implements ImageServiceV1 {
+
+  @Value("${cloud.aws.s3.url}")
+  private String s3Url;
 
   @PersistenceContext
   private EntityManager entityManager;
@@ -57,7 +61,7 @@ public class ImageServiceImplV1 implements ImageServiceV1 {
 
     if (originalImage != null) {
       String s3ProfileUrl =
-          S3Utils.S3_URL + originalImage.getPrefixUrl() + originalImage.getFileName();
+          s3Url + originalImage.getPrefixUrl() + originalImage.getFileName();
       s3Service.deleteS3Object(s3ProfileUrl);
       originalImage.updateImage(
           s3ImageResponseDto.getPrefixUrl(), s3ImageResponseDto.getFileName());
@@ -75,7 +79,7 @@ public class ImageServiceImplV1 implements ImageServiceV1 {
     try {
       imageRepository.deleteAllById(imageList.stream().map(Image::getId).toList());
       for (Image image : imageList) {
-        s3Service.deleteS3Object(image.getS3FullUrl());
+        s3Service.deleteS3Object(getS3FullUrl(image));
       }
     } catch (Exception e) {
       log.error("상품 이미지 삭제 실패 (productId: {}, userId: {})", productId, userId, e);
@@ -109,8 +113,9 @@ public class ImageServiceImplV1 implements ImageServiceV1 {
         S3Utils.USER_PREFIX + afterNickname + S3Utils.PRODUCT_PREFIX);
     log.info("총 {}건의 상품 이미지 row가 업데이트되었습니다.", updatedProductImageRow);
 
+    String imageUrl = s3Url + image.getUrl();
     entityManager.clear();
-    return S3Utils.S3_URL + image.getUrl();
+    return imageUrl;
   }
 
   @Transactional
@@ -161,11 +166,13 @@ public class ImageServiceImplV1 implements ImageServiceV1 {
     s3Service.deleteS3Object(url);
   }
 
+  @Override
+  @Transactional
   public void deleteProfileImage(String ownerNickname) {
     Image image
         = imageRepository.findByOwnerNicknameAndImageType(ownerNickname, ImageType.PROFILE)
         .orElseThrow(() -> new FileCustomException(FileExceptionCode.NOT_FOUND));
-    s3Service.deleteS3Object(image.getUrl());
+    s3Service.deleteS3Object(getS3FullUrl(image));
     imageRepository.deleteById(image.getId());
   }
 
@@ -188,7 +195,7 @@ public class ImageServiceImplV1 implements ImageServiceV1 {
   public Image changeEmojiImage(
       MultipartFile emojiImage, Emoji emoji, User emojiOwner) {
     Image image = emoji.getImage();
-    deleteS3Object(image.getS3FullUrl());
+    deleteS3Object(getS3FullUrl(image));
 
     List<S3ImageResponseDto> s3ImageResponseDtoList
         = s3Service.uploadEmojiImageList(
@@ -205,7 +212,11 @@ public class ImageServiceImplV1 implements ImageServiceV1 {
   @Override
   @Transactional
   public void deleteEmojiImage(Image deleteImage){
-    s3Service.deleteS3Object(deleteImage.getS3FullUrl());
+    s3Service.deleteS3Object(getS3FullUrl(deleteImage));
     imageRepository.deleteById(deleteImage.getId());
+  }
+
+  private String getS3FullUrl(Image image){
+    return s3Url + image.getUrl();
   }
 }

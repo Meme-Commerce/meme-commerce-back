@@ -8,6 +8,7 @@ import com.example.memecommerceback.domain.products.entity.Product;
 import com.example.memecommerceback.domain.users.entity.User;
 import com.example.memecommerceback.global.awsS3.dto.S3ImageResponseDto;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Value;
 
 public class ImageConverter {
 
@@ -61,14 +62,14 @@ public class ImageConverter {
         .extension(image.getExtension())
         .height(image.getHeight())
         .width(image.getWidth())
-        .url(image.getS3FullUrl())
+        .url(image.getPrefixUrl()+image.getFileName())
         .build();
   }
 
   public static ImageSummaryResponseDto toSummaryResponseDto(Image image){
     return ImageSummaryResponseDto.builder()
         .imageId(image.getId())
-        .url(image.getS3FullUrl())
+        .url(image.getPrefixUrl()+image.getFileName())
         .build();
   }
 }

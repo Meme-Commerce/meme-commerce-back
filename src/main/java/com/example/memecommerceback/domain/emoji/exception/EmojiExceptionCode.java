@@ -1,4 +1,4 @@
-package com.example.memecommerceback.domain.emoji.excpetion;
+package com.example.memecommerceback.domain.emoji.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,7 +9,7 @@ import org.springframework.http.HttpStatus;
 public enum EmojiExceptionCode {
 
   NOT_FOUND(
-      HttpStatus.BAD_REQUEST, "EMOJI-001",
+      HttpStatus.NOT_FOUND, "EMOJI-001",
       "찾을 수 없는 이모지입니다."),
   NEED_TO_REGISTER_NICKNAME(
       HttpStatus.BAD_REQUEST, "EMOJI-002",
@@ -26,6 +26,9 @@ public enum EmojiExceptionCode {
   NO_CHANGE_DETECTED(
       HttpStatus.BAD_REQUEST, "EMOJI-006",
       "이모지 변경 사항이 존재하지 않습니다."),
+  COUNT_MISMATCH(
+      HttpStatus.BAD_REQUEST, "EMOJI-007",
+      "이모지와 설명의 갯수가 불일치합니다."),
   ;
 
   private final HttpStatus httpStatus;

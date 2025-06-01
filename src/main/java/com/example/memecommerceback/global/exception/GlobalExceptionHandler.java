@@ -1,7 +1,7 @@
 package com.example.memecommerceback.global.exception;
 
 import com.example.memecommerceback.domain.categories.exception.CategoryCustomException;
-import com.example.memecommerceback.domain.emoji.excpetion.EmojiCustomException;
+import com.example.memecommerceback.domain.emoji.exception.EmojiCustomException;
 import com.example.memecommerceback.domain.files.exception.FileCustomException;
 import com.example.memecommerceback.domain.hashtags.exception.HashtagCustomException;
 import com.example.memecommerceback.domain.products.exception.ProductCustomException;
