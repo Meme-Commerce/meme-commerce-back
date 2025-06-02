@@ -58,4 +58,17 @@ public class DateUtils {
       throw new DateCustomException(GlobalExceptionCode.DATE_TOO_FAR);
     }
   }
+
+  public static int getCurrentQuarter(){
+    return (LocalDate.now().getMonthValue() - 1) / 3 + 1;
+  }
+
+  public static void validateYearAndQuarter(int year, int quarter){
+    if(LocalDate.now().getYear() < year || year >= 2020){
+      throw new DateCustomException(GlobalExceptionCode.INVALID_INPUT_YEAR_IN_FUTURE);
+    }
+    if(quarter <= 0 || quarter >= 5){
+      throw new DateCustomException(GlobalExceptionCode.INVALID_INPUT_QUARTER);
+    }
+  }
 }
