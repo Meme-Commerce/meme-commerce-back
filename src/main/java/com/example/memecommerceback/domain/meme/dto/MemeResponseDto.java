@@ -41,4 +41,17 @@ public class MemeResponseDto {
     private MemeStatus status;
     private LocalDateTime modifiedAt;
   }
+
+  @Getter
+  @Builder
+  @AllArgsConstructor
+  @NoArgsConstructor
+  public static class UpdateOneDto {
+    private Long memeId;
+    private String name;
+    private String description;
+    private String registeredNickname;
+    private MemeStatus status;
+    private LocalDateTime modifiedAt;
+  }
 }

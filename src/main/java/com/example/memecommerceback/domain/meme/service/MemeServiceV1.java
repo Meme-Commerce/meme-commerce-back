@@ -11,4 +11,7 @@ public interface MemeServiceV1 {
 
   MemeResponseDto.UpdateOneStatusDto updateOneStatusByAdmin(
       Long memeId, boolean isApproved, String notificationMessage, User admin);
+
+  MemeResponseDto.UpdateOneDto updateOne(
+      Long memeId, MemeRequestDto.UpdateOneDto requestDto, User user);
 }

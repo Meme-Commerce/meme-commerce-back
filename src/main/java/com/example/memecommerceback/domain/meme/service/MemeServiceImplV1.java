@@ -119,6 +119,54 @@ public class MemeServiceImplV1 implements MemeServiceV1 {
     return MemeConverter.toUpdateOneStatusDto(meme);
   }
 
+  @Override
+  @Transactional
+  public MemeResponseDto.UpdateOneDto updateOne(
+      Long memeId, MemeRequestDto.UpdateOneDto requestDto, User user) {
+    // TODO : nickname과 memeId 복합 인덱스 구현
+    Meme meme
+        = memeRepository.findByIdAndRegisteredNickname(memeId, user.getNickname())
+        .orElseThrow(() -> new MemeCustomException(MemeExceptionCode.NOT_FOUND));
+
+    // 2. 검수 중인 밈만 수정 가능
+    if(!meme.getStatus().equals(MemeStatus.PENDING)){
+      throw new MemeCustomException(MemeExceptionCode.CANNOT_MODIFY_STATUS);
+    }
+
+    // 3. 욕설 검증
+    profanityFilterService.validateNoProfanity(requestDto.getName());
+    profanityFilterService.validateNoProfanity(requestDto.getDescription());
+
+    // 4. 유사도 검증
+    List<Meme> savedMemeList = memeRepository.findAllByStatus(MemeStatus.APPROVED);
+    for(Meme savedMeme : savedMemeList){
+      String savedMemeName = savedMeme.getName();
+      String savedMemeDescription = savedMeme.getDescription();
+      String requestedMemeName = requestDto.getName();
+      String requestedMemeDescription = requestDto.getDescription();
+      double nameSimilarity = RabinKarpUtils.slidingWindowSimilarity(
+          savedMemeName, requestedMemeName, RabinKarpUtils.WINDOW_SIZE);
+      if (nameSimilarity >= RabinKarpUtils.SIMILARITY_THRESHOLD) {
+        throw new MemeCustomException(
+            MemeExceptionCode.SIMILAR_NAME,
+            String.format("기존 밈 이름 '%s'와(과) 수정하려는 이름 '%s'가 너무 유사합니다. (%.2f%%)",
+                savedMemeName, requestedMemeName, nameSimilarity));
+      }
+
+      double descSimilarity = RabinKarpUtils.slidingWindowSimilarity(
+          savedMemeDescription, requestedMemeDescription, RabinKarpUtils.WINDOW_SIZE);
+      if (descSimilarity >= RabinKarpUtils.SIMILARITY_THRESHOLD) {
+        throw new MemeCustomException(
+            MemeExceptionCode.SIMILAR_DESCRIPTION,
+            String.format("기존 밈 설명이 '%s'와(과) 수정하려는 설명 '%s'가 너무 유사합니다. (%.2f%%)",
+                savedMemeDescription, requestedMemeDescription, descSimilarity));
+      }
+    }
+
+    meme.update(requestDto.getName(), requestDto.getDescription());
+    return MemeConverter.toUpdateOneDto(meme);
+  }
+
   @Transactional(readOnly = true)
   public Meme findById(Long memeId){
     return memeRepository.findById(memeId).orElseThrow(

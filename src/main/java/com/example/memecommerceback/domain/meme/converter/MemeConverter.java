@@ -49,4 +49,14 @@ public class MemeConverter {
         .modifiedAt(meme.getModifiedAt())
         .build();
   }
+
+  public static MemeResponseDto.UpdateOneDto toUpdateOneDto(Meme meme){
+    return MemeResponseDto.UpdateOneDto.builder()
+        .memeId(meme.getId())
+        .description(meme.getDescription())
+        .status(meme.getStatus())
+        .registeredNickname(meme.getRegisteredNickname())
+        .modifiedAt(meme.getModifiedAt())
+        .build();
+  }
 }

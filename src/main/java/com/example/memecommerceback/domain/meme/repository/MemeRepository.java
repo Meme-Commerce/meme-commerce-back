@@ -11,5 +11,7 @@ public interface MemeRepository extends JpaRepository<Meme, Long> {
   List<Meme> findAllByStatus(MemeStatus status);
 
   Optional<Meme> findByIdAndStatus(Long memeId, MemeStatus status);
+
+  Optional<Meme> findByIdAndRegisteredNickname(Long memeId, String registeredNickname);
 }
 

@@ -56,4 +56,9 @@ public class Meme extends CommonEntity {
       this.status = MemeStatus.REJECTED;
     }
   }
+
+  public void update(String name, String description) {
+    if (name != null) this.name = name;
+    if (description != null) this.description = description;
+  }
 }

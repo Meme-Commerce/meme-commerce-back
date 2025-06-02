@@ -39,7 +39,7 @@ public class MemeController {
               HttpStatus.OK.value()));
   }
 
-  @PatchMapping("/meme/{memeId}")
+  @PatchMapping("/admin/meme/{memeId}")
   @PreAuthorize("hasAuthority('ROLE_ADMIN')")
   public ResponseEntity<
       CommonResponseDto<MemeResponseDto.UpdateOneStatusDto>> updateOneStatusByAdmin(
@@ -54,6 +54,20 @@ public class MemeController {
             memeId, isApproved, notificationMessage, userDetails.getUser());
     return ResponseEntity.status(HttpStatus.OK).body(
         new CommonResponseDto<>(responseDto, "밈 하나의 상태를 수정 하였습니다.",
+            HttpStatus.OK.value()));
+  }
+
+  @PatchMapping("/meme/{memeId}")
+  public ResponseEntity<
+      CommonResponseDto<MemeResponseDto.UpdateOneDto>> updateOne(
+      @PathVariable Long memeId,
+      @RequestBody @Valid MemeRequestDto.UpdateOneDto requestDto,
+      @AuthenticationPrincipal UserDetailsImpl userDetails){
+    MemeResponseDto.UpdateOneDto responseDto
+        = memeService.updateOne(memeId, requestDto, userDetails.getUser());
+    return ResponseEntity.status(HttpStatus.OK).body(
+        new CommonResponseDto<>(
+            responseDto, "밈 하나를 수정 하였습니다.",
             HttpStatus.OK.value()));
   }
 }

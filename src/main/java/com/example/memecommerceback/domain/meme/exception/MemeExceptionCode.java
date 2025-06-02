@@ -20,6 +20,9 @@ public enum MemeExceptionCode {
   MAX_CREATE_MEME_LIMIT_EXCEEDED(
       HttpStatus.BAD_REQUEST, "MEME-004",
       "밈 최대 생성 갯수는 10개입니다."),
+  CANNOT_MODIFY_STATUS(
+      HttpStatus.BAD_REQUEST, "MEME-005",
+      "밈이 REJECTED, APPROVE 상태이면 밈을 수정할 수 없습니다. "),
   ;
 
   private final HttpStatus httpStatus;
