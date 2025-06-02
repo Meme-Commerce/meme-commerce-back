@@ -64,7 +64,7 @@ public class DateUtils {
   }
 
   public static void validateYearAndQuarter(int year, int quarter){
-    if(LocalDate.now().getYear() < year){
+    if(LocalDate.now().getYear() < year || year >= 2020){
       throw new DateCustomException(GlobalExceptionCode.INVALID_INPUT_YEAR_IN_FUTURE);
     }
     if(quarter <= 0 || quarter >= 5){

@@ -113,7 +113,7 @@ public class MemeServiceImplV1 implements MemeServiceV1 {
     int currentQuarter = DateUtils.getCurrentQuarter();
     List<Meme> memeList
         = MemeConverter.toEntityList(
-            requestDto, registeredNickname, currentYear, currentQuarter);
+        requestDto, registeredNickname, currentYear, currentQuarter);
     memeRepository.saveAll(memeList);
     return MemeConverter.toCreateDto(memeList, registeredNickname);
   }
@@ -154,22 +154,29 @@ public class MemeServiceImplV1 implements MemeServiceV1 {
       String savedMemeDescription = savedMeme.getDescription();
       String requestedMemeName = requestDto.getName();
       String requestedMemeDescription = requestDto.getDescription();
-      double nameSimilarity = RabinKarpUtils.slidingWindowSimilarity(
-          savedMemeName, requestedMemeName, RabinKarpUtils.WINDOW_SIZE);
-      if (nameSimilarity >= RabinKarpUtils.SIMILARITY_THRESHOLD) {
-        throw new MemeCustomException(
-            MemeExceptionCode.SIMILAR_NAME,
-            String.format("기존 밈 이름 '%s'와(과) 수정하려는 이름 '%s'가 너무 유사합니다. (%.2f%%)",
-                savedMemeName, requestedMemeName, nameSimilarity));
+
+      // 이름 유사도 검사 (null 체크 추가)
+      if (savedMemeName != null && requestedMemeName != null) {
+        double nameSimilarity = RabinKarpUtils.slidingWindowSimilarity(
+            savedMemeName, requestedMemeName, RabinKarpUtils.WINDOW_SIZE);
+        if (nameSimilarity >= RabinKarpUtils.SIMILARITY_THRESHOLD) {
+          throw new MemeCustomException(
+              MemeExceptionCode.SIMILAR_NAME,
+              String.format("기존 밈 이름 '%s'와(과) 수정하려는 이름 '%s'가 너무 유사합니다. (%.2f%%)",
+                  savedMemeName, requestedMemeName, nameSimilarity));
+        }
       }
 
-      double descSimilarity = RabinKarpUtils.slidingWindowSimilarity(
-          savedMemeDescription, requestedMemeDescription, RabinKarpUtils.WINDOW_SIZE);
-      if (descSimilarity >= RabinKarpUtils.SIMILARITY_THRESHOLD) {
-        throw new MemeCustomException(
-            MemeExceptionCode.SIMILAR_DESCRIPTION,
-            String.format("기존 밈 설명이 '%s'와(과) 수정하려는 설명 '%s'가 너무 유사합니다. (%.2f%%)",
-                savedMemeDescription, requestedMemeDescription, descSimilarity));
+      // 설명 유사도 검사 (null 체크 추가) -> null이면 변경하지 않음.
+      if (savedMemeDescription != null && requestedMemeDescription != null) {
+        double descSimilarity = RabinKarpUtils.slidingWindowSimilarity(
+            savedMemeDescription, requestedMemeDescription, RabinKarpUtils.WINDOW_SIZE);
+        if (descSimilarity >= RabinKarpUtils.SIMILARITY_THRESHOLD) {
+          throw new MemeCustomException(
+              MemeExceptionCode.SIMILAR_DESCRIPTION,
+              String.format("기존 밈 설명이 '%s'와(과) 수정하려는 설명 '%s'가 너무 유사합니다. (%.2f%%)",
+                  savedMemeDescription, requestedMemeDescription, descSimilarity));
+        }
       }
     }
 
@@ -196,7 +203,7 @@ public class MemeServiceImplV1 implements MemeServiceV1 {
     Pageable pageable = PageRequest.of(page, size);
     Page<Meme> memePage
         = memeRepository.findAllByYearAndQuarterAndStatus(
-            pageable, year, quarter, MemeStatus.APPROVED);
+        pageable, year, quarter, MemeStatus.APPROVED);
     return MemeConverter.toSummaryReadPage(memePage);
   }
 

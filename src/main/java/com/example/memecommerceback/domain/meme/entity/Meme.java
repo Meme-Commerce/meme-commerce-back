@@ -60,7 +60,9 @@ public class Meme extends CommonEntity {
   }
 
   public void update(String name, String description) {
-    if (name != null) this.name = name;
-    if (description != null) this.description = description;
+    if (name != null && !name.trim().isEmpty())
+      this.name = name.trim();
+    if (description != null && !description.trim().isEmpty())
+      this.description = description.trim();
   }
 }

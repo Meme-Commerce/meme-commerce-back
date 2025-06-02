@@ -6,6 +6,8 @@ import com.example.memecommerceback.domain.meme.service.MemeServiceV1;
 import com.example.memecommerceback.global.exception.dto.CommonResponseDto;
 import com.example.memecommerceback.global.security.UserDetailsImpl;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.util.List;
@@ -83,7 +85,9 @@ public class MemeController {
       CommonResponseDto<Page<MemeResponseDto.ReadOneDto>>> readPageByAdmin(
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "20") int size,
-      @RequestParam int year, @RequestParam int quarter){
+      @RequestParam @Min(value = 2020, message = "최소 2020년부터 조회가 가능합니다.") int year,
+      @RequestParam @Min(value = 1, message = "분기는 1-4 사이의 값이어야 합니다.")
+      @Max(value = 4, message = "분기는 1-4 사이의 값이어야 합니다.") int quarter){
     Page<MemeResponseDto.ReadOneDto> responseDtoPage
         = memeService.readPageByAdmin(page, size, year, quarter);
     return ResponseEntity.status(HttpStatus.OK).body(
@@ -97,7 +101,9 @@ public class MemeController {
       CommonResponseDto<Page<MemeResponseDto.ReadSummaryOneDto>>> readSummaryPage(
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "20") int size,
-      @RequestParam int year, @RequestParam int quarter){
+      @RequestParam @Min(value = 2020, message = "최소 2020년부터 조회가 가능합니다.") int year,
+      @RequestParam @Min(value = 1, message = "분기는 1-4 사이의 값이어야 합니다.")
+      @Max(value = 4, message = "분기는 1-4 사이의 값이어야 합니다.") int quarter){
     Page<MemeResponseDto.ReadSummaryOneDto> responseDtoPage
         = memeService.readSummaryPage(page, size, year, quarter);
     return ResponseEntity.status(HttpStatus.OK).body(
@@ -111,8 +117,12 @@ public class MemeController {
   public ResponseEntity<
       CommonResponseDto<Void>> deleteMany(
       @RequestParam @NotNull(message = "삭제할 밈 아이디는 필수 입력란입니다.")
+      @Size(min = 1, max = 10,
+          message = "최소 1개에서 최대 10개까지 삭제 가능합니다.")
       List<Long> deletedMemeIdList,
       @RequestParam @NotNull(message = "삭제 사유는 필수 입력란입니다.")
+      @Size(min = 1, max = 200,
+          message = "최소 1자에서 최대 200자까지 삭제 이유를 적을 수 있습니다.")
       String deletedMessage,
       @AuthenticationPrincipal UserDetailsImpl userDetails){
     memeService.deleteMany(

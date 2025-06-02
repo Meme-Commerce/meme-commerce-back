@@ -108,6 +108,9 @@ public enum GlobalExceptionCode {
   WINDOW_SIZE_MUST_BE_POSITIVE(
       HttpStatus.BAD_REQUEST, "RABIN-KARP-001",
       "윈도우 사이즈(부분 문자열 길이)는 0이상이여야 합니다."),
+  INPUT_STRING_CANNOT_BE_NULL(
+      HttpStatus.BAD_REQUEST, "RABIN-KARP-002",
+      "입력 문자열은 null일 수 없습니다"),
   ;
 
   private final HttpStatus httpStatus;

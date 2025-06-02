@@ -59,6 +59,7 @@ public class MemeConverter {
   public static MemeResponseDto.UpdateOneDto toUpdateOneDto(Meme meme){
     return MemeResponseDto.UpdateOneDto.builder()
         .memeId(meme.getId())
+        .name(meme.getName())
         .description(meme.getDescription())
         .status(meme.getStatus())
         .registeredNickname(meme.getRegisteredNickname())

@@ -42,7 +42,8 @@ public class RabinKarpUtils {
   // 윈도우 해시 겹침 비율(%) 계산
   public static double slidingWindowSimilarity(String a, String b, int windowSize) {
     if (a == null || b == null)
-      throw new IllegalArgumentException("입력 문자열은 null일 수 없습니다");
+      throw new RabinKarpCustomException(
+          GlobalExceptionCode.INPUT_STRING_CANNOT_BE_NULL);
     Set<Integer> hashesA = getAllWindowHashes(a, windowSize);
     Set<Integer> hashesB = getAllWindowHashes(b, windowSize);
 
