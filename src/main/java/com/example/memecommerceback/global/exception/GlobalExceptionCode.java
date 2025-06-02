@@ -97,6 +97,11 @@ public enum GlobalExceptionCode {
   INVALID_SORT_FIELDS(
       HttpStatus.BAD_REQUEST, "PAGE-001",
       "는 정렬할 수 없는 필드입니다."),
+
+  // RABIN-KARP
+  WINDOW_SIZE_MUST_BE_POSITIVE(
+      HttpStatus.BAD_REQUEST, "RABIN-KARP-001",
+      "윈도우 사이즈(부분 문자열 길이)는 0이상이여야 합니다."),
   ;
 
   private final HttpStatus httpStatus;

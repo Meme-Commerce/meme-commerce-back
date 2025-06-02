@@ -1,5 +1,7 @@
 package com.example.memecommerceback.global.utils;
 
+import com.example.memecommerceback.global.exception.GlobalExceptionCode;
+import com.example.memecommerceback.global.exception.RabinKarpCustomException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -12,7 +14,8 @@ public class RabinKarpUtils {
   // 모든 슬라이딩 윈도우 해시 집합 구하기
   public static Set<Integer> getAllWindowHashes(String s, int windowSize) {
     if(windowSize <= 0){
-      throw new IllegalArgumentException("윈도우 크기는 0이상이여야 합니다.");
+      throw new RabinKarpCustomException(
+          GlobalExceptionCode.WINDOW_SIZE_MUST_BE_POSITIVE);
     }
     Set<Integer> hashes = new HashSet<>();
     if (s.length() < windowSize) {
