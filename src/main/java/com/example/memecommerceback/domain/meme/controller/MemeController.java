@@ -6,13 +6,19 @@ import com.example.memecommerceback.domain.meme.service.MemeServiceV1;
 import com.example.memecommerceback.global.exception.dto.CommonResponseDto;
 import com.example.memecommerceback.global.security.UserDetailsImpl;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -31,6 +37,24 @@ public class MemeController {
       return ResponseEntity.status(HttpStatus.OK).body(
           new CommonResponseDto<>(responseDto, "밈을 생성하였습니다.",
               HttpStatus.OK.value()));
+  }
+
+  @PatchMapping("/meme/{memeId}")
+  @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+  public ResponseEntity<
+      CommonResponseDto<MemeResponseDto.UpdateOneStatusDto>> updateOneStatusByAdmin(
+      @PathVariable Long memeId,
+      @RequestParam @NotNull(message = "승인 여부는 필수 입력란입니다.") boolean isApproved,
+      @RequestParam @NotNull(message = "승인 여부 알람 메세지는 필수 입력란입니다.")
+      @Size(min = 1, max = 100, message = "최소 1자, 최대 100자 이내로 알림 메세지를 작성해주셔야 합니다.")
+      String notificationMessage,
+      @AuthenticationPrincipal UserDetailsImpl userDetails){
+    MemeResponseDto.UpdateOneStatusDto responseDto
+        = memeService.updateOneStatusByAdmin(
+            memeId, isApproved, notificationMessage, userDetails.getUser());
+    return ResponseEntity.status(HttpStatus.OK).body(
+        new CommonResponseDto<>(responseDto, "밈 하나의 상태를 수정 하였습니다.",
+            HttpStatus.OK.value()));
   }
 }
 

@@ -3,6 +3,8 @@ package com.example.memecommerceback.domain.meme.entity;
 import com.example.memecommerceback.global.common.CommonEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -37,5 +39,21 @@ public class Meme extends CommonEntity {
 
   @Builder.Default
   @Column(nullable = false)
-  private boolean isApproved = false;
+  private boolean approved = false;
+
+  @Column(nullable = false)
+  private String registeredNickname;
+
+  @Builder.Default
+  @Column(nullable = false)
+  @Enumerated(EnumType.STRING)
+  private MemeStatus status = MemeStatus.PENDING;
+
+  public void updateStatus(boolean isApproved){
+    if(isApproved){
+      this.status = MemeStatus.APPROVED;
+    }else{
+      this.status = MemeStatus.REJECTED;
+    }
+  }
 }

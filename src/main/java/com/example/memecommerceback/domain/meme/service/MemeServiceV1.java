@@ -8,4 +8,7 @@ public interface MemeServiceV1 {
 
   MemeResponseDto.CreateDto create(
       MemeRequestDto.CreateDto requestDto, User user);
+
+  MemeResponseDto.UpdateOneStatusDto updateOneStatusByAdmin(
+      Long memeId, boolean isApproved, String notificationMessage, User admin);
 }

@@ -4,6 +4,7 @@ import com.example.memecommerceback.domain.meme.converter.MemeConverter;
 import com.example.memecommerceback.domain.meme.dto.MemeRequestDto;
 import com.example.memecommerceback.domain.meme.dto.MemeResponseDto;
 import com.example.memecommerceback.domain.meme.entity.Meme;
+import com.example.memecommerceback.domain.meme.entity.MemeStatus;
 import com.example.memecommerceback.domain.meme.exception.MemeCustomException;
 import com.example.memecommerceback.domain.meme.exception.MemeExceptionCode;
 import com.example.memecommerceback.domain.meme.repository.MemeRepository;
@@ -41,7 +42,7 @@ public class MemeServiceImplV1 implements MemeServiceV1 {
     List<MemeRequestDto.CreateOneDto> createOneDtoList = requestDto.getCreateOneDtoList();
 
     // 3. 기존(승인된) 밈 목록 조회
-    List<Meme> savedMemeList = memeRepository.findAllByIsApprovedTrue();
+    List<Meme> savedMemeList = memeRepository.findAllByStatus(MemeStatus.APPROVED);
 
     // 4. 신규 요청 각 밈에 대해 (1) 기존 밈과, (2) 자기들끼리 유사도 체크
     // 4-1. 기존(저장된) 밈과 유사도 검사
@@ -101,8 +102,26 @@ public class MemeServiceImplV1 implements MemeServiceV1 {
     profanityFilterService.validateListNoProfanity(descriptionList);
 
     // 6. 저장 및 반환
-    List<Meme> memeList = MemeConverter.toEntityList(requestDto);
+    String registeredNickname = user.getNickname();
+    List<Meme> memeList = MemeConverter.toEntityList(requestDto, registeredNickname);
     memeRepository.saveAll(memeList);
-    return MemeConverter.toCreateDto(memeList);
+    return MemeConverter.toCreateDto(memeList, registeredNickname);
+  }
+
+  @Override
+  @Transactional
+  public MemeResponseDto.UpdateOneStatusDto updateOneStatusByAdmin(
+      Long memeId, boolean isApproved, String notificationMessage, User admin) {
+    Meme meme = memeRepository.findByIdAndStatus(memeId, MemeStatus.PENDING).orElseThrow(
+        ()-> new MemeCustomException(MemeExceptionCode.NOT_FOUND));
+    meme.updateStatus(isApproved);
+    // notificationService.sendRejectReasonForUser
+    return MemeConverter.toUpdateOneStatusDto(meme);
+  }
+
+  @Transactional(readOnly = true)
+  public Meme findById(Long memeId){
+    return memeRepository.findById(memeId).orElseThrow(
+        ()-> new MemeCustomException(MemeExceptionCode.NOT_FOUND));
   }
 }

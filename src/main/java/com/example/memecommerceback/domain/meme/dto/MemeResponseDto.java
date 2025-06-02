@@ -1,5 +1,6 @@
 package com.example.memecommerceback.domain.meme.dto;
 
+import com.example.memecommerceback.domain.meme.entity.MemeStatus;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -14,6 +15,8 @@ public class MemeResponseDto {
   @AllArgsConstructor
   @NoArgsConstructor
   public static class CreateDto {
+    private String registeredNickname;
+    private MemeStatus status;
     private List<CreateOneDto> createOneDtoList;
   }
 
@@ -26,5 +29,16 @@ public class MemeResponseDto {
     private String name;
     private String description;
     private LocalDateTime createdAt;
+  }
+
+  @Getter
+  @Builder
+  @AllArgsConstructor
+  @NoArgsConstructor
+  public static class UpdateOneStatusDto {
+    private Long memeId;
+    private String registeredNickname;
+    private MemeStatus status;
+    private LocalDateTime modifiedAt;
   }
 }
