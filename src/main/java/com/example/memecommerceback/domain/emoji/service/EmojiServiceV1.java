@@ -94,4 +94,12 @@ public interface EmojiServiceV1 {
    * @return 이모지 상세 정보를 포함한 응답 DTO
    */
   EmojiResponseDto readOne(Long emojiId);
+
+  /**
+   * 단일 이모지 하나를 조회합니다.
+   *
+   * @param emojiId 조회할 이모지의 고유 식별자
+   * @return 식별자와 일치하는 이모지
+   */
+  Emoji findById(Long emojiId);
 }
