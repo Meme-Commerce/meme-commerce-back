@@ -142,8 +142,11 @@ public class MemeController {
   @GetMapping("/admin/meme")
   @PreAuthorize("hasAuthority('ROLE_ADMIN')")
   public ResponseEntity<CommonResponseDto<Page<MemeResponseDto.ReadOneDto>>> readPageByAdmin(
-      @RequestParam(defaultValue = "0") int page,
-      @RequestParam(defaultValue = "20") int size,
+      @RequestParam(defaultValue = "0")
+      @Min(value = 0, message = "페이지는 0 이상이어야 합니다.") int page,
+      @RequestParam(defaultValue = "20")
+      @Min(value = 1, message = "사이즈는 1 이상이어야 합니다.")
+      @Max(value = 100, message = "사이즈는 100 이하여야 합니다.") int size,
       @RequestParam @Min(value = 2020, message = "최소 2020년부터 조회가 가능합니다.") int year,
       @RequestParam @Min(value = 1, message = "분기는 1-4 사이의 값이어야 합니다.")
       @Max(value = 4, message = "분기는 1-4 사이의 값이어야 합니다.") int quarter){
@@ -163,8 +166,11 @@ public class MemeController {
               schema = @Schema(implementation = ErrorResponseDto.class))),})
   @GetMapping("/meme")
   public ResponseEntity<CommonResponseDto<Page<MemeResponseDto.ReadSummaryOneDto>>> readSummaryPage(
-      @RequestParam(defaultValue = "0") int page,
-      @RequestParam(defaultValue = "20") int size,
+      @RequestParam(defaultValue = "0")
+      @Min(value = 0, message = "페이지는 0 이상이어야 합니다.") int page,
+      @RequestParam(defaultValue = "20")
+      @Min(value = 1, message = "사이즈는 1 이상이어야 합니다.")
+      @Max(value = 100, message = "사이즈는 100 이하여야 합니다.") int size,
       @RequestParam @Min(value = 2020, message = "최소 2020년부터 조회가 가능합니다.") int year,
       @RequestParam @Min(value = 1, message = "분기는 1-4 사이의 값이어야 합니다.")
       @Max(value = 4, message = "분기는 1-4 사이의 값이어야 합니다.") int quarter){
