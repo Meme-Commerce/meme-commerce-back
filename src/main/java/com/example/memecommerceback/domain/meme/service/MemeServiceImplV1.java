@@ -3,6 +3,7 @@ package com.example.memecommerceback.domain.meme.service;
 import com.example.memecommerceback.domain.meme.converter.MemeConverter;
 import com.example.memecommerceback.domain.meme.dto.MemeRequestDto;
 import com.example.memecommerceback.domain.meme.dto.MemeResponseDto;
+import com.example.memecommerceback.domain.meme.dto.MemeResponseDto.ReadOneDto;
 import com.example.memecommerceback.domain.meme.entity.Meme;
 import com.example.memecommerceback.domain.meme.entity.MemeStatus;
 import com.example.memecommerceback.domain.meme.exception.MemeCustomException;
@@ -10,10 +11,15 @@ import com.example.memecommerceback.domain.meme.exception.MemeExceptionCode;
 import com.example.memecommerceback.domain.meme.repository.MemeRepository;
 import com.example.memecommerceback.domain.users.entity.User;
 import com.example.memecommerceback.global.service.ProfanityFilterService;
+import com.example.memecommerceback.global.utils.DateUtils;
 import com.example.memecommerceback.global.utils.RabinKarpUtils;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -103,7 +109,11 @@ public class MemeServiceImplV1 implements MemeServiceV1 {
 
     // 6. 저장 및 반환
     String registeredNickname = user.getNickname();
-    List<Meme> memeList = MemeConverter.toEntityList(requestDto, registeredNickname);
+    int currentYear = LocalDate.now().getYear();
+    int currentQuarter = DateUtils.getCurrentQuarter();
+    List<Meme> memeList
+        = MemeConverter.toEntityList(
+            requestDto, registeredNickname, currentYear, currentQuarter);
     memeRepository.saveAll(memeList);
     return MemeConverter.toCreateDto(memeList, registeredNickname);
   }
@@ -167,6 +177,39 @@ public class MemeServiceImplV1 implements MemeServiceV1 {
     return MemeConverter.toUpdateOneDto(meme);
   }
 
+  @Override
+  @Transactional(readOnly = true)
+  public Page<MemeResponseDto.ReadOneDto> readPageByAdmin(
+      int page, int size, int year, int quarter){
+    DateUtils.validateYearAndQuarter(year, quarter);
+    Pageable pageable = PageRequest.of(page, size);
+    Page<Meme> memePage
+        = memeRepository.findAllByYearAndQuarter(pageable, year, quarter);
+    return MemeConverter.toReadPage(memePage);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public Page<MemeResponseDto.ReadSummaryOneDto> readSummaryPage(
+      int page, int size, int year, int quarter) {
+    DateUtils.validateYearAndQuarter(year, quarter);
+    Pageable pageable = PageRequest.of(page, size);
+    Page<Meme> memePage
+        = memeRepository.findAllByYearAndQuarterAndStatus(
+            pageable, year, quarter, MemeStatus.APPROVED);
+    return MemeConverter.toSummaryReadPage(memePage);
+  }
+
+  @Override
+  @Transactional
+  public void deleteMany(
+      List<Long> deletedMemeIdList, String deletedReason, User admin) {
+    List<Meme> memeList = memeRepository.findAllById(deletedMemeIdList);
+    memeRepository.deleteAllById(deletedMemeIdList);
+    // TODO 등록자에게 해당 밈을 삭제 하였다는 메세지 전달
+  }
+
+  @Override
   @Transactional(readOnly = true)
   public Meme findById(Long memeId){
     return memeRepository.findById(memeId).orElseThrow(

@@ -37,10 +37,6 @@ public class Meme extends CommonEntity {
   @Column(nullable = false)
   private String description;
 
-  @Builder.Default
-  @Column(nullable = false)
-  private boolean approved = false;
-
   @Column(nullable = false)
   private String registeredNickname;
 
@@ -48,6 +44,12 @@ public class Meme extends CommonEntity {
   @Column(nullable = false)
   @Enumerated(EnumType.STRING)
   private MemeStatus status = MemeStatus.PENDING;
+
+  @Column(nullable = false)
+  private Integer year;
+
+  @Column(nullable = false)
+  private Integer quarter;
 
   public void updateStatus(boolean isApproved){
     if(isApproved){

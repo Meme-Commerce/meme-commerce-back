@@ -155,7 +155,7 @@ public class GlobalExceptionHandler {
           ProfanityFilterCustomException.class, ProductCustomException.class,
           CategoryCustomException.class, HashtagCustomException.class,
           EmojiCustomException.class, RabinKarpCustomException.class,
-          MemeCustomException.class})
+          MemeCustomException.class, DateCustomException.class})
   public ResponseEntity<CommonResponseDto<ErrorResponseDto>> handleCustomException(
       CustomException ex) {
     String category;
@@ -175,7 +175,9 @@ public class GlobalExceptionHandler {
       category = "이모지 오류";
     } else if( ex instanceof MemeCustomException){
       category = "밈 오류";
-    } else {
+    } else if (ex instanceof DateCustomException){
+      category = "날짜 오류";
+    }else {
       category = "기타 오류";
     }
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(

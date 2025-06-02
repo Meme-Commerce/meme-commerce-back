@@ -92,6 +92,12 @@ public enum GlobalExceptionCode {
   DATE_TOO_FAR(
       HttpStatus.BAD_REQUEST, "DATE-TIME-004",
       "핫링크 요청은 현 시간으로부터 3달까지만 허용됩니다."),
+  INVALID_INPUT_YEAR_IN_FUTURE(
+      HttpStatus.BAD_REQUEST, "DATE-TIME-005",
+      "현재 년도보다 높은 값을 입력할 수 없습니다."),
+  INVALID_INPUT_QUARTER(
+      HttpStatus.BAD_REQUEST, "DATE-TIME-006",
+      "분기는 0이하의 수이거나 5이상일 수 없습니다."),
 
   // PAGE-ERROR
   INVALID_SORT_FIELDS(
