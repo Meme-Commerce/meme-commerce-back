@@ -10,4 +10,7 @@ public interface MemeEmojiServiceV1 {
 
   MemeEmojiResponseDto.UpdateOneDto updateOneStatusByAdmin(
       Long memeEmojiId, boolean isApproved, String reason, User loginUser);
+
+  MemeEmojiResponseDto.UpdateOneDto updateOne(
+      Long memeEmojiId, String message, User loginUser);
 }

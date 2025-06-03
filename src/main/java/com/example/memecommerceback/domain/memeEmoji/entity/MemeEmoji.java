@@ -63,4 +63,8 @@ public class MemeEmoji {
       this.status = MemeEmojiStatus.REJECTED;
     }
   }
+
+  public void update(String message){
+    this.message = message;
+  }
 }

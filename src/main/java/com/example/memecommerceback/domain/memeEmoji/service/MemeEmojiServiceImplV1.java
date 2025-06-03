@@ -27,6 +27,8 @@ public class MemeEmojiServiceImplV1 implements MemeEmojiServiceV1 {
 
   private final MemeEmojiRepository memeEmojiRepository;
 
+  // TODO : 밈모지 생성, 상태 수정(승인/거절)은 알림을 구현해야함.
+
   @Override
   @Transactional
   public MemeEmojiResponseDto.CreateOneDto createOne(
@@ -59,4 +61,25 @@ public class MemeEmojiServiceImplV1 implements MemeEmojiServiceV1 {
     return MemeEmojiConverter.toUpdateOneDto(memeEmoji);
   }
 
+  @Override
+  @Transactional
+  public MemeEmojiResponseDto.UpdateOneDto updateOne(
+      Long memeEmojiId, String message, User loginUser){
+    // 밈모지 찾기
+    MemeEmoji memeEmoji = memeEmojiRepository.findById(memeEmojiId).orElseThrow(
+        ()-> new MemeEmojiCustomException(MemeEmojiExceptionCode.NOT_FOUND));
+    // 밈모지의 상태가 PENDING 상태인지?
+    if(memeEmoji.getStatus().equals(MemeEmojiStatus.PENDING)){
+      throw new MemeEmojiCustomException(MemeEmojiExceptionCode.ALREADY_COMPLETED_STATUS);
+    }
+    // 밈모지 주인이 맞는지 확인
+    if(memeEmoji.getRequestUserNickname().equals(loginUser.getNickname())){
+      throw new MemeEmojiCustomException(MemeEmojiExceptionCode.NOT_OWNER);
+    }
+    // 요청사항 욕설 검증
+    profanityFilterService.validateNoProfanity(message);
+    // 요청 사항 변경 및 반환
+    memeEmoji.update(message);
+    return MemeEmojiConverter.toUpdateOneDto(memeEmoji);
+  }
 }
