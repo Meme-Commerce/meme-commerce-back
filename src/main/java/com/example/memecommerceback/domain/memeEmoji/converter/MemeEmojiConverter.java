@@ -9,9 +9,9 @@ import org.springframework.data.domain.Page;
 public class MemeEmojiConverter {
 
   public static MemeEmoji toEntity(
-      Meme meme, Emoji emoji, String message, String name, String requestUserNickname){
+      Meme meme, Emoji emoji, String name, String message, String requestUserNickname){
     return MemeEmoji.builder()
-        .meme(meme).emoji(emoji).message(message).name(name)
+        .meme(meme).emoji(emoji).name(name).message(message)
         .requestUserNickname(requestUserNickname).build();
   }
 
@@ -22,7 +22,7 @@ public class MemeEmojiConverter {
         .memeId(memeId).emojiId(emojiId)
         .name(memeEmoji.getName())
         .requestMessage(memeEmoji.getMessage())
-        .requestUserNickName(memeEmoji.getRequestUserNickname())
+        .requestUserNickname(memeEmoji.getRequestUserNickname())
         .build();
   }
 
@@ -34,7 +34,7 @@ public class MemeEmojiConverter {
         .emojiId(memeEmoji.getEmoji().getId())
         .name(memeEmoji.getName())
         .status(memeEmoji.getStatus())
-        .requestUserNickName(memeEmoji.getRequestUserNickname())
+        .requestUserNickname(memeEmoji.getRequestUserNickname())
         .build();
   }
 
@@ -51,7 +51,7 @@ public class MemeEmojiConverter {
         .emojiId(memeEmoji.getEmoji().getId())
         .name(memeEmoji.getName())
         .status(memeEmoji.getStatus())
-        .requestUserNickName(memeEmoji.getRequestUserNickname())
+        .requestUserNickname(memeEmoji.getRequestUserNickname())
         .build();
   }
 }

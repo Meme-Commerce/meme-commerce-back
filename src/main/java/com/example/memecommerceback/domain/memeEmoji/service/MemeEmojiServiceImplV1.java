@@ -92,11 +92,11 @@ public class MemeEmojiServiceImplV1 implements MemeEmojiServiceV1 {
     MemeEmoji memeEmoji = memeEmojiRepository.findById(memeEmojiId).orElseThrow(
         ()-> new MemeEmojiCustomException(MemeEmojiExceptionCode.NOT_FOUND));
     // 밈모지의 상태가 PENDING 상태인지?
-    if(memeEmoji.getStatus().equals(MemeEmojiStatus.PENDING)){
+    if(!memeEmoji.getStatus().equals(MemeEmojiStatus.PENDING)){
       throw new MemeEmojiCustomException(MemeEmojiExceptionCode.ALREADY_COMPLETED_STATUS);
     }
     // 밈모지 주인이 맞는지 확인
-    if(memeEmoji.getRequestUserNickname().equals(loginUser.getNickname())){
+    if(!memeEmoji.getRequestUserNickname().equals(loginUser.getNickname())){
       throw new MemeEmojiCustomException(MemeEmojiExceptionCode.NOT_OWNER);
     }
     // 요청사항 욕설 검증
