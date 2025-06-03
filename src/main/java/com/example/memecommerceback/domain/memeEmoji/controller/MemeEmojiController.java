@@ -1,20 +1,23 @@
 package com.example.memecommerceback.domain.memeEmoji.controller;
 
-import com.example.memecommerceback.domain.memeEmoji.dto.MemeEmojiRequestDto;
 import com.example.memecommerceback.domain.memeEmoji.dto.MemeEmojiResponseDto;
+import com.example.memecommerceback.domain.memeEmoji.dto.MemeEmojiResponseDto.ReadOneDto;
 import com.example.memecommerceback.domain.memeEmoji.service.MemeEmojiServiceV1;
 import com.example.memecommerceback.global.exception.dto.CommonResponseDto;
 import com.example.memecommerceback.global.security.UserDetailsImpl;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,12 +33,14 @@ public class MemeEmojiController {
   public ResponseEntity<
       CommonResponseDto<MemeEmojiResponseDto.CreateOneDto>> createOne(
       @PathVariable Long memeId, @PathVariable Long emojiId,
+      @RequestParam @Size(min = 1, max = 20,
+          message = "밈모지 이름은 1자에서 20자 내외로 입력하셔야합니다.") String name,
       @RequestParam @Size(min = 1, max = 100,
           message = "요청 사항은 1자에서 100자 내외로 입력하셔야합니다.") String message,
       @AuthenticationPrincipal UserDetailsImpl userDetails){
     MemeEmojiResponseDto.CreateOneDto responseDto
         = memeEmojiService.createOne(
-            memeId, emojiId, message, userDetails.getUser());
+            memeId, emojiId, name, message, userDetails.getUser());
     return ResponseEntity.status(HttpStatus.OK).body(
         new CommonResponseDto<>(
             responseDto, "밈모지 하나를 생성하였습니다.",
@@ -61,13 +66,44 @@ public class MemeEmojiController {
   }
 
   @PatchMapping("/meme-emoji/{memeEmojiId}")
-  public ResponseEntity<MemeEmojiResponseDto.UpdateOneDto> updateOne(
+  public ResponseEntity<CommonResponseDto<MemeEmojiResponseDto.UpdateOneDto>> updateOne(
       @PathVariable Long memeEmojiId,
+      @RequestParam @Size(min = 1, max = 20,
+          message = "밈모지 이름은 1자에서 20자 내외로 입력하셔야합니다.") String name,
       @RequestParam @Size(min = 1, max = 100,
           message = "요청 사항은 1자에서 100자 내외로 입력하셔야합니다.") String message,
       @AuthenticationPrincipal UserDetailsImpl userDetails){
     MemeEmojiResponseDto.UpdateOneDto responseDto
-        = memeEmojiService.updateOne(memeEmojiId, message, userDetails.getUser());
-    return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+        = memeEmojiService.updateOne(memeEmojiId, name, message, userDetails.getUser());
+    return ResponseEntity.status(HttpStatus.OK).body(
+        new CommonResponseDto<>(
+            responseDto, "밈모지 하나를 수정하였습니다.", HttpStatus.OK.value()));
+  }
+
+  @GetMapping("/meme-emoji")
+  public ResponseEntity<
+      CommonResponseDto<Page<MemeEmojiResponseDto.ReadOneDto>>> readPage(
+      @RequestParam(defaultValue = "0")
+      @Min(value = 0, message = "페이지는 0 이상이어야 합니다.") int page,
+      @RequestParam(defaultValue = "20")
+      @Min(value = 1, message = "사이즈는 1 이상이어야 합니다.")
+      @Max(value = 50, message = "사이즈는 50 이하여야 합니다.") int size){
+    Page<MemeEmojiResponseDto.ReadOneDto> responseDtoPage
+        = memeEmojiService.readPage(page, size);
+    return ResponseEntity.status(HttpStatus.OK).body(
+        new CommonResponseDto<>(
+            responseDtoPage, "밈모지 페이지 조회를 하였습니다.", HttpStatus.OK.value()));
+  }
+
+  @GetMapping("/meme-emoji/{memeEmojiId}")
+  public ResponseEntity<
+      CommonResponseDto<MemeEmojiResponseDto.ReadOneDto>> readOne(
+      @PathVariable Long memeEmojiId,
+      @AuthenticationPrincipal UserDetailsImpl userDetails){
+    MemeEmojiResponseDto.ReadOneDto responseDto
+        = memeEmojiService.readOne(memeEmojiId, userDetails.getUser());
+    return ResponseEntity.status(HttpStatus.OK).body(
+        new CommonResponseDto<>(
+            responseDto, "밈모지 하나를 조회 하였습니다.", HttpStatus.OK.value()));
   }
 }

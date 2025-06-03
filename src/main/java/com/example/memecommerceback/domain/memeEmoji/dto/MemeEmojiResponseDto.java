@@ -16,6 +16,7 @@ public class MemeEmojiResponseDto {
     private Long memeEmojiId;
     private Long memeId;
     private Long emojiId;
+    private String name;
     private String requestMessage;
     private String requestUserNickName;
   }
@@ -28,7 +29,21 @@ public class MemeEmojiResponseDto {
     private Long memeEmojiId;
     private Long memeId;
     private Long emojiId;
+    private String name;
     private String requestUserNickName;
     private MemeEmojiStatus status;
+  }
+
+  @Getter
+  @Builder
+  @AllArgsConstructor
+  @NoArgsConstructor
+  public static class ReadOneDto {
+    private Long memeEmojiId;
+    private Long memeId;
+    private Long emojiId;
+    private MemeEmojiStatus status;
+    private String name;
+    private String requestUserNickName;
   }
 }

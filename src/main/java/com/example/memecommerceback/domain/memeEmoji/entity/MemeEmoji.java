@@ -37,13 +37,8 @@ public class MemeEmoji {
       allocationSize = 1)
   private Long id;
 
-  @JoinColumn(name = "meme_id")
-  @ManyToOne(fetch = FetchType.LAZY)
-  private Meme meme;
-
-  @JoinColumn(name = "emoji_id")
-  @ManyToOne(fetch = FetchType.LAZY)
-  private Emoji emoji;
+  @Column(nullable = false, unique = true)
+  private String name;
 
   @Column(nullable = false)
   private String message;
@@ -55,6 +50,16 @@ public class MemeEmoji {
   @Column(nullable = false)
   @Enumerated(EnumType.STRING)
   private MemeEmojiStatus status = MemeEmojiStatus.PENDING;
+
+  // 단방향 연관 관계 : MemeEmoji에서 meme, emoji가 삭제되더라도,
+  // 상품화 했다면 Meme, Emoji의 삭제로 인해서 MemeEmoji가 삭제되면 안됨.
+  @JoinColumn(name = "meme_id")
+  @ManyToOne(fetch = FetchType.LAZY)
+  private Meme meme;
+
+  @JoinColumn(name = "emoji_id")
+  @ManyToOne(fetch = FetchType.LAZY)
+  private Emoji emoji;
 
   public void updateStatus(boolean isApproved){
     if(isApproved){
