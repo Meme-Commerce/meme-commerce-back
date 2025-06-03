@@ -5,6 +5,7 @@ import com.example.memecommerceback.domain.emoji.exception.EmojiCustomException;
 import com.example.memecommerceback.domain.files.exception.FileCustomException;
 import com.example.memecommerceback.domain.hashtags.exception.HashtagCustomException;
 import com.example.memecommerceback.domain.meme.exception.MemeCustomException;
+import com.example.memecommerceback.domain.memeEmoji.exception.MemeEmojiCustomException;
 import com.example.memecommerceback.domain.products.exception.ProductCustomException;
 import com.example.memecommerceback.domain.users.exception.UserCustomException;
 import com.example.memecommerceback.global.exception.dto.CommonResponseDto;
@@ -155,7 +156,7 @@ public class GlobalExceptionHandler {
           ProfanityFilterCustomException.class, ProductCustomException.class,
           CategoryCustomException.class, HashtagCustomException.class,
           EmojiCustomException.class, RabinKarpCustomException.class,
-          MemeCustomException.class, DateCustomException.class})
+          MemeCustomException.class, MemeEmojiCustomException.class, DateCustomException.class})
   public ResponseEntity<CommonResponseDto<ErrorResponseDto>> handleCustomException(
       CustomException ex) {
     String category;
@@ -175,9 +176,11 @@ public class GlobalExceptionHandler {
       category = "이모지 오류";
     } else if( ex instanceof MemeCustomException){
       category = "밈 오류";
+    } else if (ex instanceof MemeEmojiCustomException){
+      category = "밈모지 오류";
     } else if (ex instanceof DateCustomException){
       category = "날짜 오류";
-    }else {
+    } else {
       category = "기타 오류";
     }
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
