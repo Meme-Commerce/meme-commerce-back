@@ -7,13 +7,16 @@ import com.example.memecommerceback.global.exception.dto.CommonResponseDto;
 import com.example.memecommerceback.global.security.UserDetailsImpl;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -48,7 +51,7 @@ public class MemeEmojiController {
   }
 
   @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-  @PostMapping("/meme-emoji/{memeEmojiId}")
+  @PatchMapping("/admin/meme-emoji/{memeEmojiId}")
   public ResponseEntity<
       CommonResponseDto<MemeEmojiResponseDto.UpdateOneDto>> updateOneStatusByAdmin(
       @PathVariable Long memeEmojiId,
@@ -105,5 +108,21 @@ public class MemeEmojiController {
     return ResponseEntity.status(HttpStatus.OK).body(
         new CommonResponseDto<>(
             responseDto, "밈모지 하나를 조회 하였습니다.", HttpStatus.OK.value()));
+  }
+
+  @DeleteMapping("/meme-emoji")
+  @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+  public ResponseEntity<CommonResponseDto<Void>> deleteMany(
+      @RequestParam @NotNull(message = "삭제할 밈 아이디는 필수 입력란입니다.")
+      @Size(min = 1, max = 10, message = "최소 1개에서 최대 10개까지 삭제 가능합니다.")
+      List<Long> deletedMemeEmojiIdList,
+      @RequestParam @NotNull(message = "삭제 사유는 필수 입력란입니다.")
+      @Size(min = 1, max = 200, message = "최소 1자에서 최대 200자까지 삭제 이유를 적을 수 있습니다.")
+      String deletedMessage,
+      @AuthenticationPrincipal UserDetailsImpl userDetails){
+    memeEmojiService.deleteMany(
+        deletedMemeEmojiIdList, deletedMessage, userDetails.getUser());
+    return ResponseEntity.status(HttpStatus.OK).body(
+        new CommonResponseDto<>(null, "밈모지(들)을 삭제하였습니다.", HttpStatus.OK.value()));
   }
 }

@@ -14,6 +14,7 @@ import com.example.memecommerceback.domain.memeEmoji.exception.MemeEmojiExceptio
 import com.example.memecommerceback.domain.memeEmoji.repository.MemeEmojiRepository;
 import com.example.memecommerceback.domain.users.entity.User;
 import com.example.memecommerceback.global.service.ProfanityFilterService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -56,13 +57,30 @@ public class MemeEmojiServiceImplV1 implements MemeEmojiServiceV1 {
   @Transactional
   public MemeEmojiResponseDto.UpdateOneDto updateOneStatusByAdmin(
       Long memeEmojiId, boolean isApproved, String reason, User admin) {
-    MemeEmoji memeEmoji
-        = memeEmojiRepository.findByIdAndStatus(memeEmojiId, MemeEmojiStatus.PENDING)
-        .orElseThrow(() -> new MemeEmojiCustomException(MemeEmojiExceptionCode.NOT_FOUND));
+    // 해당 밈모지 찾기
+    MemeEmoji memeEmoji = findById(memeEmojiId);
+
+    // 욕설 검증
     profanityFilterService.validateNoProfanity(reason);
 
-    memeEmoji.updateStatus(isApproved);
+    // 상태 변경 검증
+    MemeEmojiStatus beforeStatus = memeEmoji.getStatus();
+    switch (beforeStatus) {
+      case PENDING -> memeEmoji.updateStatus(isApproved);
+      case APPROVED -> {
+        if(isApproved)
+          throw new MemeEmojiCustomException(MemeEmojiExceptionCode.REQUEST_SAME_STATUS);
+        memeEmoji.updateStatus(false);
+      }
+      case REJECTED -> {
+        if(!isApproved)
+          throw new MemeEmojiCustomException(MemeEmojiExceptionCode.REQUEST_SAME_STATUS);
+        memeEmoji.updateStatus(true);
+      }
+      default -> throw new MemeEmojiCustomException(MemeEmojiExceptionCode.NOT_EXIST_STATUS);
+    }
 
+    // 반환
     return MemeEmojiConverter.toUpdateOneDto(memeEmoji);
   }
 
@@ -107,6 +125,15 @@ public class MemeEmojiServiceImplV1 implements MemeEmojiServiceV1 {
       throw new MemeEmojiCustomException(MemeEmojiExceptionCode.UNAUTHORIZED_READ);
     }
     return MemeEmojiConverter.toReadOneDto(memeEmoji);
+  }
+
+  @Override
+  @Transactional
+  public void deleteMany(
+      List<Long> deletedMemeIdList, String deletedReason, User admin) {
+    List<MemeEmoji> memeEmojiList
+        = memeEmojiRepository.findAllById(deletedMemeIdList);
+    memeEmojiRepository.deleteAllById(deletedMemeIdList);
   }
 
   @Override

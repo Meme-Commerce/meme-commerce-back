@@ -20,6 +20,12 @@ public enum MemeEmojiExceptionCode {
   UNAUTHORIZED_READ(
       HttpStatus.BAD_REQUEST, "MEME-EMOJI-004",
       "해당 밈모지를 읽을 권한이 없습니다"),
+  NOT_EXIST_STATUS(
+      HttpStatus.BAD_REQUEST, "MEME-EMOJI-005",
+      "존재 하지 않는 밈모지 상태입니다."),
+  REQUEST_SAME_STATUS(
+      HttpStatus.BAD_REQUEST, "MEME-EMOJI-006",
+      "현 밈모지의 상태와 똑같은 상태를 요청하였습니다."),
   ;
 
   private final HttpStatus httpStatus;
