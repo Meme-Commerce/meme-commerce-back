@@ -4,7 +4,9 @@ import com.example.memecommerceback.domain.categories.dto.CategoryRequestDto;
 import com.example.memecommerceback.domain.categories.dto.CategoryResponseDto;
 import com.example.memecommerceback.domain.categories.dto.CategoryResponseDto.CreateDto;
 import com.example.memecommerceback.domain.categories.entity.Category;
+import com.example.memecommerceback.domain.productCategory.entity.ProductCategory;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import org.springframework.data.domain.Page;
 
@@ -62,5 +64,13 @@ public class CategoryConverter {
         .categoryId(category.getId())
         .name(category.getName())
         .build();
+  }
+
+  public static List<CategoryResponseDto.ReadOneDto> toReadDtoList(
+      List<ProductCategory> productCategoryList){
+    return productCategoryList.stream()
+        .map(ProductCategory::getCategory)
+        .map(CategoryConverter::toReadOneDto)
+        .toList();
   }
 }

@@ -567,4 +567,11 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
     }
     return newImageList;
   }
+
+  @Override
+  @Transactional(readOnly = true)
+  public List<Product> findAllByIdInAndStatus(
+      List<UUID> productIdList, ProductStatus productStatus) {
+    return productRepository.findAllByIdInAndStatus(productIdList, productStatus);
+  }
 }

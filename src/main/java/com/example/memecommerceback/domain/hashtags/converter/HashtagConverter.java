@@ -4,6 +4,7 @@ import com.example.memecommerceback.domain.hashtags.dto.HashtagRequestDto;
 import com.example.memecommerceback.domain.hashtags.dto.HashtagResponseDto;
 import com.example.memecommerceback.domain.hashtags.dto.HashtagResponseDto.CreateDto;
 import com.example.memecommerceback.domain.hashtags.entity.Hashtag;
+import com.example.memecommerceback.domain.productHashtag.entity.ProductHashtag;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.data.domain.Page;
@@ -62,5 +63,13 @@ public class HashtagConverter {
         .hashtagId(hashtag.getId())
         .name(hashtag.getName())
         .build();
+  }
+
+  public static List<HashtagResponseDto.ReadOneDto> toReadListDto(
+      List<ProductHashtag> productHashtagList){
+    return productHashtagList.stream()
+        .map(ProductHashtag::getHashtag)
+        .map(HashtagConverter::toReadOneDto)
+        .toList();
   }
 }

@@ -20,4 +20,6 @@ public interface ProductRepository extends JpaRepository<Product, UUID>, Product
   List<Product> findAllBySellEndDateBefore(LocalDateTime now);
 
   List<Product> findAllByOwnerId(UUID ownerId);
+
+  List<Product> findAllByIdInAndStatus(List<UUID> productIdList, ProductStatus status);
 }

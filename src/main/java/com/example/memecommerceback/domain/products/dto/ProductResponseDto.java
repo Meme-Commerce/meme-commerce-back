@@ -1,6 +1,8 @@
 package com.example.memecommerceback.domain.products.dto;
 
+import com.example.memecommerceback.domain.categories.dto.CategoryResponseDto;
 import com.example.memecommerceback.domain.emoji.dto.EmojiResponseDto;
+import com.example.memecommerceback.domain.hashtags.dto.HashtagResponseDto;
 import com.example.memecommerceback.domain.images.dto.ImageResponseDto;
 import com.example.memecommerceback.domain.productCategory.dto.ProductCategoryResponseDto;
 import com.example.memecommerceback.domain.productHashtag.dto.ProductHashtagResponseDto;
@@ -205,10 +207,10 @@ public class ProductResponseDto {
 
     @Schema(
         description = "연결된 카테고리 아이디 리스트", example = "[1,2,3]")
-    private List<Long> categoryIdList;
+    private List<CategoryResponseDto.ReadOneDto> categoryResponseDtoList;
     @Schema(
         description = "연결된 해시태그 아이디 리스트", example = "[1,2,3]")
-    private List<Long> hashtagIdList;
+    private List<HashtagResponseDto.ReadOneDto> hashtagReponseDtoList;
   }
 
   @Getter
