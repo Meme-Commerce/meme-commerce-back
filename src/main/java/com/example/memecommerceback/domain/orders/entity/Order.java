@@ -15,6 +15,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +39,7 @@ public class Order extends CommonEntity {
   private UUID id;
 
   @Column(nullable = false)
-  private Long totalPrice;
+  private BigDecimal totalPrice = BigDecimal.ZERO;
 
   @Builder.Default
   @Enumerated(EnumType.STRING)
@@ -64,7 +65,7 @@ public class Order extends CommonEntity {
     if (!this.orderProductList.isEmpty()) {
       this.orderProductList.clear();
     }
-    this.orderProductList = orderProductList;
+    this.orderProductList.addAll(orderProductList);
   }
 }
 

@@ -2,6 +2,7 @@ package com.example.memecommerceback.domain.orders.dto;
 
 import com.example.memecommerceback.domain.orders.entity.OrderStatus;
 import com.example.memecommerceback.domain.products.dto.ProductResponseDto;
+import java.math.BigDecimal;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,7 +18,7 @@ public class OrderResponseDto {
   public static class CreateOneDto {
 
     private List<ProductResponseDto.ReadOneDto> orderedProductList;
-    private Long totalPrice;
+    private BigDecimal totalPrice;
     private String orderNumber;
     private OrderStatus orderStatus;
     private String purchaserNickname;

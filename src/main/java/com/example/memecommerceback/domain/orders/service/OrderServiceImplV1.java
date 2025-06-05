@@ -16,6 +16,7 @@ import com.example.memecommerceback.domain.products.service.ProductServiceV1;
 import com.example.memecommerceback.domain.users.entity.User;
 import com.example.memecommerceback.global.redis.service.OrderNumberServiceV1;
 import com.example.memecommerceback.global.utils.DateUtils;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -52,19 +53,26 @@ public class OrderServiceImplV1 implements OrderServiceV1 {
     Map<UUID, Product> productMap = productList.stream()
         .collect(Collectors.toMap(Product::getId, p -> p));
 
-    long totalPrice = 0;
+    BigDecimal totalPrice = BigDecimal.ZERO;
 
     // 3. 각 주문상품에 대해 가격 합산, 상품 미존재시 예외
     for (OrderProductRequestDto.CreateOneDto orderProductDto : orderedProducts) {
       UUID productId = orderProductDto.getProductId();
       Long quantity = orderProductDto.getQuantity();
 
+      if(quantity == null || quantity <= 0){
+        throw new OrderCustomException(OrderExceptionCode.INVALID_QUANTITY);
+      }
+
       Product product = productMap.get(productId);
       if (product == null) {
         throw new OrderCustomException(OrderExceptionCode.PRODUCT_NOT_FOUND,
             "주문한 상품이 존재하지 않습니다. (id=" + productId + ")");
       }
-      totalPrice += product.getPrice() * quantity;
+
+      BigDecimal quantityDecimal = BigDecimal.valueOf(quantity);
+      BigDecimal productTotal = product.getPrice().multiply(quantityDecimal);
+      totalPrice = totalPrice.add(productTotal);
     }
 
     String todayIsoDate = DateUtils.toTodayBasicIsoDateFormat();

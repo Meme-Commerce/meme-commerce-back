@@ -39,7 +39,7 @@ public class OrderNumberRepository {
     redisTemplate.opsForValue().set(
         getRedisKey(key), newOrderNumberToString);
     long minutesUntilMidnight = DateUtils.getMinutesUntilMidnight();
-    redisTemplate.expire(key, minutesUntilMidnight, TimeUnit.MINUTES);
+    redisTemplate.expire(getRedisKey(key), minutesUntilMidnight, TimeUnit.MINUTES);
     return newOrderNumberToString;
   }
 
@@ -53,11 +53,11 @@ public class OrderNumberRepository {
       throw new NumberFormatException("음수이거나 백만이 넘는 숫자는 불가능합니다.");
     }
 
-    StringBuilder sb = new StringBuilder(7);
+    StringBuilder sb = new StringBuilder(8);
     String numberToString = Long.toString(number);
 
-    if (numberToString.length() < 7) {
-      int length = 7 - numberToString.length();
+    if (numberToString.length() < 8) {
+      int length = 8 - numberToString.length();
       for (int i = 0; i < length; i++) {
         sb.append('0');
       }

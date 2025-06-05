@@ -52,16 +52,25 @@ public enum OrderStatus {
   }
 
   public static List<OrderStatus> fromStatusList(List<String> statusList) {
+    if (statusList == null || statusList.isEmpty()) {
+      return new ArrayList<>();
+    }
+
     List<OrderStatus> orderStatusList = new ArrayList<>();
-    for (OrderStatus orderStatus : OrderStatus.values()) {
-      for (String status : statusList) {
+    for (String status : statusList) {
+      boolean found = false;
+      for (OrderStatus orderStatus : OrderStatus.values()) {
         if (orderStatus.getStatus().equals(status)) {
           orderStatusList.add(orderStatus);
+          found = true;
+          break;
         }
       }
-      return orderStatusList;
+      if (!found) {
+        throw new OrderCustomException(OrderExceptionCode.NOT_EXIST_STATUS);
+      }
     }
-    throw new OrderCustomException(OrderExceptionCode.NOT_EXIST_STATUS);
+    return orderStatusList;
   }
 
   public static Set<OrderStatus> getAlreadyCompletedList() {

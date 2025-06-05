@@ -7,12 +7,13 @@ import com.example.memecommerceback.domain.orders.entity.Order;
 import com.example.memecommerceback.domain.products.converter.ProductConverter;
 import com.example.memecommerceback.domain.products.entity.Product;
 import com.example.memecommerceback.domain.users.entity.User;
+import java.math.BigDecimal;
 import java.util.List;
 
 public class OrderConverter {
 
   public static Order toEntity(
-      User user, Long totalPrice, String orderNumber) {
+      User user, BigDecimal totalPrice, String orderNumber) {
     return Order.builder()
         .purchaser(user)
         .totalPrice(totalPrice)

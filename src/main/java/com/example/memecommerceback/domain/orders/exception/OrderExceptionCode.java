@@ -74,6 +74,10 @@ public enum OrderExceptionCode {
   PRODUCT_NOT_FOUND(
       HttpStatus.BAD_REQUEST, "ORDER-022",
       "해당 상품을 주문하지 않았습니다."),
+  INVALID_QUANTITY(
+      HttpStatus.BAD_REQUEST, "ORDER-023",
+      "해당 상품 수량은 1개 이상이여야합니다."
+  ),
   ;
 
   private final HttpStatus httpStatus;

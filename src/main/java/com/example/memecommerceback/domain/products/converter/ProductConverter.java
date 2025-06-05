@@ -104,10 +104,10 @@ public class ProductConverter {
         .ownerName(product.getOwner().getName())
         .imageResponseDtoList(
             ImageConverter.toResponseDtoList(product.getImageList()))
-        .categoryResponseDtoList(
-            CategoryConverter.toReadDtoList(product.getProductCategoryList()))
-        .hashtagReponseDtoList(
-            HashtagConverter.toReadListDto(product.getProductHashtagList()))
+        .productCategoryResponseDtoList(
+            ProductCategoryConverter.toResponseDtoList(product.getProductCategoryList()))
+        .productHashtagResponseDtoList(
+            ProductHashtagConverter.toResponseDtoList(product.getProductHashtagList()))
         .status(product.getStatus())
         .likeCount(product.getLikeCount())
         .viewCount(product.getViewCount())

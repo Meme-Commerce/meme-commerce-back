@@ -17,6 +17,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +48,7 @@ public class Product extends CommonEntity {
   private String description;
 
   @Column(nullable = false)
-  private Long price;
+  private BigDecimal price = BigDecimal.ZERO;
 
   @Column(nullable = false)
   private Long stock;
@@ -99,7 +100,7 @@ public class Product extends CommonEntity {
 
   public void update(
       ProductStatus status, LocalDateTime sellStartDate, LocalDateTime sellEndDate,
-      String name, String description, Long price, Long stock) {
+      String name, String description, BigDecimal price, Long stock) {
     this.status = status;
     this.sellStartDate = sellStartDate;
     this.sellEndDate = sellEndDate;

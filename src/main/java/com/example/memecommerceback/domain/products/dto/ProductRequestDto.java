@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -36,7 +37,7 @@ public class ProductRequestDto {
     @Positive(message = "음수 또는 0은 사용할 수 없고 최소 100원 부터 입력 가능합니다.")
     @Min(value = 100, message = "최소 가격은 100원 이상입니다.")
     @Schema(description = "상품 가격(원)", example = "15000")
-    private Long price;
+    private BigDecimal price;
     @Size(max = 200, message = "설명은 200자까지 입력 가능합니다.")
     @NotNull(message = "설명은 필수 입력란입니다.")
     @Schema(description = "상품 설명", example = "아름다운 앤티크 램프")
@@ -81,7 +82,7 @@ public class ProductRequestDto {
     @Positive(message = "음수 또는 0은 사용할 수 없고 최소 100원 부터 입력 가능합니다.")
     @Min(value = 100, message = "최소 가격은 100원 이상입니다.")
     @Schema(description = "상품 가격(원)", example = "15000")
-    private Long price;
+    private BigDecimal price;
     @Size(max = 200, message = "설명은 200자까지 입력 가능합니다.")
     @NotNull(message = "설명은 필수 입력란입니다.")
     @Schema(description = "상품 설명", example = "아름다운 앤티크 램프")
@@ -143,7 +144,7 @@ public class ProductRequestDto {
     @Positive(message = "음수는 사용할 수 없고 최소 0원 부터 입력 가능합니다.")
     @Min(value = 0, message = "최소 가격은 0원 이상입니다.")
     @Schema(description = "상품 가격(원)", example = "15000")
-    private Long price;
+    private BigDecimal price;
     @NotNull(message = "판매 시작 일은 필수 입력란입니다.")
     @Schema(
         description = "상품 판매 시작일 (ISO 8601 형식의 날짜/시간)",
@@ -197,7 +198,7 @@ public class ProductRequestDto {
     @Positive(message = "음수는 사용할 수 없고 최소 0원 부터 입력 가능합니다.")
     @Min(value = 0, message = "최소 가격은 0원 이상입니다.")
     @Schema(description = "상품 가격(원)", example = "15000")
-    private Long price;
+    private BigDecimal price;
     @Schema(description = "상품 상태",
         example = "[PENDING, TEMP_OUT_OF_STOCK, HIDDEN, "
             + "ON_SALE, RESALE_SOON, REJECTED] 중 선택")

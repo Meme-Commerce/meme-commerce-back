@@ -5,6 +5,7 @@ import com.example.memecommerceback.domain.orders.dto.OrderResponseDto;
 import com.example.memecommerceback.domain.orders.service.OrderServiceV1;
 import com.example.memecommerceback.global.exception.dto.CommonResponseDto;
 import com.example.memecommerceback.global.security.UserDetailsImpl;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +26,7 @@ public class OrderController {
   @PostMapping("/orders")
   public ResponseEntity<
       CommonResponseDto<OrderResponseDto.CreateOneDto>> createOne(
-      @RequestBody OrderRequestDto.CreateOneDto requestDto,
+      @RequestBody @Valid OrderRequestDto.CreateOneDto requestDto,
       @AuthenticationPrincipal UserDetailsImpl userDetails) {
     OrderResponseDto.CreateOneDto responseDto
         = orderService.createOne(requestDto, userDetails.getUser());
