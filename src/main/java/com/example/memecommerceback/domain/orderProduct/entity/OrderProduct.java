@@ -3,6 +3,7 @@ package com.example.memecommerceback.domain.orderProduct.entity;
 import com.example.memecommerceback.domain.orders.entity.Order;
 import com.example.memecommerceback.domain.products.entity.Product;
 import jakarta.persistence.*;
+import java.math.BigDecimal;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -29,5 +30,11 @@ public class OrderProduct {
   @JoinColumn(name = "order_id")
   @ManyToOne(fetch = FetchType.LAZY)
   private Order order;
+
+  @Column(nullable = false)
+  private Long quantity;
+
+  @Column(nullable = false)
+  private BigDecimal price;
 }
 

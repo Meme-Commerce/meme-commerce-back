@@ -67,5 +67,9 @@ public class Order extends CommonEntity {
     }
     this.orderProductList.addAll(orderProductList);
   }
+
+  public void updateStatus(OrderStatus orderStatus){
+    this.status = orderStatus;
+  }
 }
 
