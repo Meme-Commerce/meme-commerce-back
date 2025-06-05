@@ -6,6 +6,7 @@ import com.example.memecommerceback.domain.productCategory.dto.ProductCategoryRe
 import com.example.memecommerceback.domain.productHashtag.dto.ProductHashtagResponseDto;
 import com.example.memecommerceback.domain.products.entity.ProductStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -34,7 +35,7 @@ public class ProductResponseDto {
     private String description;
 
     @Schema(description = "상품 가격(원)", example = "15000")
-    private Long price;
+    private BigDecimal price;
 
     @Schema(description = "상품 소유자명", example = "홍길동")
     private String ownerName;
@@ -85,7 +86,7 @@ public class ProductResponseDto {
     private String description;
 
     @Schema(description = "상품 가격(원)", example = "15000")
-    private Long price;
+    private BigDecimal price;
 
     @Schema(description = "상품 소유자명", example = "홍길동")
     private String ownerName;
@@ -111,12 +112,12 @@ public class ProductResponseDto {
     @Schema(description = "상품 판매 종료일 (ISO 8601 형식의 날짜/시간)", example = "2025-05-30T23:59:59")
     private LocalDateTime sellEndDate;
 
-    @Schema(
-        description = "연결된 카테고리 아이디 리스트", example = "[1,2,3]")
-    private List<Long> categoryIdList;
-    @Schema(
-        description = "연결된 해시태그 아이디 리스트", example = "[1,2,3]")
-    private List<Long> hashtagIdList;
+    @Schema(description = "상품 카테고리 리스트", example = "[전자기기, 생활용품]")
+    private List<ProductCategoryResponseDto> productCategoryResponseDtoList;
+
+    @Schema(description = "상품 해시태그 리스트", example = "[편안함, 엔티크]")
+    private List<ProductHashtagResponseDto> productHashtagResponseDtoList;
+
   }
 
   @Getter
@@ -148,12 +149,11 @@ public class ProductResponseDto {
     @Schema(description = "상품 판매 종료일 (ISO 8601 형식의 날짜/시간)", example = "2025-05-30T23:59:59")
     private LocalDateTime sellEndDate;
 
-    @Schema(
-        description = "수정된 카테고리 아이디 리스트", example = "[1,2,3]")
-    private List<Long> categoryIdList;
-    @Schema(
-        description = "수정된 해시태그 아이디 리스트", example = "[1,2,3]")
-    private List<Long> hashtagIdList;
+    @Schema(description = "상품 카테고리 리스트", example = "[전자기기, 생활용품]")
+    private List<ProductCategoryResponseDto> productCategoryResponseDtoList;
+
+    @Schema(description = "상품 해시태그 리스트", example = "[편안함, 엔티크]")
+    private List<ProductHashtagResponseDto> productHashtagResponseDtoList;
   }
 
   @Getter
@@ -174,7 +174,7 @@ public class ProductResponseDto {
     private String description;
 
     @Schema(description = "상품 가격(원)", example = "15000")
-    private Long price;
+    private BigDecimal price;
 
     @Schema(description = "상품 소유자명", example = "홍길동")
     private String ownerName;
@@ -203,12 +203,12 @@ public class ProductResponseDto {
     @Schema(description = "상품 판매 종료일 (ISO 8601 형식의 날짜/시간)", example = "2025-05-30T23:59:59")
     private LocalDateTime sellEndDate;
 
-    @Schema(
-        description = "연결된 카테고리 아이디 리스트", example = "[1,2,3]")
-    private List<Long> categoryIdList;
-    @Schema(
-        description = "연결된 해시태그 아이디 리스트", example = "[1,2,3]")
-    private List<Long> hashtagIdList;
+    @Schema(description = "상품 카테고리 리스트", example = "[전자기기, 생활용품]")
+    private List<ProductCategoryResponseDto> productCategoryResponseDtoList;
+
+    @Schema(description = "상품 해시태그 리스트", example = "[편안함, 엔티크]")
+    private List<ProductHashtagResponseDto> productHashtagResponseDtoList;
+
   }
 
   @Getter
@@ -227,7 +227,7 @@ public class ProductResponseDto {
     private String description;
 
     @Schema(description = "상품 가격(원)", example = "15000")
-    private Long price;
+    private BigDecimal price;
 
     @Schema(description = "상품 소유자명", example = "홍길동")
     private String ownerName;

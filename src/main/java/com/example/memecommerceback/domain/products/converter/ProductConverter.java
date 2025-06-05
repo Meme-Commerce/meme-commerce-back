@@ -1,7 +1,10 @@
 package com.example.memecommerceback.domain.products.converter;
 
+import com.example.memecommerceback.domain.categories.converter.CategoryConverter;
 import com.example.memecommerceback.domain.emoji.converter.EmojiConverter;
 import com.example.memecommerceback.domain.emoji.entity.Emoji;
+import com.example.memecommerceback.domain.hashtags.converter.HashtagConverter;
+import com.example.memecommerceback.domain.hashtags.entity.Hashtag;
 import com.example.memecommerceback.domain.images.converter.ImageConverter;
 import com.example.memecommerceback.domain.images.entity.Image;
 import com.example.memecommerceback.domain.productCategory.converter.ProductCategoryConverter;
@@ -101,9 +104,16 @@ public class ProductConverter {
         .ownerName(product.getOwner().getName())
         .imageResponseDtoList(
             ImageConverter.toResponseDtoList(product.getImageList()))
+        .productCategoryResponseDtoList(
+            ProductCategoryConverter.toResponseDtoList(product.getProductCategoryList()))
+        .productHashtagResponseDtoList(
+            ProductHashtagConverter.toResponseDtoList(product.getProductHashtagList()))
         .status(product.getStatus())
         .likeCount(product.getLikeCount())
         .viewCount(product.getViewCount())
+        .sellStartDate(product.getSellStartDate())
+        .sellEndDate(product.getSellEndDate())
+
         .build();
   }
 
@@ -134,5 +144,10 @@ public class ProductConverter {
         .sellStartDate(product.getSellStartDate())
         .sellEndDate(product.getSellEndDate())
         .build();
+  }
+
+  public static List<ProductResponseDto.ReadOneDto> toReadListDto(
+      List<Product> productList){
+    return productList.stream().map(ProductConverter::toReadOneDto).toList();
   }
 }

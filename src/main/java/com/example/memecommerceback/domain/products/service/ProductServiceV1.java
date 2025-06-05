@@ -4,6 +4,7 @@ import com.example.memecommerceback.domain.files.exception.FileCustomException;
 import com.example.memecommerceback.domain.products.dto.ProductRequestDto;
 import com.example.memecommerceback.domain.products.dto.ProductResponseDto;
 import com.example.memecommerceback.domain.products.entity.Product;
+import com.example.memecommerceback.domain.products.entity.ProductStatus;
 import com.example.memecommerceback.domain.products.exception.ProductCustomException;
 import com.example.memecommerceback.domain.users.entity.User;
 import com.example.memecommerceback.global.exception.PageCustomException;
@@ -223,4 +224,7 @@ public interface ProductServiceV1 {
    * @return 소유자가 소유한 상품 목록 (소유한 상품이 없는 경우 빈 리스트 반환)
    */
   List<Product> findAllByOwnerId(UUID ownerId);
+
+  List<Product> findAllByIdInAndStatus(
+      List<UUID> productIdList, ProductStatus productStatus);
 }

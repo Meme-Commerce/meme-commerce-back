@@ -71,4 +71,18 @@ public class DateUtils {
       throw new DateCustomException(GlobalExceptionCode.INVALID_INPUT_QUARTER);
     }
   }
+
+  public static String toTodayBasicIsoDateFormat() {
+    return LocalDate.now().format(DateTimeFormatter.BASIC_ISO_DATE);
+  }
+
+  public static LocalDateTime getMidnight(LocalDateTime now){
+    return now.toLocalDate().plusDays(1).atStartOfDay();
+  }
+
+  public static long getMinutesUntilMidnight() {
+    LocalDateTime now = LocalDateTime.now();
+    LocalDateTime midnight = getMidnight(now);
+    return ChronoUnit.MINUTES.between(now, midnight);
+  }
 }
