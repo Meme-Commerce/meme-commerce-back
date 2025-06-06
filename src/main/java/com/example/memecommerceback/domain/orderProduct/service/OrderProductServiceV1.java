@@ -7,4 +7,6 @@ import java.util.UUID;
 public interface OrderProductServiceV1 {
 
   List<OrderProduct> findAllByOrderId(UUID orderId);
+
+  OrderProduct findByOrderId(UUID orderId);
 }

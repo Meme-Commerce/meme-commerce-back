@@ -18,6 +18,7 @@ import com.example.memecommerceback.domain.products.entity.Product;
 import com.example.memecommerceback.domain.products.entity.ProductStatus;
 import com.example.memecommerceback.global.redis.service.StockLockServiceV1;
 import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -41,6 +42,7 @@ public class PaymentServiceImplV1 implements PaymentServiceV1 {
     List<OrderProduct> orderedProductList
         = orderProductService.findAllByOrderId(requestDto.getOrderId());
 
+    // 주문은 무조건 OrderProduct의 어떤 인덱스건, 고유 번호가 지정된 딱 하나의 주문
     Order order = orderedProductList.get(0).getOrder();
 
     if(!order.getStatus().equals(OrderStatus.WAITING_FOR_PAYMENT)){
@@ -62,7 +64,6 @@ public class PaymentServiceImplV1 implements PaymentServiceV1 {
         = tossPaymentService.confirmOne(requestDto);
 
     if (tossResponse.isSuccessful()) {
-
       Payment payment = PaymentConverter.toEntity(
           tossResponse, order, PaymentStatus.SUCCESS);
       paymentRepository.save(payment);
@@ -82,8 +83,17 @@ public class PaymentServiceImplV1 implements PaymentServiceV1 {
 
   @Override
   @Transactional(readOnly = true)
-  public PaymentResponseDto.ReadOneDto readOne(String paymentKey) {
-    return null;
+  public PaymentResponseDto.ReadOneDto readOne(String paymentKey){
+    TossPaymentResponseDto.ReadOneDto tossResponseDto
+        = tossPaymentService.readOne(paymentKey);
+    // 주문 내역을 삭제하면 안 보이도록 변경
+    orderProductService.findByOrderId(
+        UUID.fromString(tossResponseDto.getOrderId()));
+
+    Payment payment = findByPaymentKey(paymentKey);
+
+    return PaymentConverter.toReadOneDto(
+        tossResponseDto, payment.getStatus());
   }
 
   @Override

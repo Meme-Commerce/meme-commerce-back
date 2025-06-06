@@ -27,4 +27,11 @@ public class OrderProductServiceImplV1 implements OrderProductServiceV1{
     }
     return orderProductList;
   }
+
+  @Override
+  @Transactional(readOnly = true)
+  public OrderProduct findByOrderId(UUID orderId) {
+    return orderProductRepository.findByOrderId(orderId).orElseThrow(
+        ()-> new OrderProductCustomException(OrderProductExceptionCode.NOT_FOUND));
+  }
 }
