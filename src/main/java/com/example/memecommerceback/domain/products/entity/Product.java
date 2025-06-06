@@ -126,4 +126,9 @@ public class Product extends CommonEntity {
     this.stock -= quantity;
     return stock;
   }
+
+  public Long increaseStock(Long quantity){
+    this.stock += quantity;
+    return stock;
+  }
 }

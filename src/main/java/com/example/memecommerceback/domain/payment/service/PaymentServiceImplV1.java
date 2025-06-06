@@ -39,17 +39,20 @@ public class PaymentServiceImplV1 implements PaymentServiceV1 {
   @Transactional
   public PaymentResponseDto.ConfirmOneDto confirmOne(
       PaymentRequestDto.ConfirmOneDto requestDto) {
+    // 1. 주문한 상품 리스트 조회 (Product, Order, OrderProduct 모두 Eager)
     List<OrderProduct> orderedProductList
         = orderProductService.findAllByOrderId(requestDto.getOrderId());
 
-    // 주문은 무조건 OrderProduct의 어떤 인덱스건, 고유 번호가 지정된 딱 하나의 주문
+    // 2. 주문은 무조건 OrderProduct의 어떤 인덱스건, 고유 번호가 지정된 딱 하나의 주문
     Order order = orderedProductList.get(0).getOrder();
 
+    // 3. 주문 상태가 결제 대기 중인 상품이 아니면 예외
     if(!order.getStatus().equals(OrderStatus.WAITING_FOR_PAYMENT)){
       throw new PaymentCustomException(
           PaymentExceptionCode.NOT_WAITING_FOR_PAYMENT_ORDER);
     }
 
+    // 4. 주문한 상품의 결제 프로세스 진행 및 재고락 추가
     for (OrderProduct orderedProduct : orderedProductList) {
       Product product = orderedProduct.getProduct();
       stockLockService.tryLockStock(
@@ -60,9 +63,11 @@ public class PaymentServiceImplV1 implements PaymentServiceV1 {
       }
     }
 
+    // 5. 토스 페이먼츠에 결제 요청
     TossPaymentResponseDto.ConfirmOneDto tossResponse
         = tossPaymentService.confirmOne(requestDto);
 
+    // 6. 성공 또는 실패 시 각각의 상태를 DB에 저장
     if (tossResponse.isSuccessful()) {
       Payment payment = PaymentConverter.toEntity(
           tossResponse, order, PaymentStatus.SUCCESS);
@@ -96,11 +101,51 @@ public class PaymentServiceImplV1 implements PaymentServiceV1 {
         tossResponseDto, payment.getStatus());
   }
 
+  // 반품 또는 취소 요청
   @Override
   @Transactional
   public PaymentResponseDto.CancelOneDto cancelOne(
       PaymentRequestDto.CancelOneDto requestDto) {
-    return null;
+    // 1. 페이먼츠 키로 주문한 상품 내역 조회
+    Payment payment = findByPaymentKey(requestDto.getPaymentKey());
+
+    // 2. 이미 완료된(취소) 결제 내역이면 예외
+    if (payment.getStatus() == PaymentStatus.CANCELED) {
+      throw new PaymentCustomException(
+          PaymentExceptionCode.ALREADY_CANCELED_PAYMENT);
+    }
+
+    // 3. 토스 페이먼츠 먼저 취소 요청
+    TossPaymentResponseDto.CancelOneDto tossResponse =
+        tossPaymentService.cancelOne(requestDto);
+
+    // 4. 주문된 상품 환불 처리 요청
+    OrderProduct orderedProduct
+        = orderProductService.findByOrderId(payment.getOrder().getId());
+    Product product = orderedProduct.getProduct();
+    payment.updateStatus(PaymentStatus.CANCELED);
+
+    // 5. 재고락 레포지토리에서 취소한 상품 갯수만큼 복원
+    Long totalProductStockQuantity
+        = stockLockService.restoreStock(
+        product.getId(), orderedProduct.getQuantity());
+
+    // 6. 재고가 null || 0 미만이면 오류
+    if (totalProductStockQuantity == null || totalProductStockQuantity < 0) {
+      // 관리자 Redis 복구 실패 비상 알림 추가
+      log.error("[Redis 복구 실패] 상품 ID: {}", product.getId());
+    }
+
+    // 7. 상품에 등록된 재고와 레디스에 등록된 재고량이 맞지 않으면 오류
+    product.increaseStock(orderedProduct.getQuantity());
+    if (!totalProductStockQuantity.equals(product.getStock())) {
+      log.warn("[재고 불일치] Redis={}, DB={}",
+          totalProductStockQuantity, product.getStock());
+      // 관리자 비상 알림 로직 추가
+    }
+
+    // 취소 요청 반환 DTO
+    return PaymentConverter.toCancelOneDto(tossResponse);
   }
 
   @Override
