@@ -17,7 +17,7 @@ public interface OrderProductRepository extends JpaRepository<OrderProduct, UUID
       "where op.order.id = :orderId")
   List<OrderProduct> findAllByOrderIdFetch(@Param("orderId") UUID orderId);
 
-  Optional<OrderProduct> findByOrderId(UUID orderId);
+  Optional<OrderProduct> findFirstByOrderId(UUID orderId);
 }
 
 

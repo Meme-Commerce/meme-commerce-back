@@ -30,8 +30,16 @@ public class OrderProductServiceImplV1 implements OrderProductServiceV1{
 
   @Override
   @Transactional(readOnly = true)
-  public OrderProduct findByOrderId(UUID orderId) {
-    return orderProductRepository.findByOrderId(orderId).orElseThrow(
+  public OrderProduct findFirstByOrderId(UUID orderId) {
+    return orderProductRepository.findFirstByOrderId(orderId).orElseThrow(
         ()-> new OrderProductCustomException(OrderProductExceptionCode.NOT_FOUND));
+  }
+
+  @Override
+  public void validateOrderProductCountMatch(
+      int orderedProductListSize, int productListSize) {
+    if(orderedProductListSize != productListSize){
+      throw new OrderProductCustomException(OrderProductExceptionCode.NOT_MATCHED);
+    }
   }
 }

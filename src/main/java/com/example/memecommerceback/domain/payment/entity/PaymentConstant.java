@@ -2,6 +2,10 @@ package com.example.memecommerceback.domain.payment.entity;
 
 public class PaymentConstant {
 
+  private PaymentConstant() {
+
+  }
+
   public static final String TOSS_CONFIRM_URL = "https://api.tosspayments.com/v1/payments/confirm";
   public static final String TOSS_READ_URL = "https://api.tosspayments.com/v1/payments/{paymentKey}";
   public static final String CANCEL_URL = "https://api.tosspayments.com/v1/payments/";

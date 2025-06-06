@@ -55,12 +55,9 @@ public class PaymentServiceImplV1 implements PaymentServiceV1 {
     // 4. 주문한 상품의 결제 프로세스 진행 및 재고락 추가
     for (OrderProduct orderedProduct : orderedProductList) {
       Product product = orderedProduct.getProduct();
-      stockLockService.tryLockStock(
+      stockLockService.lockStock(
           product.getId(), orderedProduct.getQuantity());
-      Long productStock = product.decreaseStock(orderedProduct.getQuantity());
-      if (productStock == 0L) {
-        product.updateStatus(ProductStatus.TEMP_OUT_OF_STOCK);
-      }
+      product.decreaseStock(orderedProduct.getQuantity());
     }
 
     // 5. 토스 페이먼츠에 결제 요청
@@ -92,7 +89,7 @@ public class PaymentServiceImplV1 implements PaymentServiceV1 {
     TossPaymentResponseDto.ReadOneDto tossResponseDto
         = tossPaymentService.readOne(paymentKey);
     // 주문 내역을 삭제하면 안 보이도록 변경
-    orderProductService.findByOrderId(
+    orderProductService.findFirstByOrderId(
         UUID.fromString(tossResponseDto.getOrderId()));
 
     Payment payment = findByPaymentKey(paymentKey);
@@ -120,30 +117,39 @@ public class PaymentServiceImplV1 implements PaymentServiceV1 {
         tossPaymentService.cancelOne(requestDto);
 
     // 4. 주문된 상품 환불 처리 요청
-    OrderProduct orderedProduct
-        = orderProductService.findByOrderId(payment.getOrder().getId());
-    Product product = orderedProduct.getProduct();
+    List<OrderProduct> orderedProductList
+        = orderProductService.findAllByOrderId(payment.getOrder().getId());
+    List<Product> productList
+        = orderedProductList.stream()
+        .map(OrderProduct::getProduct)
+        .toList();
+    orderProductService.validateOrderProductCountMatch(
+        orderedProductList.size(), productList.size());
+
     payment.updateStatus(PaymentStatus.CANCELED);
 
+
     // 5. 재고락 레포지토리에서 취소한 상품 갯수만큼 복원
-    Long totalProductStockQuantity
-        = stockLockService.restoreStock(
-        product.getId(), orderedProduct.getQuantity());
+    for(int i = 0; i <orderedProductList.size(); i++){
+      OrderProduct orderProduct = orderedProductList.get(i);
+      Product product = orderedProductList.get(i).getProduct();
+      Long totalProductStockQuantity
+          = stockLockService.restoreStock(product.getId(), orderProduct.getQuantity());
+      // 6. 재고가 null || 0 미만이면 오류
+      if (totalProductStockQuantity == null || totalProductStockQuantity < 0) {
+        // 관리자 Redis 복구 실패 비상 알림 추가
+        log.error("[Redis 복구 실패] 상품 ID: {}", product.getId());
+      }
 
-    // 6. 재고가 null || 0 미만이면 오류
-    if (totalProductStockQuantity == null || totalProductStockQuantity < 0) {
-      // 관리자 Redis 복구 실패 비상 알림 추가
-      log.error("[Redis 복구 실패] 상품 ID: {}", product.getId());
+      // 7. 상품에 등록된 재고와 레디스에 등록된 재고량이 맞지 않으면 오류
+      product.increaseStock(orderProduct.getQuantity());
+      if (!totalProductStockQuantity.equals(product.getStock())) {
+        log.warn("[재고 불일치] Redis={}, DB={}",
+            totalProductStockQuantity, product.getStock());
+        // 관리자 비상 알림 로직 추가
+      }
+
     }
-
-    // 7. 상품에 등록된 재고와 레디스에 등록된 재고량이 맞지 않으면 오류
-    product.increaseStock(orderedProduct.getQuantity());
-    if (!totalProductStockQuantity.equals(product.getStock())) {
-      log.warn("[재고 불일치] Redis={}, DB={}",
-          totalProductStockQuantity, product.getStock());
-      // 관리자 비상 알림 로직 추가
-    }
-
     // 취소 요청 반환 DTO
     return PaymentConverter.toCancelOneDto(tossResponse);
   }

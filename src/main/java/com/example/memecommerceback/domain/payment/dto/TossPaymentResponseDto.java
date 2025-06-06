@@ -27,25 +27,6 @@ public class TossPaymentResponseDto {
     @JsonProperty("card")
     private CardInfo cardInfo;
 
-    @Getter
-    @Builder
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class CardInfo {
-
-      private String issuerCode;
-      private String acquirerCode;
-      private String number;  // 마스킹된 카드 번호
-      private int installmentPlanMonths;
-      private boolean isInterestFree;
-      private String approveNo;
-
-      @JsonProperty("number")
-      public String getMaskedCardNumber() {
-        return this.number;
-      }
-    }
-
     public boolean isSuccessful() {
       return "DONE".equalsIgnoreCase(this.status);
     }
@@ -68,25 +49,6 @@ public class TossPaymentResponseDto {
     @JsonProperty("card")
     private CardInfo cardInfo;
 
-    @Getter
-    @Builder
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class CardInfo {
-
-      private String issuerCode;
-      private String acquirerCode;
-      private String number;  // 마스킹된 카드 번호
-      private int installmentPlanMonths;
-      private boolean isInterestFree;
-      private String approveNo;
-
-      @JsonProperty("number")
-      public String getMaskedCardNumber() {
-        return this.number;  // 반환할 때 마스킹된 카드 번호로 처리
-      }
-    }
-
     public boolean isSuccessful() {
       return "DONE".equalsIgnoreCase(this.status);
     }
@@ -104,32 +66,32 @@ public class TossPaymentResponseDto {
     private String paymentKey;
     private String status;
     private LocalDateTime approvedAt;
-    private int amount;
+    private Long amount;
     private String method;
     @JsonProperty("card")
-    private ReadOneDto.CardInfo cardInfo;
-
-    @Getter
-    @Builder
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class CardInfo {
-
-      private String issuerCode;
-      private String acquirerCode;
-      private String number;  // 마스킹된 카드 번호
-      private int installmentPlanMonths;
-      private boolean isInterestFree;
-      private String approveNo;
-
-      @JsonProperty("number")
-      public String getMaskedCardNumber() {
-        return this.number;  // 반환할 때 마스킹된 카드 번호로 처리
-      }
-    }
+    private CardInfo cardInfo;
 
     public boolean isSuccessful() {
       return "DONE".equalsIgnoreCase(this.status);
+    }
+  }
+
+  @Getter
+  @Builder
+  @AllArgsConstructor
+  @NoArgsConstructor
+  public static class CardInfo {
+
+    private String issuerCode;
+    private String acquirerCode;
+    private String number;  // 마스킹된 카드 번호
+    private int installmentPlanMonths;
+    private boolean isInterestFree;
+    private String approveNo;
+
+    @JsonProperty("number")
+    public String getMaskedCardNumber() {
+      return this.number;
     }
   }
 }

@@ -17,6 +17,6 @@ public class RedisKeyUtils {
   }
 
   public static String getRecentlyViewedUserKey(UUID userId){
-    return "recent:user:" + userId + ":product";
+    return RedisKeyConstants.RECENT_USER + ":" + userId + ":product";
   }
 }

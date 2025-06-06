@@ -1,9 +1,10 @@
 package com.example.memecommerceback.global.redis.service;
 
+import com.example.memecommerceback.domain.orders.exception.OrderCustomException;
 import java.util.UUID;
 
 public interface StockLockServiceV1 {
-  void tryLockStock(UUID productId, Long quantity);
+  void lockStock(UUID productId, Long quantity) throws OrderCustomException;
 
   void save(UUID productId, Long quantity);
 

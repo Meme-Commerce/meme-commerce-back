@@ -8,7 +8,7 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 public enum PaymentExceptionCode {
   NOT_FOUND(
-      HttpStatus.BAD_REQUEST, "PAYMENT-001",
+      HttpStatus.NOT_FOUND, "PAYMENT-001",
       "찾을 수 없는 결제입니다."),
   TOSS_PAYMENT_REQUEST_FAIL(
       HttpStatus.BAD_REQUEST, "PAYMENT-002",

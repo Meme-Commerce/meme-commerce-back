@@ -55,7 +55,7 @@ public class PaymentResponseDto {
     private String paymentKey;
     private String status;
     private LocalDateTime approvedAt;
-    private int amount;
+    private Long amount;
     private String method;
     private String markedCardNumber;
   }

@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -63,7 +64,7 @@ public class PaymentController {
               schema = @Schema(implementation = CommonResponseDto.class))),})
   public ResponseEntity<
       CommonResponseDto<PaymentResponseDto.ReadOneDto>> readOne(
-      @PathVariable String paymentKey) {
+      @PathVariable @Valid @NotBlank(message = "페이먼츠 키는 필수 입력란입니다.") String paymentKey) {
     PaymentResponseDto.ReadOneDto responseDto = paymentService.readOne(paymentKey);
     return ResponseEntity.status(HttpStatus.OK).body(
         new CommonResponseDto<>(

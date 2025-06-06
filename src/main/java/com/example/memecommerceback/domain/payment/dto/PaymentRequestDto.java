@@ -1,6 +1,7 @@
 package com.example.memecommerceback.domain.payment.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.util.UUID;
@@ -22,7 +23,7 @@ public class PaymentRequestDto {
     @NotNull(message = "주문 아이디는 필수 입력란입니다.")
     private UUID orderId;
     @NotNull(message = "총 결제 금액은 필수 입력란입니다.")
-    @Size(min = 100, message = "총 결제 금액의 최소 값은 100이상입니다.")
+    @Min(value = 100, message = "총 결제 금액의 최소 값은 100이상입니다.")
     private Long amount;
     @NotNull(message = "페이먼츠 키는 필수 입력한입니다.")
     private String paymentKey;

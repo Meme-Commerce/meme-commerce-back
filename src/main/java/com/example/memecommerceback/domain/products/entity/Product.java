@@ -119,16 +119,17 @@ public class Product extends CommonEntity {
     this.sellEndDate = sellEndDate;
   }
 
-  public Long decreaseStock(Long quantity) {
+  public void decreaseStock(Long quantity) {
     if (this.stock < quantity) {
       throw new ProductCustomException(ProductExceptionCode.INSUFFICIENT_STOCK);
     }
     this.stock -= quantity;
-    return stock;
+    if(this.stock == 0){
+      this.status = ProductStatus.TEMP_OUT_OF_STOCK;
+    }
   }
 
-  public Long increaseStock(Long quantity){
+  public void increaseStock(Long quantity){
     this.stock += quantity;
-    return stock;
   }
 }

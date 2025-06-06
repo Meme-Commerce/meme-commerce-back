@@ -14,7 +14,7 @@ public enum PaymentStatus {
     this.status = status;
   }
 
-  public class Status {
+  public static class Status {
 
     public static final String SUCCESS = "SUCCESS";
     public static final String FAIL = "FAIL";

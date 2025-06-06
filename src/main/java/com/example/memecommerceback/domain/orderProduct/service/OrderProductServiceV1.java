@@ -8,5 +8,7 @@ public interface OrderProductServiceV1 {
 
   List<OrderProduct> findAllByOrderId(UUID orderId);
 
-  OrderProduct findByOrderId(UUID orderId);
+  OrderProduct findFirstByOrderId(UUID orderId);
+
+  void validateOrderProductCountMatch(int orderedProductListSize, int productListSize);
 }

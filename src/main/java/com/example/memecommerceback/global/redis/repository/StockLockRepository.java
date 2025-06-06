@@ -26,7 +26,7 @@ public class StockLockRepository {
     redisTemplate.opsForValue().set(key, String.valueOf(quantity));
   }
 
-  public Long executeStockLock(UUID productId, long quantity) {
+  public Long executeStockLock(UUID productId, Long quantity) {
     DefaultRedisScript<Long> redisScript = new DefaultRedisScript<>();
     redisScript.setScriptText(RedisKeyConstants.LUA_SCRIPT);
     redisScript.setResultType(Long.class);
@@ -37,6 +37,14 @@ public class StockLockRepository {
 
   public Long restoreStock(UUID productId, Long quantity){
     String key = RedisKeyUtils.getProductStockKey(productId);
+    try {
+      Long result = redisTemplate.opsForValue().increment(key, quantity);
+      if (result == null) {
+        throw new IllegalStateException("재고 복원에 실패했습니다: " + productId);
+      }
+    } catch (Exception e) {
+      throw new RuntimeException("재고 복원 중 오류가 발생했습니다: " + productId, e);
+    }
     return redisTemplate.opsForValue().increment(key, quantity);
   }
 }

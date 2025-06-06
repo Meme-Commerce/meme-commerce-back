@@ -15,8 +15,8 @@ public class StockLockServiceImplV1 implements StockLockServiceV1{
   private final StockLockRepository stockLockRepository;
 
   @Override
-  @Transactional(readOnly = true)
-  public void tryLockStock(UUID productId, Long quantity) {
+  @Transactional
+  public void lockStock(UUID productId, Long quantity) {
     Long result = stockLockRepository.executeStockLock(productId, quantity);
     if (result == null || result != 1L) {
       throw new OrderCustomException(OrderExceptionCode.STOCK_LOCK_FAILED);
