@@ -19,6 +19,7 @@ import com.example.memecommerceback.domain.products.repository.ProductRepository
 import com.example.memecommerceback.domain.users.entity.User;
 import com.example.memecommerceback.domain.users.entity.UserRole;
 import com.example.memecommerceback.global.awsS3.dto.S3ImageResponseDto;
+import com.example.memecommerceback.global.redis.service.StockLockServiceV1;
 import com.example.memecommerceback.global.service.ProfanityFilterService;
 import com.example.memecommerceback.global.utils.DateUtils;
 import com.example.memecommerceback.global.utils.PageUtils;
@@ -44,6 +45,7 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
 
   private final ImageServiceV1 imageService;
   private final EmojiServiceV1 emojiService;
+  private final StockLockServiceV1 stockLockService;
   private final ProfanityFilterService profanityFilterService;
   private final ProductHashtagServiceV1 productHashtagService;
   private final ProductCategoryServiceV1 productCategoryService;
@@ -199,6 +201,7 @@ public class ProductServiceImplV1 implements ProductServiceV1 {
       case RESALE_SOON, ON_SALE -> {
         DateUtils.validateDateTime(product.getSellStartDate(), product.getSellEndDate());
         product.updateStatus(status);
+        stockLockService.save(productId, product.getStock());
       }
       case PENDING, TEMP_OUT_OF_STOCK ->
           throw new ProductCustomException(ProductExceptionCode.CANNOT_MODIFY_STATUS);

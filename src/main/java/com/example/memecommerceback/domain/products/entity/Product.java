@@ -3,6 +3,8 @@ package com.example.memecommerceback.domain.products.entity;
 import com.example.memecommerceback.domain.images.entity.Image;
 import com.example.memecommerceback.domain.productCategory.entity.ProductCategory;
 import com.example.memecommerceback.domain.productHashtag.entity.ProductHashtag;
+import com.example.memecommerceback.domain.products.exception.ProductCustomException;
+import com.example.memecommerceback.domain.products.exception.ProductExceptionCode;
 import com.example.memecommerceback.domain.users.entity.User;
 import com.example.memecommerceback.global.common.CommonEntity;
 import jakarta.persistence.CascadeType;
@@ -117,4 +119,17 @@ public class Product extends CommonEntity {
     this.sellEndDate = sellEndDate;
   }
 
+  public void decreaseStock(Long quantity) {
+    if (this.stock < quantity) {
+      throw new ProductCustomException(ProductExceptionCode.INSUFFICIENT_STOCK);
+    }
+    this.stock -= quantity;
+    if(this.stock == 0){
+      this.status = ProductStatus.TEMP_OUT_OF_STOCK;
+    }
+  }
+
+  public void increaseStock(Long quantity){
+    this.stock += quantity;
+  }
 }

@@ -74,6 +74,12 @@ public class ProductConverter {
         .status(product.getStatus())
         .modifiedAt(product.getModifiedAt())
         .createdAt(product.getCreatedAt())
+        .sellStartDate(product.getSellStartDate())
+        .sellEndDate(product.getSellEndDate())
+        .productCategoryResponseDtoList(
+            ProductCategoryConverter.toResponseDtoList(product.getProductCategoryList()))
+        .productHashtagResponseDtoList(
+            ProductHashtagConverter.toResponseDtoList(product.getProductHashtagList()))
         .build();
   }
 

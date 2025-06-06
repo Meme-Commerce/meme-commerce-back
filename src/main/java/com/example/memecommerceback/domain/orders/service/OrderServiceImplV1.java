@@ -7,6 +7,7 @@ import com.example.memecommerceback.domain.orders.converter.OrderConverter;
 import com.example.memecommerceback.domain.orders.dto.OrderRequestDto;
 import com.example.memecommerceback.domain.orders.dto.OrderResponseDto;
 import com.example.memecommerceback.domain.orders.entity.Order;
+import com.example.memecommerceback.domain.orders.entity.OrderStatus;
 import com.example.memecommerceback.domain.orders.exception.OrderCustomException;
 import com.example.memecommerceback.domain.orders.exception.OrderExceptionCode;
 import com.example.memecommerceback.domain.orders.repository.OrderRepository;
@@ -17,6 +18,7 @@ import com.example.memecommerceback.domain.users.entity.User;
 import com.example.memecommerceback.global.redis.service.OrderNumberServiceV1;
 import com.example.memecommerceback.global.utils.DateUtils;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -54,7 +56,8 @@ public class OrderServiceImplV1 implements OrderServiceV1 {
         .collect(Collectors.toMap(Product::getId, p -> p));
 
     BigDecimal totalPrice = BigDecimal.ZERO;
-
+    List<BigDecimal> productTotalList = new ArrayList<>();
+    List<Long> quantityList = new ArrayList<>();
     // 3. 각 주문상품에 대해 가격 합산, 상품 미존재시 예외
     for (OrderProductRequestDto.CreateOneDto orderProductDto : orderedProducts) {
       UUID productId = orderProductDto.getProductId();
@@ -72,6 +75,8 @@ public class OrderServiceImplV1 implements OrderServiceV1 {
 
       BigDecimal quantityDecimal = BigDecimal.valueOf(quantity);
       BigDecimal productTotal = product.getPrice().multiply(quantityDecimal);
+      productTotalList.add(productTotal);
+      quantityList.add(quantity);
       totalPrice = totalPrice.add(productTotal);
     }
 
@@ -81,7 +86,8 @@ public class OrderServiceImplV1 implements OrderServiceV1 {
     Order order = OrderConverter.toEntity(purchaser, totalPrice, orderNumber);
 
     List<OrderProduct> orderProductList
-        = OrderProductConverter.toEntityList(productList, order);
+        = OrderProductConverter.toEntityList(
+            productList, productTotalList, quantityList, order);
     order.resetOrderProductList(orderProductList);
     orderRepository.save(order);
 
@@ -89,4 +95,12 @@ public class OrderServiceImplV1 implements OrderServiceV1 {
     return OrderConverter.toCreateOneDto(
         savedOrder, savedOrder.getOrderProductList(), purchaser.getNickname());
   }
+
+  @Override
+  @Transactional(readOnly = true)
+  public Order findById(UUID orderId) {
+    return orderRepository.findById(orderId).orElseThrow(
+        ()-> new OrderCustomException(OrderExceptionCode.NOT_FOUND));
+  }
+
 }

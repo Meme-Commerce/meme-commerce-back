@@ -54,6 +54,9 @@ public enum ProductExceptionCode {
   NOT_EMOJI_PACK_PRODUCT(
       HttpStatus.BAD_REQUEST, "PRODUCT-015",
       "해당 상품은 이모지 팩 상품이 아닙니다."),
+  INSUFFICIENT_STOCK(
+      HttpStatus.BAD_REQUEST, "PRODUCT-016",
+      "해당 상품의 재고가 부족합니다."),
   ;
 
   private final HttpStatus httpStatus;
