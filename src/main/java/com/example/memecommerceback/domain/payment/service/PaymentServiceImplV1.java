@@ -4,7 +4,6 @@ import com.example.memecommerceback.domain.orderProduct.entity.OrderProduct;
 import com.example.memecommerceback.domain.orderProduct.service.OrderProductServiceV1;
 import com.example.memecommerceback.domain.orders.entity.Order;
 import com.example.memecommerceback.domain.orders.entity.OrderStatus;
-import com.example.memecommerceback.domain.orders.service.OrderServiceV1;
 import com.example.memecommerceback.domain.payment.converter.PaymentConverter;
 import com.example.memecommerceback.domain.payment.dto.PaymentRequestDto;
 import com.example.memecommerceback.domain.payment.dto.PaymentResponseDto;
@@ -15,7 +14,6 @@ import com.example.memecommerceback.domain.payment.exception.PaymentCustomExcept
 import com.example.memecommerceback.domain.payment.exception.PaymentExceptionCode;
 import com.example.memecommerceback.domain.payment.repository.PaymentRepository;
 import com.example.memecommerceback.domain.products.entity.Product;
-import com.example.memecommerceback.domain.products.entity.ProductStatus;
 import com.example.memecommerceback.global.redis.service.StockLockServiceV1;
 import java.util.List;
 import java.util.UUID;
@@ -47,7 +45,7 @@ public class PaymentServiceImplV1 implements PaymentServiceV1 {
     Order order = orderedProductList.get(0).getOrder();
 
     // 3. 주문 상태가 결제 대기 중인 상품이 아니면 예외
-    if(!order.getStatus().equals(OrderStatus.WAITING_FOR_PAYMENT)){
+    if (!order.getStatus().equals(OrderStatus.WAITING_FOR_PAYMENT)) {
       throw new PaymentCustomException(
           PaymentExceptionCode.NOT_WAITING_FOR_PAYMENT_ORDER);
     }
@@ -73,7 +71,7 @@ public class PaymentServiceImplV1 implements PaymentServiceV1 {
 
       return PaymentConverter.toConfirmOneDto(
           tossResponse, payment.getStatus());
-    }else{
+    } else {
       Payment payment = PaymentConverter.toEntity(
           tossResponse, order, PaymentStatus.FAIL);
       paymentRepository.save(payment);
@@ -85,7 +83,7 @@ public class PaymentServiceImplV1 implements PaymentServiceV1 {
 
   @Override
   @Transactional(readOnly = true)
-  public PaymentResponseDto.ReadOneDto readOne(String paymentKey){
+  public PaymentResponseDto.ReadOneDto readOne(String paymentKey) {
     TossPaymentResponseDto.ReadOneDto tossResponseDto
         = tossPaymentService.readOne(paymentKey);
     // 주문 내역을 삭제하면 안 보이도록 변경
@@ -128,9 +126,8 @@ public class PaymentServiceImplV1 implements PaymentServiceV1 {
 
     payment.updateStatus(PaymentStatus.CANCELED);
 
-
     // 5. 재고락 레포지토리에서 취소한 상품 갯수만큼 복원
-    for(int i = 0; i <orderedProductList.size(); i++){
+    for (int i = 0; i < orderedProductList.size(); i++) {
       OrderProduct orderProduct = orderedProductList.get(i);
       Product product = orderedProductList.get(i).getProduct();
       Long totalProductStockQuantity

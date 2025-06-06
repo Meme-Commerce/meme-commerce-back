@@ -6,7 +6,6 @@ import com.example.memecommerceback.domain.payment.dto.PaymentResponseDto;
 import com.example.memecommerceback.domain.payment.dto.TossPaymentResponseDto;
 import com.example.memecommerceback.domain.payment.entity.Payment;
 import com.example.memecommerceback.domain.payment.entity.PaymentStatus;
-import com.example.memecommerceback.global.utils.DateUtils;
 
 public class PaymentConverter {
 
